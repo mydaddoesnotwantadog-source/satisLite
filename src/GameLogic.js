@@ -367,9 +367,10 @@ export class GameLogic {
                             bestTarget.inboundCount[item] = (bestTarget.inboundCount[item] || 0) + 1;
                             
                             this.drones.push({
-                                id: Math.random().toString(36).substr(2, 9),
                                 sourceUuid: b.uuid,
                                 targetUuid: bestTarget.uuid,
+                                sourceX: b.x,
+                                sourceZ: b.z,
                                 itemKey: item,
                                 progress: 0,
                                 tripDist: bestDist

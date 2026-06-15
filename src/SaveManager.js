@@ -32,11 +32,16 @@ export class SaveManager {
                     inventoryCount: b.inventoryCount,
                     activeBurn: b.activeBurn,
                     burnProgress: b.burnProgress,
-                    burnDuration: b.burnDuration
+                    burnDuration: b.burnDuration,
+                    burnQueue: b.burnQueue,
+                    uncollectedPhones: b.uncollectedPhones,
+                    phoneFractions: b.phoneFractions
                 })),
                 drones: this.gameLogic.drones.map(d => ({
                     sourceUuid: d.sourceUuid,
                     targetUuid: d.targetUuid,
+                    sourceX: d.sourceX,
+                    sourceZ: d.sourceZ,
                     itemKey: d.itemKey,
                     progress: d.progress,
                     tripDist: d.tripDist
@@ -97,6 +102,8 @@ export class SaveManager {
                         .filter(d => d.sourceUuid && d.targetUuid)
                         .map(d => ({
                             ...d,
+                            sourceX: d.sourceX,
+                            sourceZ: d.sourceZ,
                             progress: d.progress || 0,
                             itemKey: d.itemKey || 'iron'
                         }));
@@ -130,6 +137,9 @@ export class SaveManager {
                     if (bData.activeBurn !== undefined) newBld.activeBurn = bData.activeBurn;
                     if (bData.burnProgress !== undefined) newBld.burnProgress = bData.burnProgress;
                     if (bData.burnDuration !== undefined) newBld.burnDuration = bData.burnDuration;
+                    if (bData.burnQueue !== undefined) newBld.burnQueue = bData.burnQueue;
+                    if (bData.uncollectedPhones !== undefined) newBld.uncollectedPhones = bData.uncollectedPhones;
+                    if (bData.phoneFractions !== undefined) newBld.phoneFractions = bData.phoneFractions;
                     
                     // Update visual rotation if applicable (bData.rotation is already in radians!)
                     if (newBld.mesh) {

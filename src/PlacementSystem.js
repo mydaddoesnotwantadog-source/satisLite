@@ -492,23 +492,76 @@ export class PlacementSystem {
             const bldId = this.hoveredBuildingMesh.userData.uuid;
             
             const bldInfo = this.gameLogic.buildings.find(b => b.uuid === bldId);
-            if (bldInfo && bldInfo.type === 'storage' && bldInfo.inventoryCount > 0) {
-                // Try to empty it
-                for (const tb of this.gameLogic.buildings) {
-                    if (tb.type === 'storage' && tb !== bldInfo && tb.storageFilter === bldInfo.storageFilter) {
-                        const availableSpace = 2048 - (tb.inventoryCount || 0) - (tb.inboundCount[bldInfo.storageFilter] || 0);
-                        if (availableSpace > 0) {
-                            const transferAmount = Math.min(bldInfo.inventoryCount, availableSpace);
-                            tb.inventoryCount += transferAmount;
-                            bldInfo.inventoryCount -= transferAmount;
-                            if (bldInfo.inventoryCount <= 0) break;
+            if (bldInfo) {
+                let toRefund = {};
+                if (bldInfo.type === 'storage' && bldInfo.inventoryCount > 0) {
+                    toRefund[bldInfo.storageFilter] = bldInfo.inventoryCount;
+                } else if (bldInfo.type === 'school') {
+                    if (bldInfo.burnQueue) {
+                        for (const q of bldInfo.burnQueue) {
+                            if (q.received > 0) toRefund[q.itemKey] = (toRefund[q.itemKey] || 0) + q.received;
                         }
                     }
+                    if (bldInfo.activeBurn) {
+                        toRefund[bldInfo.activeBurn.itemKey] = (toRefund[bldInfo.activeBurn.itemKey] || 0) + 1;
+                    }
+                } else {
+                    for (const [k, v] of Object.entries(bldInfo.inputBuffer || {})) {
+                        if (v > 0) toRefund[k] = (toRefund[k] || 0) + v;
+                    }
+                    for (const [k, v] of Object.entries(bldInfo.outputBuffer || {})) {
+                        if (v > 0) toRefund[k] = (toRefund[k] || 0) + v;
+                    }
                 }
-                
-                if (bldInfo.inventoryCount > 0) {
-                    const confirmDelete = window.confirm(`There is no space available for ${bldInfo.inventoryCount} items. Are you sure you want to delete this storage box and destroy them?`);
-                    if (!confirmDelete) return;
+
+                let totalItems = 0;
+                for (const v of Object.values(toRefund)) totalItems += v;
+
+                if (totalItems > 0) {
+                    let destinations = [];
+                    let unmet = 0;
+                    for (const [k, v] of Object.entries(toRefund)) {
+                        let remaining = v;
+                        for (const tb of this.gameLogic.buildings) {
+                            if (tb.uuid === bldId) continue;
+                            if (tb.type === 'storage' && tb.storageFilter === k) {
+                                const space = 2048 - (tb.inventoryCount || 0) - (tb.inboundCount[k] || 0);
+                                if (space > 0) {
+                                    const amount = Math.min(remaining, space);
+                                    destinations.push({ target: tb, item: k, amount });
+                                    tb.inboundCount[k] = (tb.inboundCount[k] || 0) + amount; // reserve space
+                                    remaining -= amount;
+                                    if (remaining <= 0) break;
+                                }
+                            }
+                        }
+                        if (remaining > 0) unmet += remaining;
+                    }
+
+                    if (unmet > 0) {
+                        const confirmDelete = window.confirm(`There is no Storage Box space available for ${unmet} in-progress resources. Are you sure you want to delete this building and destroy them?`);
+                        if (!confirmDelete) {
+                            for (const d of destinations) d.target.inboundCount[d.item] -= d.amount;
+                            return;
+                        }
+                    }
+
+                    for (const d of destinations) {
+                        for (let i = 0; i < d.amount; i++) {
+                            const dx = bldInfo.x - d.target.x;
+                            const dz = bldInfo.z - d.target.z;
+                            const dist = Math.sqrt(dx * dx + dz * dz) * this.gridSystem.tileSize;
+                            this.gameLogic.drones.push({
+                                sourceUuid: 'deleted',
+                                targetUuid: d.target.uuid,
+                                sourceX: bldInfo.x,
+                                sourceZ: bldInfo.z,
+                                itemKey: d.item,
+                                progress: 0,
+                                tripDist: dist
+                            });
+                        }
+                    }
                 }
             }
             
