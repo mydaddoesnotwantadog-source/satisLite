@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SatisLite - A Big Thune Adventure</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏭</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Import map for Three.js so we can use modern ES imports without a bundler -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+
+<body>
+    <!-- 3D Canvas Container -->
+    <div id="game-container"></div>
+
+    <!-- TITLE SCREEN -->
+    <div id="title-container">
+        <!-- Title Background and Logo -->
+        <div id="title-bg-rect" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 26, 0.95); pointer-events: none; transition: opacity 1.0s ease-out;"></div>
+        
+        <svg id="title-svg-overlay" width="100%" height="100%" style="position: absolute; top: 0; left: 0; pointer-events: none;">
+            <!-- Solid text logo -->
+            <text id="mask-text" x="50%" y="28%" text-anchor="middle" dominant-baseline="middle" font-size="12vw" font-family="'Outfit', sans-serif" font-weight="900" fill="#ffffff" stroke="rgba(0,0,0,0.8)" stroke-width="4px" letter-spacing="0.5vw">SATISLITE</text>
+        </svg>
+
+        <div id="title-ui-content">
+            <h2 id="title-subtitle">A BIG THUNE ADVENTURE</h2>
+
+            <div id="save-section"
+                style="display: none; flex-direction: column; align-items: center; margin-bottom: 40px;">
+                <button id="btn-continue-game" class="huge-btn highlight">CONTINUE GAME</button>
+                <button id="btn-delete-save" class="small-btn danger" style="margin-top: 20px;">Delete Save</button>
+            </div>
+
+            <div id="new-game-section">
+                <h3>NEW GAME - MAP SIZE</h3>
+                <div id="map-size-buttons" class="btn-group">
+                    <button class="map-btn" data-size="100">Large</button>
+                    <button class="map-btn active" data-size="50">Medium</button>
+                    <button class="map-btn" data-size="20">Small</button>
+                </div>
+
+                <h3 style="margin-top: 25px;">DIFFICULTY</h3>
+                <div id="diff-buttons" class="btn-group">
+                    <button class="diff-btn active" data-diff="easy">Easy</button>
+                    <button class="diff-btn" data-diff="medium">Medium</button>
+                    <button class="diff-btn" data-diff="hard">Hard</button>
+                </div>
+
+                <button id="btn-start-game" class="huge-btn" style="margin-top: 40px;">START MISSION</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MAIN UI (Hidden initially) -->
+    <div id="ui-layer" style="display: none;">
+        <!-- Top Left: Main Currency -->
+        <div id="resource-panel" class="glass-panel">
+            <h2>Currency</h2>
+            <div class="resource-item">
+                <span class="resource-icon" style="background: #2c3e50;"></span>
+                <span class="resource-name">Confiscated Phones</span>
+                <span class="resource-value" id="res-phones">0</span>
+            </div>
+        </div>
+
+        <!-- Bottom Left: Resources Split -->
+        <div id="inventory-panel" class="glass-panel">
+            <div id="inventory-header" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; grid-column: 1 / -1;">
+                <h2 style="margin: 0; padding: 0; border: none;">Stored Materials</h2>
+                <span id="inventory-toggle-arrow" style="transition: transform 0.2s; font-size: 1.2em; line-height: 1;">▼</span>
+            </div>
+            
+            <div id="inventory-content" style="display: contents;">
+                <!-- Raw Materials -->
+                <div class="resource-item">
+                    <span class="resource-icon" style="background: #BDC3C7;"></span>
+                    <span class="resource-name">Iron</span>
+                    <span class="resource-value" id="res-iron">0</span>
+                </div>
+                <div class="resource-item">
+                    <span class="resource-icon" style="background: #E67E22;"></span>
+                    <span class="resource-name">Copper</span>
+                    <span class="resource-value" id="res-copper">0</span>
+                </div>
+                <div class="resource-item">
+                    <span class="resource-icon" style="background: #34495E;"></span>
+                    <span class="resource-name">Coal</span>
+                    <span class="resource-value" id="res-coal">0</span>
+                </div>
+                <div class="resource-item">
+                    <span class="resource-icon" style="background: #F4D03F;"></span>
+                    <span class="resource-name">Gold</span>
+                    <span class="resource-value" id="res-gold">0</span>
+                </div>
+                <div class="resource-item">
+                    <span class="resource-icon" style="background: #1FB0E8;"></span>
+                    <span class="resource-name">Water</span>
+                    <span class="resource-value" id="res-water">0</span>
+                </div>
+                <div class="resource-item">
+                    <span class="resource-icon" style="background: #6E2C00;"></span>
+                    <span class="resource-name">Poop</span>
+                    <span class="resource-value" id="res-poop">0</span>
+                </div>
+
+                <h2 style="margin-top: 10px; grid-column: 1 / -1;">Stored Manufactured Materials</h2>
+                <div class="resource-item">
+                    <span class="resource-icon" style="background: #ff6666;"></span>
+                <span class="resource-name">Iron Ingot</span>
+                <span class="resource-value" id="res-ironIngot">0</span>
+            </div>
+            <div class="resource-item">
+                <span class="resource-icon" style="background: #74b9ff;"></span>
+                <span class="resource-name">Copper Ingot</span>
+                <span class="resource-value" id="res-copperIngot">0</span>
+            </div>
+            <div class="resource-item">
+                <span class="resource-icon" style="background: #bdc3c7;"></span>
+                <span class="resource-name">Iron Plate</span>
+                <span class="resource-value" id="res-ironPlate">0</span>
+            </div>
+            <div class="resource-item">
+                <span class="resource-icon" style="background: #95a5a6;"></span>
+                <span class="resource-name">Iron Rod</span>
+                <span class="resource-value" id="res-ironRod">0</span>
+            </div>
+            <div class="resource-item">
+                <span class="resource-icon" style="background: #e67e22;"></span>
+                <span class="resource-name">Copper Wire</span>
+                <span class="resource-value" id="res-copperWire">0</span>
+            </div>
+            <div class="resource-item">
+                <span class="resource-icon" style="background: #34495e;"></span>
+                <span class="resource-name">Frame</span>
+                <span class="resource-value" id="res-frame">0</span>
+            </div>
+            <div class="resource-item">
+                <span class="resource-icon" style="background: #9b59b6;"></span>
+                <span class="resource-name">Panel</span>
+                <span class="resource-value" id="res-panel">0</span>
+            </div>
+            </div> <!-- Close inventory-content -->
+        </div>
+
+        <!-- Recipe Popup UI -->
+        <div id="recipe-popup" class="glass-panel"
+            style="display: none; position: absolute; z-index: 1000; left: 300px; top: 100px; min-width: 250px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h2 id="recipe-machine-title" style="margin: 0;">Machine</h2>
+                <button id="close-recipe-btn"
+                    style="background: none; border: none; color: white; cursor: pointer; font-size: 1.2em;">✖</button>
+            </div>
+            <div id="recipe-list">
+                <!-- Populated by JS -->
+            </div>
+            <div id="recipe-info"
+                style="margin-top: 15px; font-size: 0.9em; min-height: 40px; color: var(--text-color);">
+                <!-- Hover info goes here -->
+            </div>
+            <div
+                style="margin-top: 10px; width: 100%; height: 10px; background: #222; border: 1px solid #000; border-radius: 5px; overflow: hidden;">
+                <div id="recipe-progress-bar"
+                    style="height: 100%; width: 0%; background: #2ecc71; transition: width 0.1s linear;"></div>
+            </div>
+        </div>
+
+        <!-- Save Button (Top Right) -->
+        <div id="btn-save-game" class="tool-btn" style="position: absolute; top: 10px; right: 300px; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; cursor: pointer; padding: 0; user-select: none; pointer-events: auto;" title="Save Game">
+            <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: none; stroke: var(--primary-color, #74b9ff); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        </div>
+
+        <!-- Top Right: Big Thune's Demands -->
+        <div id="goal-panel" class="glass-panel">
+            <h2>Big Thune's Demands</h2>
+            <p class="subtitle" id="goal-subtitle">Quest 1</p>
+            <div id="goal-requirements">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+
+        <!-- Build Controls Overlay -->
+        <div id="build-controls-overlay"
+            style="display: none; position: absolute; bottom: 120px; width: 100%; text-align: center; pointer-events: none; z-index: 900;">
+            <div class="glass-panel"
+                style="display: inline-block; padding: 5px 15px; font-size: 0.9em; color: var(--text-color);">
+                <strong>Left Click</strong> to Place &nbsp;|&nbsp; <strong>R</strong> to Rotate
+            </div>
+        </div>
+
+        <!-- Tooltips -->
+        <div id="world-tooltip" class="glass-panel no-rivets"
+            style="display: none; position: absolute; pointer-events: none; z-index: 1000;">
+            <h3 id="tooltip-title" style="margin: 0; font-size: 1.1em; color: var(--primary-color);">Ore Node</h3>
+            <p id="tooltip-desc" style="margin: 5px 0 0 0; font-size: 0.9em; color: var(--text-color);">Level: 1</p>
+        </div>
+
+        <div id="building-world-tooltip" class="glass-panel no-rivets"
+            style="display: none; position: absolute; pointer-events: none; z-index: 1000; min-width: 180px;">
+            <h3 id="bwt-name" style="margin: 0; font-size: 1.1em; color: var(--accent);">Miner</h3>
+            <div id="bwt-details" style="font-size: 0.9em; margin-top: 5px;"></div>
+            <div
+                style="margin-top: 6px; width: 100%; height: 8px; background: #222; border: 1px solid #000; border-radius: 4px; overflow: hidden;">
+                <div id="bwt-progress-bar"
+                    style="height: 100%; width: 0%; background: #2ecc71; transition: width 0.1s linear;"></div>
+            </div>
+            <div id="bwt-rate"
+                style="margin-top: 4px; font-size: 0.8em; font-family: 'Courier New', monospace; color: #5f5;"></div>
+        </div>
+
+        <div id="extractor-tooltip" class="glass-panel no-rivets"
+            style="display: none; position: absolute; pointer-events: none; z-index: 1000;">
+            <h3 id="tt-name" style="margin: 0; font-size: 1.1em; color: var(--primary-color);">Miner</h3>
+            <div style="font-size: 0.9em; margin-top: 5px;">
+                Extracts: <strong id="tt-node">None</strong><br>
+                Rate: <strong id="tt-rate">0</strong>/s<br>
+                Cost: <strong id="tt-cost">0</strong> Phones
+            </div>
+        </div>
+
+        <div id="machine-tooltip" class="glass-panel no-rivets"
+            style="display: none; position: absolute; pointer-events: none; z-index: 1000;">
+            <h3 id="mt-name" style="margin: 0; font-size: 1.1em; color: var(--primary-color);">Machine</h3>
+            <p id="mt-desc" style="margin: 4px 0; font-size: 0.85em; color: #ccc; font-style: italic;"></p>
+            <div style="font-size: 0.9em; margin-top: 5px;">
+                Size: <strong id="mt-size">1×1</strong><br>
+                Cost: <strong id="mt-cost">0</strong> Phones
+            </div>
+        </div>
+
+        <!-- Leigh High UI Popup -->
+        <div id="leigh-high-popup" class="glass-panel"
+            style="display: none; position: absolute; z-index: 1000; left: 300px; top: 100px; min-width: 350px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h2 style="margin: 0;">Leigh High School</h2>
+                <button id="close-leigh-btn"
+                    style="background: none; border: none; color: white; cursor: pointer; font-size: 1.2em;">✖</button>
+            </div>
+            <div id="leigh-items-list">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <div id="bottom-toolbar" class="glass-panel full-width-bar">
+            <div class="toolbar-group">
+                <button class="tool-btn active" data-tool="select">Select</button>
+                <button class="tool-btn" data-tool="delete" id="btn-delete-tool">Delete (B)</button>
+            </div>
+            <div class="toolbar-group">
+                <div class="menu-container">
+                    <button class="tool-btn" id="btn-machine-category">Machines ▼</button>
+                    <div class="submenu-horizontal glass-panel" id="machine-submenu">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+            <div class="toolbar-group">
+                <button class="tool-btn highlight" data-tool="school">Leigh High</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Game Logic -->
+    <script type="module" src="src/main.js"></script>
+</body>
+
+</html>
