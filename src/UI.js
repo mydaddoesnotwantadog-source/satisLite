@@ -141,19 +141,29 @@ export class UI {
         
         const invHeader = document.getElementById('inventory-header');
         if (invHeader) {
+            const content = document.getElementById('inventory-content');
+            const arrow = document.getElementById('inventory-toggle-arrow');
+            const panel = document.getElementById('inventory-panel');
+
+            // Default to collapsed on mobile
+            if (window.isMobile) {
+                content.style.display = 'none';
+                arrow.style.transform = 'rotate(180deg)';
+                panel.style.minWidth = 'auto';
+                panel.classList.remove('mobile-expanded');
+            }
+
             invHeader.addEventListener('click', () => {
-                const content = document.getElementById('inventory-content');
-                const arrow = document.getElementById('inventory-toggle-arrow');
-                const panel = document.getElementById('inventory-panel');
-                
                 if (content.style.display !== 'none') {
                     content.style.display = 'none';
                     arrow.style.transform = 'rotate(180deg)';
                     panel.style.minWidth = 'auto';
+                    if (window.isMobile) panel.classList.remove('mobile-expanded');
                 } else {
                     content.style.display = 'contents';
                     arrow.style.transform = 'rotate(0deg)';
                     panel.style.minWidth = '320px';
+                    if (window.isMobile) panel.classList.add('mobile-expanded');
                 }
             });
         }
@@ -293,9 +303,18 @@ export class UI {
         const info = document.getElementById('recipe-info');
         
         popup.style.display = 'block';
-        title.textContent = this.logic.otherBuildings.find(b => b.id === building.type).name + ' Recipes';
         list.innerHTML = '';
+        this.injectPowerSwitch(list, building);
         
+        if (building.isExtractor) {
+            title.textContent = building.type.charAt(0).toUpperCase() + building.type.slice(1) + ' Extractor';
+            info.innerHTML = `Extracts: <strong>${building.type}</strong><br>Rate: <strong>${building.rate.toFixed(2)}</strong>/s`;
+            document.getElementById('recipe-buffer-status').innerHTML = '';
+            document.getElementById('recipe-progress-bar').style.width = '0%';
+            return;
+        }
+
+        title.textContent = this.logic.otherBuildings.find(b => b.id === building.type).name + ' Recipes';
         const updateInfoText = (recipeKey) => {
             if (!recipeKey) {
                 info.innerHTML = '';
@@ -411,6 +430,47 @@ export class UI {
         this.selectedBuilding = null;
         document.getElementById('recipe-popup').style.display = 'none';
     }
+
+    injectPowerSwitch(container, building) {
+        const switchHtml = `
+            <div class="power-switch-container">
+                <div class="power-switch-label">
+                    <div class="power-status-light ${building.isEnabled !== false ? 'on' : ''}"></div>
+                    POWER
+                </div>
+                <div class="power-switch ${building.isEnabled !== false ? 'on' : ''}">
+                    <div class="power-lever"></div>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', switchHtml);
+        
+        const switchContainer = container.lastElementChild;
+        const switchEl = switchContainer.querySelector('.power-switch');
+        const lightEl = switchContainer.querySelector('.power-status-light');
+        
+        switchEl.addEventListener('click', () => {
+            building.isEnabled = building.isEnabled === false ? true : false;
+            
+            if (building.isEnabled) {
+                switchEl.classList.add('on');
+                lightEl.classList.add('on');
+                if (this.app.soundEngine) this.app.soundEngine.play('wind_up');
+                if (building.mesh && building.mesh.userData.powerLightMat) {
+                    building.mesh.userData.powerLightMat.color.setHex(0x00ff00);
+                    building.mesh.userData.powerLightMat.emissive.setHex(0x00ff00);
+                }
+            } else {
+                switchEl.classList.remove('on');
+                lightEl.classList.remove('on');
+                if (this.app.soundEngine) this.app.soundEngine.play('breaker_trip');
+                if (building.mesh && building.mesh.userData.powerLightMat) {
+                    building.mesh.userData.powerLightMat.color.setHex(0xff0000);
+                    building.mesh.userData.powerLightMat.emissive.setHex(0xff0000);
+                }
+            }
+        });
+    }
     
     openLeighHighUI(building) {
         if (this.app.soundEngine && (!this.selectedBuilding || this.selectedBuilding.uuid !== building.uuid)) {
@@ -422,6 +482,7 @@ export class UI {
         const list = document.getElementById('leigh-items-list');
         popup.style.display = 'block';
         list.innerHTML = '';
+        this.injectPowerSwitch(list, building);
         
         // Setup Custom Dropdown and Input container
         const isQueueFull = this.selectedBuilding.burnQueue && this.selectedBuilding.burnQueue.length >= 10;

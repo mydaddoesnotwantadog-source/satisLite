@@ -134,6 +134,10 @@ export class GameScene {
         }
         
         this.placementSystem = new PlacementSystem(this.scene, this.camera, this.renderer.domElement, this.gridSystem, this.logic, this.ui, this.fxSystem, this.soundEngine);
+        
+        if (this.mobileInputManager) {
+            this.mobileInputManager.placementSystem = this.placementSystem;
+        }
     }
 
     onWindowResize() {
@@ -157,36 +161,71 @@ export class GameScene {
             
             const rocketGroup = new THREE.Group();
             
-            // Main body
-            const bodyGeo = new THREE.CylinderGeometry(0.2, 0.3, 1.2, 12);
-            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xecf0f1, metalness: 0.5, roughness: 0.2 });
+            // Stylized Fuselage
+            const bodyGeo = new THREE.CylinderGeometry(0.15, 0.35, 1.4, 16);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, metalness: 0.7, roughness: 0.2 });
             const body = new THREE.Mesh(bodyGeo, bodyMat);
-            body.position.y = 0.6;
+            body.position.y = 0.7;
             rocketGroup.add(body);
             
-            // Nose cone
-            const coneGeo = new THREE.ConeGeometry(0.2, 0.5, 12);
-            const coneMat = new THREE.MeshStandardMaterial({ color: 0xe74c3c, metalness: 0.7, roughness: 0.3 });
+            // Sleek Glass Canopy
+            const canopyGeo = new THREE.SphereGeometry(0.16, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+            const canopyMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.05, transparent: true, opacity: 0.9 });
+            const canopy = new THREE.Mesh(canopyGeo, canopyMat);
+            canopy.scale.set(1, 1.5, 1);
+            canopy.position.set(0, 1.1, 0.15);
+            canopy.rotation.x = Math.PI / 12;
+            rocketGroup.add(canopy);
+            
+            // Glowing Neon Accent Ring
+            const ringGeo = new THREE.TorusGeometry(0.32, 0.03, 8, 24);
+            const ringMat = new THREE.MeshStandardMaterial({ color: 0x00ffff, emissive: 0x00ffff, emissiveIntensity: 1.5 });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.position.y = 0.4;
+            rocketGroup.add(ring);
+            
+            // Aerodynamic Nose Cone
+            const coneGeo = new THREE.ConeGeometry(0.15, 0.6, 16);
+            const coneMat = new THREE.MeshStandardMaterial({ color: 0xe74c3c, metalness: 0.8, roughness: 0.2 });
             const cone = new THREE.Mesh(coneGeo, coneMat);
-            cone.position.y = 1.45;
+            cone.position.y = 1.7;
             rocketGroup.add(cone);
             
-            // Engine nozzle
-            const nozzleGeo = new THREE.CylinderGeometry(0.15, 0.25, 0.3, 8);
-            const nozzleMat = new THREE.MeshStandardMaterial({ color: 0x34495e, metalness: 0.8, roughness: 0.4 });
+            // Flared Engine Nozzle
+            const nozzleGeo = new THREE.CylinderGeometry(0.2, 0.1, 0.4, 16);
+            const nozzleMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.9, roughness: 0.5 });
             const nozzle = new THREE.Mesh(nozzleGeo, nozzleMat);
-            nozzle.position.y = -0.15;
+            nozzle.position.y = -0.2;
             rocketGroup.add(nozzle);
             
-            // Fins
-            const finGeo = new THREE.BoxGeometry(0.05, 0.4, 0.4);
-            const finMat = new THREE.MeshStandardMaterial({ color: 0xe74c3c });
+            // Swept-back Fins
+            const finShape = new THREE.Shape();
+            finShape.moveTo(0, 0);
+            finShape.lineTo(0.3, -0.4);
+            finShape.lineTo(0.3, -0.6);
+            finShape.lineTo(0, -0.2);
+            finShape.lineTo(0, 0);
+            const finExtrudeSettings = { depth: 0.05, bevelEnabled: true, bevelSegments: 2, steps: 1, bevelSize: 0.01, bevelThickness: 0.01 };
+            const finGeo = new THREE.ExtrudeGeometry(finShape, finExtrudeSettings);
+            const finMat = new THREE.MeshStandardMaterial({ color: 0xe74c3c, metalness: 0.6, roughness: 0.3 });
+            
             for(let i=0; i<4; i++) {
                 const fin = new THREE.Mesh(finGeo, finMat);
-                fin.position.y = 0.2;
+                fin.position.y = 0.5;
                 fin.rotation.y = (Math.PI / 2) * i;
-                fin.translateX(0.3);
-                rocketGroup.add(fin);
+                
+                // Align the extrusion thickness to the center
+                fin.children.forEach(c => c.position.z = -0.025);
+                // Actually to center the extruded shape, we can wrap it
+                const finWrapper = new THREE.Group();
+                fin.position.z = -0.025;
+                finWrapper.add(fin);
+                finWrapper.position.y = 0.5;
+                finWrapper.rotation.y = (Math.PI / 2) * i;
+                
+                // Translate outward slightly to match hull
+                finWrapper.translateX(0.15);
+                rocketGroup.add(finWrapper);
             }
             
             // Emissive exhaust glow

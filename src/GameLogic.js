@@ -140,7 +140,7 @@ export class GameLogic {
             uuid, id: toolId,
             x: gridX, z: gridZ, rotation,
             inputBuffer: {}, outputBuffer: {}, inboundCount: {},
-            isWorking: false, progress: 0, disabled: false
+            isWorking: false, progress: 0, isEnabled: true
         };
         
         if (toolId === 'miner' && nodeSubType) {
@@ -204,11 +204,11 @@ export class GameLogic {
 
         // Process Extractors
         for (const b of this.buildings) {
+            if (b.isEnabled === false) {
+                b.isWorking = false;
+                continue;
+            }
             if (b.isExtractor) {
-                if (b.disabled) {
-                    b.isWorking = false;
-                    continue;
-                }
                 const currentOut = b.outputBuffer[b.type] || 0;
                 if (currentOut >= 50) {
                     b.isWorking = false;
@@ -232,8 +232,11 @@ export class GameLogic {
         
         // Process Machines
         for (const b of this.buildings) {
+            if (b.isEnabled === false) {
+                b.isWorking = false;
+                continue;
+            }
             if (!b.isExtractor && b.activeRecipe && b.type !== 'storage' && b.type !== 'school') {
-                if (b.disabled) continue;
                 const recipe = this.recipes[b.activeRecipe];
                 
                 if (!b.isWorking) {
@@ -271,6 +274,7 @@ export class GameLogic {
 
         // Process Leigh High
         for (const b of this.buildings) {
+            if (b.isEnabled === false) continue;
             if (b.type === 'school') {
                 if (!b.activeBurn && b.burnQueue && b.burnQueue.length > 0) {
                     if (b.burnQueue[0].received > 0) {

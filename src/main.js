@@ -2,9 +2,16 @@ import { GameScene } from './GameScene.js';
 import { UI } from './UI.js';
 import { GameLogic } from './GameLogic.js';
 import { SaveManager } from './SaveManager.js';
+import { MobileInputManager } from './MobileInputManager.js';
 
 class GameApp {
     constructor() {
+        // Mobile Detection needs to happen before UI setup
+        window.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 800;
+        if (window.isMobile) {
+            document.body.classList.add('mobile-mode');
+        }
+
         this.logic = new GameLogic();
         this.scene = new GameScene(document.getElementById('game-container'), this.logic, null);
         this.ui = new UI(this, this.logic);
@@ -12,6 +19,11 @@ class GameApp {
         // Pass UI to scene after instantiation
         this.scene.ui = this.ui;
         this.saveManager = new SaveManager(this.logic, this.scene.gridSystem);
+        
+        if (window.isMobile) {
+            this.mobileInputManager = new MobileInputManager(this.scene.cameraController, null, document.getElementById('game-container'));
+            this.scene.mobileInputManager = this.mobileInputManager;
+        }
         
         // Initial setup for title screen
         this.lastTime = performance.now();

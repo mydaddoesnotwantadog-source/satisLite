@@ -1,0 +1,131 @@
+/* mobile.css */
+body.mobile-mode {
+    /* Prevent pull-to-refresh and selection on mobile */
+    overscroll-behavior: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Make specific popups take up full screen when active */
+body.mobile-mode #recipe-popup,
+body.mobile-mode #leigh-high-popup,
+body.mobile-mode #inventory-panel.mobile-expanded {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    border-radius: 0;
+    box-sizing: border-box;
+    z-index: 10000;
+    margin: 0;
+    padding: 20px;
+    background: rgba(10, 15, 25, 0.95);
+    overflow-y: auto;
+    align-content: start;
+}
+
+/* Except for toolbars or small panels if we want them docked */
+body.mobile-mode #bottom-toolbar {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: auto !important;
+    top: auto !important;
+    transform: none !important;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 5px;
+    border-radius: 0;
+    background: rgba(10, 15, 25, 0.85);
+    z-index: 900;
+}
+
+body.mobile-mode #goal-panel {
+    /* Top right docked but smaller */
+    position: fixed !important;
+    top: 5px !important;
+    right: 5px !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: 45vw !important;
+    padding: 5px;
+    background: rgba(10, 15, 25, 0.6);
+    border: none;
+    box-shadow: none;
+    font-size: 0.75em !important;
+    pointer-events: none;
+    z-index: 800;
+}
+
+body.mobile-mode #resource-panel {
+    position: fixed !important;
+    top: 5px !important;
+    left: 5px !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: 45vw !important;
+    padding: 5px;
+    font-size: 0.75em !important;
+    z-index: 800;
+}
+
+/* Enlarge close buttons */
+body.mobile-mode #close-recipe-btn,
+body.mobile-mode #close-leigh-btn,
+body.mobile-mode #close-inventory-btn {
+    font-size: 2.5em !important;
+    padding: 15px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+/* Enlarge tools for touch, but keep compact */
+body.mobile-mode .tool-btn {
+    width: auto !important;
+    min-width: 60px;
+    height: 45px;
+    padding: 5px 10px;
+    font-size: 0.8em !important;
+    margin-right: 5px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+/* Hide hover tooltips */
+body.mobile-mode .tooltip {
+    display: none !important;
+}
+
+/* Save button moved */
+body.mobile-mode #btn-save-game {
+    position: fixed !important;
+    bottom: 60px !important;
+    right: 5px !important;
+    top: auto !important;
+    left: auto !important;
+    width: 45px !important;
+    height: 45px !important;
+    padding: 5px !important;
+    z-index: 900;
+}
+
+/* Hide desktop-specific labels */
+body.mobile-mode .desktop-only {
+    display: none !important;
+}
+
+/* Default minimized state for inventory panel on mobile */
+body.mobile-mode #inventory-panel:not(.mobile-expanded) {
+    position: fixed !important;
+    bottom: 60px !important; /* Above the toolbar */
+    left: 5px !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 120px;
+    padding: 5px 10px;
+    font-size: 0.8em;
+    z-index: 1000;
+}

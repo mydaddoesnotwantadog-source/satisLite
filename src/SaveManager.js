@@ -28,7 +28,6 @@ export class SaveManager {
                     inputBuffer: b.inputBuffer,
                     outputBuffer: b.outputBuffer,
                     progress: b.progress,
-                    disabled: b.disabled,
                     storageFilter: b.storageFilter,
                     inventoryCount: b.inventoryCount,
                     activeBurn: b.activeBurn,
@@ -36,7 +35,8 @@ export class SaveManager {
                     burnDuration: b.burnDuration,
                     burnQueue: b.burnQueue,
                     uncollectedPhones: b.uncollectedPhones,
-                    phoneFractions: b.phoneFractions
+                    phoneFractions: b.phoneFractions,
+                    isEnabled: b.isEnabled
                 })),
                 drones: this.gameLogic.drones.map(d => ({
                     sourceUuid: d.sourceUuid,
@@ -136,16 +136,26 @@ export class SaveManager {
                     newBld.inputBuffer = bData.inputBuffer || {};
                     newBld.outputBuffer = bData.outputBuffer || {};
                     newBld.progress = bData.progress || 0;
-                    newBld.disabled = bData.disabled || false;
                     
                     if (bData.storageFilter !== undefined) newBld.storageFilter = bData.storageFilter;
                     if (bData.inventoryCount !== undefined) newBld.inventoryCount = bData.inventoryCount;
+                    if (bData.burnQueue !== undefined) newBld.burnQueue = bData.burnQueue;
                     if (bData.activeBurn !== undefined) newBld.activeBurn = bData.activeBurn;
                     if (bData.burnProgress !== undefined) newBld.burnProgress = bData.burnProgress;
                     if (bData.burnDuration !== undefined) newBld.burnDuration = bData.burnDuration;
-                    if (bData.burnQueue !== undefined) newBld.burnQueue = bData.burnQueue;
                     if (bData.uncollectedPhones !== undefined) newBld.uncollectedPhones = bData.uncollectedPhones;
                     if (bData.phoneFractions !== undefined) newBld.phoneFractions = bData.phoneFractions;
+                    newBld.isEnabled = bData.isEnabled !== undefined ? bData.isEnabled : true;
+                    
+                    if (newBld.mesh && newBld.mesh.userData.powerLightMat) {
+                        if (newBld.isEnabled) {
+                            newBld.mesh.userData.powerLightMat.color.setHex(0x00ff00);
+                            newBld.mesh.userData.powerLightMat.emissive.setHex(0x00ff00);
+                        } else {
+                            newBld.mesh.userData.powerLightMat.color.setHex(0xff0000);
+                            newBld.mesh.userData.powerLightMat.emissive.setHex(0xff0000);
+                        }
+                    }
                     
                     // Update visual rotation if applicable (bData.rotation is already in radians!)
                     if (newBld.mesh) {

@@ -103,38 +103,42 @@ export class FXSystem {
     }
 
     spawnRocketPlume(x, y, z) {
-        // Spawn a thick but computationally light plume using smoke particles
-        for(let i = 0; i < 3; i++) {
-            const mat = this.smokeBaseMat.clone();
-            // Fiery core occasionally
-            if (Math.random() > 0.7) {
-                mat.color.setHex(0xffaa00);
-                mat.opacity = 0.9;
-            }
-            
-            const mesh = new THREE.Mesh(this.smokeGeo, mat);
-            mesh.position.set(
-                x + (Math.random() - 0.5) * 0.3,
-                y + (Math.random() - 0.5) * 0.3,
-                z + (Math.random() - 0.5) * 0.3
-            );
-            const startScale = 0.5 + Math.random() * 0.5;
-            mesh.scale.set(startScale, startScale, startScale);
-            this.scene.add(mesh);
-            
-            const maxLife = 0.8 + Math.random() * 0.5;
-            this.particles.push({
-                mesh: mesh,
-                velocity: new THREE.Vector3(
-                    (Math.random() - 0.5) * 0.5,
-                    -2.0 - Math.random() * 2.0, // thrust downwards
-                    (Math.random() - 0.5) * 0.5
-                ),
-                life: maxLife,
-                maxLife: maxLife,
-                type: 'smoke'
-            });
+        // Spawn a thick but computationally light plume using an expanding smoke particle
+        // We only spawn 1 per frame instead of 3, but it grows larger
+        const mat = this.smokeBaseMat.clone();
+        
+        let startScale = 0.5 + Math.random() * 0.3;
+        const isCore = Math.random() > 0.6;
+        
+        if (isCore) {
+            mat.color.setHex(0xffaa00);
+            mat.opacity = 1.0;
+            startScale *= 0.8; // fire core is smaller
         }
+        
+        const mesh = new THREE.Mesh(this.smokeGeo, mat);
+        mesh.position.set(
+            x + (Math.random() - 0.5) * 0.2,
+            y + (Math.random() - 0.5) * 0.2,
+            z + (Math.random() - 0.5) * 0.2
+        );
+        mesh.scale.set(startScale, startScale, startScale);
+        this.scene.add(mesh);
+        
+        const maxLife = 1.0 + Math.random() * 0.5;
+        this.particles.push({
+            mesh: mesh,
+            velocity: new THREE.Vector3(
+                (Math.random() - 0.5) * 0.3,
+                -2.5 - Math.random() * 1.5, // thrust downwards
+                (Math.random() - 0.5) * 0.3
+            ),
+            life: maxLife,
+            maxLife: maxLife,
+            type: 'rocketPlume', // specialized type
+            isCore: isCore,
+            baseScale: startScale
+        });
     }
     
     spawnMinerParticles(x, y, z, colorHex) {
@@ -201,13 +205,31 @@ export class FXSystem {
                 // Gentle growth as puff rises and dissipates
                 const growScale = 1.0 + (1.0 - t) * 1.5;
                 p.mesh.scale.set(growScale, growScale, growScale);
+            } else if (p.type === 'rocketPlume') {
+                p.mesh.position.addScaledVector(p.velocity, deltaTime);
+                
+                const t = p.life / p.maxLife; // 1.0 down to 0.0
+                const age = 1.0 - t;
+                
+                // Grow drastically over lifetime
+                const currentScale = p.baseScale * (1.0 + age * 8.0);
+                p.mesh.scale.set(currentScale, currentScale, currentScale);
+                
+                // Opacity fades out
+                p.mesh.material.opacity = t * (p.isCore ? 1.0 : 0.8);
+                
+                // Color shifting from core (yellow/orange) to dark grey smoke
+                if (p.isCore && age > 0.3) {
+                    // transition to dark smoke as it expands
+                    p.mesh.material.color.lerp(new THREE.Color(0x333333), deltaTime * 4);
+                }
             }
             
             // Lifetime
             p.life -= deltaTime;
             
-            // Shrink as it dies for non-smoke
-            if (p.type !== 'smoke') {
+            // Shrink as it dies for non-smoke/non-plume
+            if (p.type !== 'smoke' && p.type !== 'rocketPlume') {
                 const scale = p.life / p.maxLife;
                 p.mesh.scale.set(scale, scale, scale);
             }
@@ -215,7 +237,7 @@ export class FXSystem {
             if (p.life <= 0) {
                 this.scene.remove(p.mesh);
                 // Dispose cloned smoke materials to avoid leaks
-                if (p.type === 'smoke') {
+                if (p.type === 'smoke' || p.type === 'rocketPlume') {
                     p.mesh.material.dispose();
                 }
                 this.particles.splice(i, 1);

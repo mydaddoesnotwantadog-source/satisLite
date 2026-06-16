@@ -157,22 +157,21 @@ export class SoundEngine {
             return (rumble * 0.6 + noise * 0.4) * env * 0.8;
         });
 
-        // 13. Breaker Trip (Off): Heavy clunk with boom
-        this.buffers.breaker_trip = this.createBuffer(0.4, (t, i, len) => {
+        // 13. Breaker Trip (Off): Dramatic boom/zap
+        this.buffers.breaker_trip = this.createBuffer(0.8, (t, i, len) => {
             const env = Math.pow(1 - (i / len), 3);
-            const clunk = Math.sin(t * 80 * Math.exp(-t * 50) * Math.PI * 2);
-            const boom = Math.sin(t * 40 * Math.PI * 2) * Math.exp(-t * 10);
-            const spark = (Math.random() * 2 - 1) * Math.exp(-t * 40) * 0.3;
-            return (clunk * 0.6 + boom * 0.5 + spark) * env * 0.7;
+            const zap = (Math.random() * 2 - 1) * Math.exp(-t * 40);
+            const boom = Math.sin(t * (60 * Math.exp(-t * 10)) * Math.PI * 2);
+            return (zap * 0.5 + boom * 0.7) * env * 0.8;
         });
 
-        // 14. Wind Up (On): Rising pitch hum
-        this.buffers.wind_up = this.createBuffer(0.8, (t, i, len) => {
-            const env = t < 0.4 ? t / 0.4 : Math.pow(1 - (t - 0.4) / 0.4, 2);
-            const freq = 60 + (t * 150); // Pitch rises from 60Hz to ~180Hz
-            const hum = Math.sin(t * freq * Math.PI * 2);
-            const overtone = Math.sin(t * (freq * 2) * Math.PI * 2) * 0.3;
-            return (hum + overtone) * env * 0.5;
+        // 14. Wind Up (On): Engine spinning up
+        this.buffers.wind_up = this.createBuffer(1.0, (t, i, len) => {
+            const env = t < 0.2 ? t / 0.2 : 1 - (t - 0.2) / 0.8;
+            const freq = 50 + t * 400; // pitch goes up
+            const engine = Math.sin(t * freq * Math.PI * 2);
+            const hum = Math.sin(t * (freq / 2) * Math.PI * 2);
+            return (engine * 0.6 + hum * 0.4) * env * 0.5;
         });
     }
 
