@@ -46,6 +46,13 @@ class GameApp {
             }
         });
         
+        // Auto-save when app is backgrounded on mobile
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden' && this.isRunning && document.getElementById('ui-layer').style.display !== 'none') {
+                this.saveManager.saveGame(this.scene.gridSystem.mapSize, this.logic.inventory.confiscatedPhones);
+            }
+        });
+        
         // Manual save button (floppy disk)
         document.getElementById('btn-save-game').addEventListener('click', () => {
             this.saveManager.saveGame(this.scene.gridSystem.mapSize, this.logic.inventory.confiscatedPhones);

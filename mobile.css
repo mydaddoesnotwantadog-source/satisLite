@@ -100,17 +100,9 @@ body.mobile-mode .tooltip {
     display: none !important;
 }
 
-/* Save button moved */
+/* Save button completely hidden on mobile */
 body.mobile-mode #btn-save-game {
-    position: fixed !important;
-    bottom: 60px !important;
-    right: 5px !important;
-    top: auto !important;
-    left: auto !important;
-    width: 45px !important;
-    height: 45px !important;
-    padding: 5px !important;
-    z-index: 900;
+    display: none !important;
 }
 
 /* Hide desktop-specific labels */

@@ -174,6 +174,17 @@ export class UI {
             if (this.app.soundEngine) this.app.soundEngine.play('whoosh');
             machineSubmenu.classList.toggle('show');
             
+            if (window.isMobile) {
+                const invPanel = document.getElementById('inventory-panel');
+                if (invPanel) {
+                    if (machineSubmenu.classList.contains('show')) {
+                        invPanel.style.display = 'none';
+                    } else {
+                        invPanel.style.display = '';
+                    }
+                }
+            }
+            
             // Turn off build mode and depress other buttons
             document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
             this.activeTool = 'select';
