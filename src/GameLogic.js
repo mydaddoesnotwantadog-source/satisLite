@@ -401,18 +401,84 @@ export class GameLogic {
     }
 
     checkQuests() {
+        // Quest completion is now manual via UI and rocket launch sequence
+    }
+
+    isCurrentQuestReady() {
         if (this.currentQuest === 1) {
-            if (this.inventory.ironIngot >= 100 && this.inventory.copperIngot >= 100) {
-                this.currentQuest = 2;
-                this.otherBuildings.find(b => b.id === 'constructor').unlocked = true;
-                if (this.soundEngine) this.soundEngine.play('fanfare');
-            }
+            return this.inventory.ironIngot >= 100 && this.inventory.copperIngot >= 100;
         } else if (this.currentQuest === 2) {
-            if (this.inventory.ironPlate >= 25 && this.inventory.ironRod >= 25) {
-                this.currentQuest = 3;
-                this.otherBuildings.find(b => b.id === 'bigConstructor').unlocked = true;
-                if (this.soundEngine) this.soundEngine.play('fanfare');
+            return this.inventory.ironPlate >= 25 && this.inventory.ironRod >= 25;
+        } else if (this.currentQuest === 3) {
+            return this.inventory.panel >= 15;
+        }
+        return false;
+    }
+
+    consumeQuestResources() {
+        let requirements = {};
+        if (this.currentQuest === 1) {
+            requirements = { ironIngot: 100, copperIngot: 100 };
+        } else if (this.currentQuest === 2) {
+            requirements = { ironPlate: 25, ironRod: 25 };
+        } else if (this.currentQuest === 3) {
+            requirements = { panel: 15 };
+        }
+
+        let consumedLocations = [];
+
+        for (const [item, needed] of Object.entries(requirements)) {
+            let remaining = needed;
+
+            for (const b of this.buildings) {
+                if (remaining <= 0) break;
+
+                let consumedHere = 0;
+
+                if (b.type === 'storage' && b.storageFilter === item) {
+                    if (b.inventoryCount > 0) {
+                        const take = Math.min(remaining, b.inventoryCount);
+                        b.inventoryCount -= take;
+                        remaining -= take;
+                        consumedHere += take;
+                    }
+                } else {
+                    if (b.outputBuffer && b.outputBuffer[item] > 0) {
+                        const take = Math.min(remaining, b.outputBuffer[item]);
+                        b.outputBuffer[item] -= take;
+                        remaining -= take;
+                        consumedHere += take;
+                    }
+                    if (remaining > 0 && b.inputBuffer && b.inputBuffer[item] > 0) {
+                        const take = Math.min(remaining, b.inputBuffer[item]);
+                        b.inputBuffer[item] -= take;
+                        remaining -= take;
+                        consumedHere += take;
+                    }
+                }
+
+                if (consumedHere > 0) {
+                    consumedLocations.push({ x: b.x, z: b.z, uuid: b.uuid, item: item, amount: consumedHere });
+                }
             }
+        }
+
+        this.computeGlobalInventory();
+        return consumedLocations;
+    }
+
+    advanceQuest() {
+        if (this.currentQuest === 1) {
+            this.currentQuest = 2;
+            this.otherBuildings.find(b => b.id === 'constructor').unlocked = true;
+            if (this.soundEngine) this.soundEngine.play('fanfare');
+        } else if (this.currentQuest === 2) {
+            this.currentQuest = 3;
+            this.otherBuildings.find(b => b.id === 'bigConstructor').unlocked = true;
+            if (this.soundEngine) this.soundEngine.play('fanfare');
+        } else if (this.currentQuest === 3) {
+            this.currentQuest = 4;
+            if (this.soundEngine) this.soundEngine.play('fanfare');
         }
     }
 }

@@ -101,6 +101,41 @@ export class FXSystem {
             type: 'smoke'
         });
     }
+
+    spawnRocketPlume(x, y, z) {
+        // Spawn a thick but computationally light plume using smoke particles
+        for(let i = 0; i < 3; i++) {
+            const mat = this.smokeBaseMat.clone();
+            // Fiery core occasionally
+            if (Math.random() > 0.7) {
+                mat.color.setHex(0xffaa00);
+                mat.opacity = 0.9;
+            }
+            
+            const mesh = new THREE.Mesh(this.smokeGeo, mat);
+            mesh.position.set(
+                x + (Math.random() - 0.5) * 0.3,
+                y + (Math.random() - 0.5) * 0.3,
+                z + (Math.random() - 0.5) * 0.3
+            );
+            const startScale = 0.5 + Math.random() * 0.5;
+            mesh.scale.set(startScale, startScale, startScale);
+            this.scene.add(mesh);
+            
+            const maxLife = 0.8 + Math.random() * 0.5;
+            this.particles.push({
+                mesh: mesh,
+                velocity: new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.5,
+                    -2.0 - Math.random() * 2.0, // thrust downwards
+                    (Math.random() - 0.5) * 0.5
+                ),
+                life: maxLife,
+                maxLife: maxLife,
+                type: 'smoke'
+            });
+        }
+    }
     
     spawnMinerParticles(x, y, z, colorHex) {
         // Spawn 1 or 2 tiny particles

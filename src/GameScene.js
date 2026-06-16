@@ -148,11 +148,115 @@ export class GameScene {
         this.composer.setSize(window.innerWidth, window.innerHeight);
     }
 
+    triggerRocketLaunch(consumedLocations, onComplete) {
+        if (!this.rockets) this.rockets = [];
+        
+        for (const loc of consumedLocations) {
+            const bld = this.logic.buildings.find(b => b.uuid === loc.uuid);
+            if (!bld || !bld.mesh) continue;
+            
+            const rocketGroup = new THREE.Group();
+            
+            // Main body
+            const bodyGeo = new THREE.CylinderGeometry(0.2, 0.3, 1.2, 12);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xecf0f1, metalness: 0.5, roughness: 0.2 });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.6;
+            rocketGroup.add(body);
+            
+            // Nose cone
+            const coneGeo = new THREE.ConeGeometry(0.2, 0.5, 12);
+            const coneMat = new THREE.MeshStandardMaterial({ color: 0xe74c3c, metalness: 0.7, roughness: 0.3 });
+            const cone = new THREE.Mesh(coneGeo, coneMat);
+            cone.position.y = 1.45;
+            rocketGroup.add(cone);
+            
+            // Engine nozzle
+            const nozzleGeo = new THREE.CylinderGeometry(0.15, 0.25, 0.3, 8);
+            const nozzleMat = new THREE.MeshStandardMaterial({ color: 0x34495e, metalness: 0.8, roughness: 0.4 });
+            const nozzle = new THREE.Mesh(nozzleGeo, nozzleMat);
+            nozzle.position.y = -0.15;
+            rocketGroup.add(nozzle);
+            
+            // Fins
+            const finGeo = new THREE.BoxGeometry(0.05, 0.4, 0.4);
+            const finMat = new THREE.MeshStandardMaterial({ color: 0xe74c3c });
+            for(let i=0; i<4; i++) {
+                const fin = new THREE.Mesh(finGeo, finMat);
+                fin.position.y = 0.2;
+                fin.rotation.y = (Math.PI / 2) * i;
+                fin.translateX(0.3);
+                rocketGroup.add(fin);
+            }
+            
+            // Emissive exhaust glow
+            const glowGeo = new THREE.SphereGeometry(0.18, 8, 8);
+            const glowMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+            const glow = new THREE.Mesh(glowGeo, glowMat);
+            glow.position.y = -0.3;
+            glow.material.color.multiplyScalar(2.0); // push past 1.0 for bloom
+            rocketGroup.add(glow);
+            
+            const startPos = new THREE.Vector3();
+            bld.mesh.getWorldPosition(startPos);
+            startPos.y += 1.5; 
+            
+            rocketGroup.position.copy(startPos);
+            this.scene.add(rocketGroup);
+            
+            this.rockets.push({
+                mesh: rocketGroup,
+                velocity: 0,
+                glowMesh: glow,
+                life: 0
+            });
+        }
+        
+        this.onRocketsComplete = onComplete;
+        
+        // Failsafe in case no resources were somehow consumed but quest advances
+        if (this.rockets.length === 0 && onComplete) {
+            onComplete();
+            this.onRocketsComplete = null;
+        }
+    }
+
     update(deltaTime) {
         this.cameraController.update(deltaTime);
         if (this.gridSystem) this.gridSystem.update(this.camera, deltaTime);
         if (this.placementSystem) this.placementSystem.update(deltaTime);
         this.fxSystem.update(deltaTime);
+        
+        if (this.rockets && this.rockets.length > 0) {
+            let allDone = true;
+            for (let i = this.rockets.length - 1; i >= 0; i--) {
+                const r = this.rockets[i];
+                r.life += deltaTime;
+                
+                // Exponential acceleration
+                r.velocity += 15.0 * deltaTime;
+                r.mesh.position.y += r.velocity * deltaTime;
+                
+                const s = 0.8 + Math.random() * 0.4;
+                r.glowMesh.scale.set(s, s, s);
+                
+                if (r.life > 0.1) {
+                    this.fxSystem.spawnRocketPlume(r.mesh.position.x, r.mesh.position.y - 0.4, r.mesh.position.z);
+                }
+                
+                if (r.mesh.position.y < 100) {
+                    allDone = false;
+                } else {
+                    this.scene.remove(r.mesh);
+                    this.rockets.splice(i, 1);
+                }
+            }
+            
+            if (allDone && this.onRocketsComplete) {
+                this.onRocketsComplete();
+                this.onRocketsComplete = null;
+            }
+        }
         
         this.composer.render(deltaTime);
     }

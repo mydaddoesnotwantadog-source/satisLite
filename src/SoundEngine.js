@@ -148,6 +148,14 @@ export class SoundEngine {
             
             return (bass + beat + melody) * env * 0.5;
         });
+
+        // 12. Rocket Engine (Launch): Deep rumble with noise
+        this.buffers.rocket_engine = this.createBuffer(4.0, (t, i, len) => {
+            const env = t < 0.5 ? t / 0.5 : (t > 3.0 ? (4.0 - t) / 1.0 : 1);
+            const rumble = Math.sin(t * (40 + Math.random() * 20) * Math.PI * 2);
+            const noise = Math.random() * 2 - 1;
+            return (rumble * 0.6 + noise * 0.4) * env * 0.8;
+        });
     }
 
     play(name) {

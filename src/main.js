@@ -41,6 +41,32 @@ class GameApp {
             if (this.scene.soundEngine) this.scene.soundEngine.play('click');
         });
     }
+
+    triggerRocketLaunch() {
+        if (this.isLaunchingRockets) return;
+        this.isLaunchingRockets = true;
+        this.ui.updateDisplay(); // Hide the button immediately
+        
+        if (this.scene.soundEngine) {
+            this.scene.soundEngine.play('rocket_engine');
+        }
+        
+        const consumed = this.logic.consumeQuestResources();
+        this.ui.updateDisplay(); // Show updated resource counts
+        
+        if (this.scene.triggerRocketLaunch) {
+            this.scene.triggerRocketLaunch(consumed, () => {
+                this.logic.advanceQuest();
+                this.isLaunchingRockets = false;
+                this.ui.updateDisplay();
+            });
+        } else {
+            // Fallback if not implemented
+            this.logic.advanceQuest();
+            this.isLaunchingRockets = false;
+            this.ui.updateDisplay();
+        }
+    }
     
     setupTitleScreen() {
         const titleContainer = document.getElementById('title-container');

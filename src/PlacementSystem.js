@@ -539,7 +539,7 @@ export class PlacementSystem {
                     }
 
                     if (unmet > 0) {
-                        const confirmDelete = window.confirm(`There is no Storage Box space available for ${unmet} in-progress resources. Are you sure you want to delete this building and destroy them?`);
+                        const confirmDelete = window.confirm(`There is no Storage Box space available for ${unmet} buffered resources with nowhere to go. Are you sure you want to delete this building and destroy them?`);
                         if (!confirmDelete) {
                             for (const d of destinations) d.target.inboundCount[d.item] -= d.amount;
                             return;

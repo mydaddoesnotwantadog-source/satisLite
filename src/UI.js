@@ -128,6 +128,17 @@ export class UI {
         
         document.getElementById('ui-layer').addEventListener('contextmenu', e => e.preventDefault());
         
+        const launchBtn = document.getElementById('btn-launch-rocket');
+        if (launchBtn) {
+            launchBtn.addEventListener('click', () => {
+                if (this.app.soundEngine) this.app.soundEngine.play('click');
+                launchBtn.style.display = 'none';
+                if (this.app.triggerRocketLaunch) {
+                    this.app.triggerRocketLaunch();
+                }
+            });
+        }
+        
         const invHeader = document.getElementById('inventory-header');
         if (invHeader) {
             invHeader.addEventListener('click', () => {
@@ -705,16 +716,53 @@ export class UI {
             `;
         }
         
-        // Update Recipe Progress Bar
-        if (this.selectedBuilding && this.selectedBuilding.activeRecipe) {
-            const recipeData = this.logic.recipes[this.selectedBuilding.activeRecipe];
-            let percent = 0;
-            if (this.selectedBuilding.isWorking && recipeData && recipeData.time > 0) {
-                percent = Math.min(100, Math.max(0, (this.selectedBuilding.progress / recipeData.time) * 100));
+        const launchBtn = document.getElementById('btn-launch-rocket');
+        if (launchBtn) {
+            if (this.logic.isCurrentQuestReady() && !this.app.isLaunchingRockets) {
+                launchBtn.style.display = 'block';
+                reqDiv.style.display = 'none';
+            } else {
+                launchBtn.style.display = 'none';
+                reqDiv.style.display = 'block';
             }
-            document.getElementById('recipe-progress-bar').style.width = percent + '%';
+        }
+        
+        // Update Recipe Progress Bar and Buffer Status
+        const bufferStatusEl = document.getElementById('recipe-buffer-status');
+        if (this.selectedBuilding) {
+            if (this.selectedBuilding.activeRecipe) {
+                const recipeData = this.logic.recipes[this.selectedBuilding.activeRecipe];
+                let percent = 0;
+                if (this.selectedBuilding.isWorking && recipeData && recipeData.time > 0) {
+                    percent = Math.min(100, Math.max(0, (this.selectedBuilding.progress / recipeData.time) * 100));
+                }
+                document.getElementById('recipe-progress-bar').style.width = percent + '%';
+            } else {
+                document.getElementById('recipe-progress-bar').style.width = '0%';
+            }
+
+            if (bufferStatusEl) {
+                const bld = this.selectedBuilding;
+                const parts = [];
+                if (bld.inputBuffer) {
+                    for (const [k, v] of Object.entries(bld.inputBuffer)) {
+                        if (v > 0) parts.push(`In ${k}: ${Math.floor(v)}`);
+                    }
+                }
+                if (bld.outputBuffer) {
+                    for (const [k, v] of Object.entries(bld.outputBuffer)) {
+                        if (v > 0) parts.push(`Out ${k}: ${Math.floor(v)}`);
+                    }
+                }
+                if (parts.length > 0) {
+                    bufferStatusEl.textContent = `[${parts.join(' | ')}]`;
+                } else {
+                    bufferStatusEl.textContent = '';
+                }
+            }
         } else {
             document.getElementById('recipe-progress-bar').style.width = '0%';
+            if (bufferStatusEl) bufferStatusEl.textContent = '';
         }
         
         this.updateLeighHighProgress();
