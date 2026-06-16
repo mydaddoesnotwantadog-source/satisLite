@@ -28,6 +28,7 @@ export class SaveManager {
                     inputBuffer: b.inputBuffer,
                     outputBuffer: b.outputBuffer,
                     progress: b.progress,
+                    disabled: b.disabled,
                     storageFilter: b.storageFilter,
                     inventoryCount: b.inventoryCount,
                     activeBurn: b.activeBurn,
@@ -135,6 +136,7 @@ export class SaveManager {
                     newBld.inputBuffer = bData.inputBuffer || {};
                     newBld.outputBuffer = bData.outputBuffer || {};
                     newBld.progress = bData.progress || 0;
+                    newBld.disabled = bData.disabled || false;
                     
                     if (bData.storageFilter !== undefined) newBld.storageFilter = bData.storageFilter;
                     if (bData.inventoryCount !== undefined) newBld.inventoryCount = bData.inventoryCount;

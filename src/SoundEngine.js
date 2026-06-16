@@ -156,6 +156,24 @@ export class SoundEngine {
             const noise = Math.random() * 2 - 1;
             return (rumble * 0.6 + noise * 0.4) * env * 0.8;
         });
+
+        // 13. Breaker Trip (Off): Heavy clunk with boom
+        this.buffers.breaker_trip = this.createBuffer(0.4, (t, i, len) => {
+            const env = Math.pow(1 - (i / len), 3);
+            const clunk = Math.sin(t * 80 * Math.exp(-t * 50) * Math.PI * 2);
+            const boom = Math.sin(t * 40 * Math.PI * 2) * Math.exp(-t * 10);
+            const spark = (Math.random() * 2 - 1) * Math.exp(-t * 40) * 0.3;
+            return (clunk * 0.6 + boom * 0.5 + spark) * env * 0.7;
+        });
+
+        // 14. Wind Up (On): Rising pitch hum
+        this.buffers.wind_up = this.createBuffer(0.8, (t, i, len) => {
+            const env = t < 0.4 ? t / 0.4 : Math.pow(1 - (t - 0.4) / 0.4, 2);
+            const freq = 60 + (t * 150); // Pitch rises from 60Hz to ~180Hz
+            const hum = Math.sin(t * freq * Math.PI * 2);
+            const overtone = Math.sin(t * (freq * 2) * Math.PI * 2) * 0.3;
+            return (hum + overtone) * env * 0.5;
+        });
     }
 
     play(name) {

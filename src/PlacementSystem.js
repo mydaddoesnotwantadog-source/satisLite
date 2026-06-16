@@ -86,6 +86,8 @@ export class PlacementSystem {
         
         this.domElement.addEventListener('mousedown', (e) => {
             if (e.button === 0) { // Left click
+                if (this.tryToggleLever()) return;
+                
                 if (this.ui.activeTool === 'select') {
                     this.trySelectBuilding();
                 } else if (this.ui.activeTool === 'delete') {
@@ -611,6 +613,26 @@ export class PlacementSystem {
         }
     }
 
+    tryToggleLever() {
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+        const leverIntersect = intersects.find(hit => hit.object.userData && hit.object.userData.isLever);
+        if (leverIntersect) {
+            const uuid = leverIntersect.object.userData.buildingUuid;
+            const bld = this.gameLogic.buildings.find(b => b.uuid === uuid);
+            if (bld) {
+                bld.disabled = !bld.disabled;
+                if (this.soundEngine) {
+                    this.soundEngine.play(bld.disabled ? 'breaker_trip' : 'wind_up');
+                }
+                this.updateFuseSwitchVisual(uuid, bld.disabled);
+                this.ui.updateDisplay(); // update UI to reflect Disabled status
+            }
+            return true;
+        }
+        return false;
+    }
+
     tryPlaceBuilding() {
         if (!this.ghostMesh.visible || this.ghostMesh.material === this.ghostMatInvalid) return;
         
@@ -664,6 +686,7 @@ export class PlacementSystem {
             buildingMesh.userData = { isBuilding: true, uuid: uuid };
             
             this.buildExtractorTops(buildingMesh, toolId, nodeSubType);
+            this.buildFuseSwitch(buildingMesh);
             this.scene.add(buildingMesh);
             
             const bld = this.gameLogic.buildings.find(b => b.uuid === uuid);
@@ -746,6 +769,7 @@ export class PlacementSystem {
         buildingMesh.userData = { isBuilding: true, uuid: uuid };
         
         this.buildExtractorTops(buildingMesh, toolId, nodeSubType);
+        this.buildFuseSwitch(buildingMesh);
         
         const bld = this.gameLogic.buildings.find(b => b.uuid === uuid);
         if (bld) {
@@ -1146,6 +1170,78 @@ export class PlacementSystem {
                     if (pressHead) pressHead.position.y = 0.8;
                 }
             }
+        }
+    }
+
+    buildFuseSwitch(buildingMesh) {
+        if (!buildingMesh.geometry || !buildingMesh.geometry.boundingBox) {
+            buildingMesh.geometry.computeBoundingBox();
+        }
+        const box = buildingMesh.geometry.boundingBox;
+        const width = box.max.x - box.min.x;
+        const depth = box.max.z - box.min.z;
+        const height = box.max.y - box.min.y;
+
+        const switchGroup = new THREE.Group();
+        
+        // Base box
+        const baseGeo = new THREE.BoxGeometry(0.3, 0.5, 0.15);
+        const baseMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.9, roughness: 0.4 });
+        const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+        
+        // Lever arm
+        const armGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.4, 8);
+        const armMat = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.8, roughness: 0.5 });
+        const armMesh = new THREE.Mesh(armGeo, armMat);
+        armMesh.position.y = 0.2;
+        
+        // Glowing fuse tip
+        const fuseGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.15, 8);
+        const fuseMat = new THREE.MeshStandardMaterial({ color: 0x00ff00, emissive: 0x00ff00, emissiveIntensity: 1.5 });
+        const fuseMesh = new THREE.Mesh(fuseGeo, fuseMat);
+        fuseMesh.position.y = 0.4;
+        
+        const leverGroup = new THREE.Group();
+        leverGroup.add(armMesh);
+        leverGroup.add(fuseMesh);
+        
+        // Pivot point at the bottom of the arm
+        leverGroup.position.set(0, 0, 0.08);
+        leverGroup.rotation.x = Math.PI / 4; // Up position (On)
+        
+        switchGroup.add(baseMesh);
+        switchGroup.add(leverGroup);
+        
+        // Position on the front-right edge
+        switchGroup.position.set(width/2 - 0.2, -height/2 + 0.35, depth/2 + 0.075);
+        
+        // Invisible click target
+        const clickTargetGeo = new THREE.BoxGeometry(0.5, 0.7, 0.5);
+        const clickTargetMat = new THREE.MeshBasicMaterial({ visible: false });
+        const clickTarget = new THREE.Mesh(clickTargetGeo, clickTargetMat);
+        clickTarget.userData = { isLever: true, buildingUuid: buildingMesh.userData.uuid };
+        switchGroup.add(clickTarget);
+        
+        buildingMesh.add(switchGroup);
+        buildingMesh.userData.switchGroup = switchGroup;
+        buildingMesh.userData.leverGroup = leverGroup;
+        buildingMesh.userData.fuseMat = fuseMat;
+    }
+
+    updateFuseSwitchVisual(uuid, disabled) {
+        const bld = this.gameLogic.buildings.find(b => b.uuid === uuid);
+        if (!bld || !bld.mesh) return;
+        const mesh = bld.mesh;
+        if (!mesh.userData.leverGroup) return;
+        
+        if (disabled) {
+            mesh.userData.leverGroup.rotation.x = -Math.PI / 4; // Down
+            mesh.userData.fuseMat.color.setHex(0xff0000);
+            mesh.userData.fuseMat.emissive.setHex(0xff0000);
+        } else {
+            mesh.userData.leverGroup.rotation.x = Math.PI / 4; // Up
+            mesh.userData.fuseMat.color.setHex(0x00ff00);
+            mesh.userData.fuseMat.emissive.setHex(0x00ff00);
         }
     }
 }

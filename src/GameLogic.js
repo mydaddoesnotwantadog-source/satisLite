@@ -140,7 +140,7 @@ export class GameLogic {
             uuid, id: toolId,
             x: gridX, z: gridZ, rotation,
             inputBuffer: {}, outputBuffer: {}, inboundCount: {},
-            isWorking: false, progress: 0
+            isWorking: false, progress: 0, disabled: false
         };
         
         if (toolId === 'miner' && nodeSubType) {
@@ -205,6 +205,10 @@ export class GameLogic {
         // Process Extractors
         for (const b of this.buildings) {
             if (b.isExtractor) {
+                if (b.disabled) {
+                    b.isWorking = false;
+                    continue;
+                }
                 const currentOut = b.outputBuffer[b.type] || 0;
                 if (currentOut >= 50) {
                     b.isWorking = false;
@@ -229,6 +233,7 @@ export class GameLogic {
         // Process Machines
         for (const b of this.buildings) {
             if (!b.isExtractor && b.activeRecipe && b.type !== 'storage' && b.type !== 'school') {
+                if (b.disabled) continue;
                 const recipe = this.recipes[b.activeRecipe];
                 
                 if (!b.isWorking) {
