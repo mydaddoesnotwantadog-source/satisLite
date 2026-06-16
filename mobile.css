@@ -43,13 +43,14 @@ body.mobile-mode #bottom-toolbar {
 }
 
 body.mobile-mode #goal-panel {
-    /* Top right docked but smaller */
+    /* Stack under the currency panel on the left */
     position: fixed !important;
-    top: 5px !important;
-    right: 5px !important;
+    top: 60px !important;
+    left: 5px !important;
+    right: auto !important;
     width: auto !important;
     height: auto !important;
-    max-width: 45vw !important;
+    max-width: 60vw !important;
     padding: 5px;
     background: rgba(10, 15, 25, 0.6);
     border: none;
@@ -128,4 +129,13 @@ body.mobile-mode #inventory-panel:not(.mobile-expanded) {
     padding: 5px 10px;
     font-size: 0.8em;
     z-index: 1000;
+}
+
+/* Fix machine submenu clipping in scrollable toolbar */
+body.mobile-mode #machine-submenu {
+    position: fixed !important;
+    bottom: 60px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 2000 !important;
 }

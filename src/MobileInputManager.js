@@ -10,7 +10,6 @@ export class MobileInputManager {
         this.initialPinchDist = null;
         this.initialZoom = null;
         
-        this.panSensitivity = 0.5;
         this.zoomSensitivity = 0.01;
         
         this.setupEvents();
@@ -54,9 +53,15 @@ export class MobileInputManager {
                     touchData.isTap = false;
                 }
                 
-                const factor = (1 / this.cameraController.camera.zoom) * (this.panSensitivity);
-                const moveRight = this.cameraController.right.clone().multiplyScalar(-deltaX * factor);
-                const moveForward = this.cameraController.forward.clone().multiplyScalar(deltaY * factor);
+                // Calculate exact world units per pixel to keep 1:1 touch mapping
+                const frustumSize = 12; // Matches GameScene
+                // X mapping
+                const factorX = (frustumSize * (this.domElement.clientWidth / this.domElement.clientHeight)) / (this.domElement.clientWidth * this.cameraController.camera.zoom);
+                // Y mapping is scaled because the ground plane is viewed at an angle
+                const factorY = frustumSize / (this.domElement.clientHeight * this.cameraController.camera.zoom) * 1.2; 
+                
+                const moveRight = this.cameraController.right.clone().multiplyScalar(-deltaX * factorX);
+                const moveForward = this.cameraController.forward.clone().multiplyScalar(deltaY * factorY);
                 
                 this.cameraController.target.add(moveRight);
                 this.cameraController.target.add(moveForward);
