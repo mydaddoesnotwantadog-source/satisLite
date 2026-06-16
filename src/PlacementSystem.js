@@ -311,8 +311,7 @@ export class PlacementSystem {
                     const outBuffer = bld.outputBuffer[bld.type] || 0;
                     detailsEl.innerHTML = `Extracting: <strong style="color:${iconColors[bld.type] || '#fff'}">${typeName}</strong><br>Buffer: <strong>${outBuffer} / 50</strong>`;
                     
-                    const occ = this.gridSystem.getOccupantAt(bld.x, bld.z);
-                    const level = occ ? occ.level : 1;
+                    const level = bld.nodeLevel || 1;
                     const baseRate = this.gameLogic.baseRates[bld.type] || 1;
                     const actualRate = baseRate * level;
                     

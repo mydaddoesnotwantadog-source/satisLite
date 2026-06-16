@@ -65,8 +65,12 @@ export class SaveManager {
             
             const data = JSON.parse(json);
             
-            // Restore inventory immediately
-            this.gameLogic.inventory = data.inventory;
+            // Restore inventory immediately, merging with existing keys
+            if (data.inventory) {
+                for (const [k, v] of Object.entries(data.inventory)) {
+                    this.gameLogic.inventory[k] = v;
+                }
+            }
             this.gameLogic.brokenTrees = data.brokenTrees || [];
             
             // First, animate breaking the trees that were cleared by the player
