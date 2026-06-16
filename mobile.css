@@ -50,14 +50,27 @@ body.mobile-mode #goal-panel {
     left: auto !important;
     width: auto !important;
     height: auto !important;
-    max-width: 45vw !important;
+    max-width: 48vw !important;
     padding: 5px;
     background: rgba(10, 15, 25, 0.6);
     border: none;
     box-shadow: none;
-    font-size: 0.75em !important;
+    font-size: 0.65em !important;
     pointer-events: none;
     z-index: 800;
+}
+
+body.mobile-mode #goal-panel h2,
+body.mobile-mode #resource-panel h2 {
+    font-size: 1.1em !important;
+    margin: 2px 0 !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+body.mobile-mode #goal-panel .subtitle {
+    font-size: 0.9em !important;
+    margin: 2px 0 !important;
 }
 
 body.mobile-mode #resource-panel {
@@ -66,9 +79,9 @@ body.mobile-mode #resource-panel {
     left: 5px !important;
     width: auto !important;
     height: auto !important;
-    max-width: 45vw !important;
+    max-width: 48vw !important;
     padding: 5px;
-    font-size: 0.75em !important;
+    font-size: 0.65em !important;
     z-index: 800;
 }
 
