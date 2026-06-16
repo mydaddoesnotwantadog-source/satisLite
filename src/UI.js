@@ -833,22 +833,24 @@ export class UI {
 
             if (bufferStatusEl) {
                 const bld = this.selectedBuilding;
-                const parts = [];
+                let inParts = [];
+                let outParts = [];
                 if (bld.inputBuffer) {
                     for (const [k, v] of Object.entries(bld.inputBuffer)) {
-                        if (v > 0) parts.push(`In ${k}: ${Math.floor(v)}`);
+                        if (v > 0) inParts.push(`<span style="color:#f39c12;">${k}:</span> <span style="font-family:'Courier New',monospace; font-weight:bold; color:#fff;">${Math.floor(v)}</span>`);
                     }
                 }
                 if (bld.outputBuffer) {
                     for (const [k, v] of Object.entries(bld.outputBuffer)) {
-                        if (v > 0) parts.push(`Out ${k}: ${Math.floor(v)}`);
+                        if (v > 0) outParts.push(`<span style="color:#3498db;">${k}:</span> <span style="font-family:'Courier New',monospace; font-weight:bold; color:#fff;">${Math.floor(v)}</span>`);
                     }
                 }
-                if (parts.length > 0) {
-                    bufferStatusEl.textContent = `[${parts.join(' | ')}]`;
-                } else {
-                    bufferStatusEl.textContent = '';
-                }
+                
+                let html = '';
+                if (inParts.length > 0) html += `<div style="background: rgba(243, 156, 18, 0.1); border-left: 3px solid #f39c12; padding: 4px 8px;"><strong style="color:#f39c12; font-size:0.85em; text-transform:uppercase; letter-spacing:1px;">Input</strong><br>${inParts.join(' | ')}</div>`;
+                if (outParts.length > 0) html += `<div style="background: rgba(52, 152, 219, 0.1); border-left: 3px solid #3498db; padding: 4px 8px;"><strong style="color:#3498db; font-size:0.85em; text-transform:uppercase; letter-spacing:1px;">Output</strong><br>${outParts.join(' | ')}</div>`;
+                
+                bufferStatusEl.innerHTML = html;
             }
         } else {
             document.getElementById('recipe-progress-bar').style.width = '0%';
