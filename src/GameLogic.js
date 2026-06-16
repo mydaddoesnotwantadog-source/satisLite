@@ -259,9 +259,6 @@ export class GameLogic {
                         }
                         b.isWorking = false;
                         b.progress = 0;
-                        if (this.soundEngine && b.type !== 'smelter') {
-                            this.soundEngine.play('complete');
-                        }
                     }
                 }
             }

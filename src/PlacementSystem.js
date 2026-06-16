@@ -630,11 +630,7 @@ export class PlacementSystem {
         
         if (this.gameLogic.purchaseBuilding(toolId)) {
             if (this.soundEngine) {
-                if (toolId === 'smelter') {
-                    this.soundEngine.play('hammer_place');
-                } else {
-                    this.soundEngine.play('place');
-                }
+                this.soundEngine.play('place');
             }
             let nodeLevel = 1;
             let nodeSubType = null;
