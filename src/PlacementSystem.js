@@ -138,13 +138,15 @@ export class PlacementSystem {
             this.updateGhost();
             this.trySelectBuilding();
         } else if (this.ui.activeTool === 'delete') {
-            const prevX = this.hoveredX;
-            const prevZ = this.hoveredZ;
+            const prevBld = this.hoveredBuildingMesh;
+            const prevTree = this.hoveredTreeId;
             this.updateGhost();
             
-            if (this.hoveredX === prevX && this.hoveredZ === prevZ && this.ghostMesh.visible) {
+            const hasTarget = this.hoveredBuildingMesh || this.hoveredTreeId !== null;
+            
+            if (hasTarget && this.hoveredBuildingMesh === prevBld && this.hoveredTreeId === prevTree) {
                 this.tryDeleteBuilding();
-            } else if (this.soundEngine && this.ghostMesh.visible) {
+            } else if (this.soundEngine && hasTarget) {
                 this.soundEngine.play('click');
             }
         } else {
