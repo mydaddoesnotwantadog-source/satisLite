@@ -262,6 +262,9 @@ export class PlacementSystem {
             const gridX = Math.floor(target.x / this.gridSystem.tileSize);
             const gridZ = Math.floor(target.z / this.gridSystem.tileSize);
             
+            this.hoveredX = gridX;
+            this.hoveredZ = gridZ;
+            
             // Calculate center point based on footprint and rotation
             let centerX = (gridX + 0.5) * this.gridSystem.tileSize;
             let centerZ = (gridZ + 0.5) * this.gridSystem.tileSize;
