@@ -36,7 +36,7 @@ body.mobile-mode #bottom-toolbar {
     transform: none !important;
     flex-direction: row;
     overflow-x: auto;
-    padding: 5px;
+    padding: 5px 5px 25px 5px !important; /* Extra bottom padding for curved phone screens */
     border-radius: 0;
     background: rgba(10, 15, 25, 0.85);
     z-index: 900;
@@ -73,6 +73,13 @@ body.mobile-mode #goal-panel .subtitle {
     margin: 2px 0 !important;
 }
 
+body.mobile-mode #goal-panel .goal-item {
+    display: flex !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    margin: 1px 0 !important;
+}
+
 body.mobile-mode #resource-panel {
     position: fixed !important;
     top: 5px !important;
@@ -80,9 +87,14 @@ body.mobile-mode #resource-panel {
     width: auto !important;
     height: auto !important;
     max-width: 48vw !important;
-    padding: 5px;
+    padding: 2px 4px !important;
     font-size: 0.65em !important;
     z-index: 800;
+}
+
+body.mobile-mode #resource-panel .resource-item {
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 /* Enlarge close buttons */
@@ -126,7 +138,7 @@ body.mobile-mode .desktop-only {
 /* Default minimized state for inventory panel on mobile */
 body.mobile-mode #inventory-panel:not(.mobile-expanded) {
     position: fixed !important;
-    bottom: 60px !important; /* Above the toolbar */
+    bottom: 80px !important; /* Above the taller toolbar */
     left: 5px !important;
     width: auto !important;
     height: auto !important;
@@ -139,7 +151,7 @@ body.mobile-mode #inventory-panel:not(.mobile-expanded) {
 /* Fix machine submenu clipping in scrollable toolbar */
 body.mobile-mode #machine-submenu {
     position: fixed !important;
-    bottom: 60px !important;
+    bottom: 80px !important; /* Above the taller toolbar */
     left: 50% !important;
     transform: translateX(-50%) !important;
     z-index: 2000 !important;

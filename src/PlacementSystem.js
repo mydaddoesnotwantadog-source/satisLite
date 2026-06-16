@@ -1020,14 +1020,14 @@ export class PlacementSystem {
     update(deltaTime) {
         this.updateGhost();
         
-        // Update tree shader uniforms for see-through leaves
-        if (this.gridSystem.treeLeavesMat.userData.shader) {
+        // Update tree shader uniforms for see-through leaves (Desktop Only)
+        if (!window.isMobile && this.gridSystem.treeLeavesMat.userData.shader) {
             this.raycaster.setFromCamera(this.mouse, this.camera);
             this.gridSystem.treeLeavesMat.userData.shader.uniforms.uRayOrigin.value.copy(this.raycaster.ray.origin);
             this.gridSystem.treeLeavesMat.userData.shader.uniforms.uRayDir.value.copy(this.raycaster.ray.direction).normalize();
-            
-            // If the mouse is off-screen (e.g. over UI), we could hide the hole by moving the ray far away,
-            // but for now relying on ray distance works perfectly.
+        } else if (window.isMobile && this.gridSystem.treeLeavesMat.userData.shader) {
+            // Hide the hole on mobile completely by pushing it far away
+            this.gridSystem.treeLeavesMat.userData.shader.uniforms.uRayOrigin.value.set(-9999, -9999, -9999);
         }
         
         // Continuously refresh tooltip with last known mouse position
