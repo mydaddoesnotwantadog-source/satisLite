@@ -3,10 +3,14 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SatisLite - A Big Thune Adventure</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏭</text></svg>">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏭</text></svg>">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="mobile.css">
 
@@ -28,11 +32,16 @@
     <!-- TITLE SCREEN -->
     <div id="title-container">
         <!-- Title Background and Logo -->
-        <div id="title-bg-rect" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 26, 0.95); pointer-events: none; transition: opacity 1.0s ease-out;"></div>
-        
-        <svg id="title-svg-overlay" width="100%" height="100%" style="position: absolute; top: 0; left: 0; pointer-events: none;">
+        <div id="title-bg-rect"
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 26, 0.95); pointer-events: none; transition: opacity 1.0s ease-out;">
+        </div>
+
+        <svg id="title-svg-overlay" width="100%" height="100%"
+            style="position: absolute; top: 0; left: 0; pointer-events: none;">
             <!-- Solid text logo -->
-            <text id="mask-text" x="50%" y="28%" text-anchor="middle" dominant-baseline="middle" font-size="12vw" font-family="'Outfit', sans-serif" font-weight="900" fill="#ffffff" stroke="rgba(0,0,0,0.8)" stroke-width="4px" letter-spacing="0.5vw">SATISLITE</text>
+            <text id="mask-text" x="50%" y="28%" text-anchor="middle" dominant-baseline="middle" font-size="12vw"
+                font-family="'Outfit', sans-serif" font-weight="900" fill="#ffffff" stroke="rgba(0,0,0,0.8)"
+                stroke-width="4px" letter-spacing="0.5vw">SATISLITE</text>
         </svg>
 
         <div id="title-ui-content">
@@ -64,7 +73,8 @@
         </div>
 
         <!-- Version Label -->
-        <div id="version-label" style="position: absolute; bottom: 20px; left: 30px; font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; font-weight: 700; color: rgba(255, 255, 255, 0.4); letter-spacing: 4px; border-left: 2px solid var(--primary-color, #74b9ff); padding-left: 10px; z-index: 10;">
+        <div id="version-label"
+            style="position: absolute; bottom: 20px; left: 30px; font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; font-weight: 700; color: rgba(255, 255, 255, 0.4); letter-spacing: 4px; border-left: 2px solid var(--primary-color, #74b9ff); padding-left: 10px; z-index: 10;">
             v0.2.3
         </div>
     </div>
@@ -84,11 +94,13 @@
 
         <!-- Bottom Left: Resources Split -->
         <div id="inventory-panel" class="glass-panel">
-            <div id="inventory-header" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; grid-column: 1 / -1;">
+            <div id="inventory-header"
+                style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; grid-column: 1 / -1;">
                 <h2 style="margin: 0; padding: 0; border: none;">Stored Materials</h2>
-                <span id="inventory-toggle-arrow" style="transition: transform 0.2s; font-size: 1.2em; line-height: 1;">▼</span>
+                <span id="inventory-toggle-arrow"
+                    style="transition: transform 0.2s; font-size: 1.2em; line-height: 1;">▼</span>
             </div>
-            
+
             <div id="inventory-content" style="display: contents;">
                 <!-- Raw Materials -->
                 <div class="resource-item">
@@ -125,39 +137,39 @@
                 <h2 style="margin-top: 10px; grid-column: 1 / -1;">Stored Manufactured Materials</h2>
                 <div class="resource-item">
                     <span class="resource-icon" style="background: #ff6666;"></span>
-                <span class="resource-name">Iron Ingot</span>
-                <span class="resource-value" id="res-ironIngot">0</span>
-            </div>
-            <div class="resource-item">
-                <span class="resource-icon" style="background: #74b9ff;"></span>
-                <span class="resource-name">Copper Ingot</span>
-                <span class="resource-value" id="res-copperIngot">0</span>
-            </div>
-            <div class="resource-item">
-                <span class="resource-icon" style="background: #bdc3c7;"></span>
-                <span class="resource-name">Iron Plate</span>
-                <span class="resource-value" id="res-ironPlate">0</span>
-            </div>
-            <div class="resource-item">
-                <span class="resource-icon" style="background: #95a5a6;"></span>
-                <span class="resource-name">Iron Rod</span>
-                <span class="resource-value" id="res-ironRod">0</span>
-            </div>
-            <div class="resource-item">
-                <span class="resource-icon" style="background: #e67e22;"></span>
-                <span class="resource-name">Copper Wire</span>
-                <span class="resource-value" id="res-copperWire">0</span>
-            </div>
-            <div class="resource-item">
-                <span class="resource-icon" style="background: #34495e;"></span>
-                <span class="resource-name">Frame</span>
-                <span class="resource-value" id="res-frame">0</span>
-            </div>
-            <div class="resource-item">
-                <span class="resource-icon" style="background: #9b59b6;"></span>
-                <span class="resource-name">Panel</span>
-                <span class="resource-value" id="res-panel">0</span>
-            </div>
+                    <span class="resource-name">Iron Ingot</span>
+                    <span class="resource-value" id="res-ironIngot">0</span>
+                </div>
+                <div class="resource-item">
+                    <span class="resource-icon" style="background: #74b9ff;"></span>
+                    <span class="resource-name">Copper Ingot</span>
+                    <span class="resource-value" id="res-copperIngot">0</span>
+                </div>
+                <div class="resource-item">
+                    <span class="resource-icon" style="background: #bdc3c7;"></span>
+                    <span class="resource-name">Iron Plate</span>
+                    <span class="resource-value" id="res-ironPlate">0</span>
+                </div>
+                <div class="resource-item">
+                    <span class="resource-icon" style="background: #95a5a6;"></span>
+                    <span class="resource-name">Iron Rod</span>
+                    <span class="resource-value" id="res-ironRod">0</span>
+                </div>
+                <div class="resource-item">
+                    <span class="resource-icon" style="background: #e67e22;"></span>
+                    <span class="resource-name">Copper Wire</span>
+                    <span class="resource-value" id="res-copperWire">0</span>
+                </div>
+                <div class="resource-item">
+                    <span class="resource-icon" style="background: #34495e;"></span>
+                    <span class="resource-name">Frame</span>
+                    <span class="resource-value" id="res-frame">0</span>
+                </div>
+                <div class="resource-item">
+                    <span class="resource-icon" style="background: #9b59b6;"></span>
+                    <span class="resource-name">Panel</span>
+                    <span class="resource-value" id="res-panel">0</span>
+                </div>
             </div> <!-- Close inventory-content -->
         </div>
 
@@ -187,8 +199,15 @@
         </div>
 
         <!-- Save Button (Top Right) -->
-        <div id="btn-save-game" class="tool-btn" style="position: absolute; top: 10px; right: 300px; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; cursor: pointer; padding: 0; user-select: none; pointer-events: auto;" title="Save Game">
-            <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: none; stroke: var(--primary-color, #74b9ff); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        <div id="btn-save-game" class="tool-btn"
+            style="position: absolute; top: 10px; right: 300px; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; cursor: pointer; padding: 0; user-select: none; pointer-events: auto;"
+            title="Save Game">
+            <svg viewBox="0 0 24 24"
+                style="width: 28px; height: 28px; fill: none; stroke: var(--primary-color, #74b9ff); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
         </div>
 
         <!-- Top Right: Big Thune's Demands -->
@@ -198,7 +217,9 @@
             <div id="goal-requirements">
                 <!-- Dynamically populated -->
             </div>
-            <button id="btn-launch-rocket" class="nuke-btn" style="display: none; margin-top: 15px; width: 100%; font-size: 1.2em; box-shadow: 0 0 15px #e74c3c;">LAUNCH RESOURCES</button>
+            <button id="btn-launch-rocket" class="nuke-btn"
+                style="display: none; margin-top: 15px; width: 100%; font-size: 1.2em; box-shadow: 0 0 15px #e74c3c;">LAUNCH
+                RESOURCES</button>
         </div>
 
         <!-- Build Controls Overlay -->

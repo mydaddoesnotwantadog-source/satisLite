@@ -753,7 +753,16 @@ export class UI {
             if (el) {
                 let key = res;
                 if (res === 'phones') key = 'confiscatedPhones';
-                el.textContent = Math.floor(this.logic.inventory[key] || 0);
+                
+                if (el.parentElement.dataset.showDerivative === 'true') {
+                    const rate = this._rates[res] || 0;
+                    const rounded = Math.round(rate);
+                    const sign = rounded >= 0 ? '+' : '';
+                    const color = rounded > 0 ? '#5f5' : rounded < 0 ? '#f55' : '#aaa';
+                    el.innerHTML = `<span style="color:${color}; font-family:'Courier New',monospace; font-weight:bold;">${sign}${rounded}/s</span>`;
+                } else {
+                    el.textContent = Math.floor(this.logic.inventory[key] || 0);
+                }
             }
         }
         
@@ -1023,6 +1032,7 @@ export class UI {
             const resId = valueEl.id.replace('res-', '');
             
             item.addEventListener('mouseenter', (e) => {
+                if (window.isMobile) return;
                 const rate = this._rates[resId] || 0;
                 const rounded = Math.round(rate);
                 const sign = rounded >= 0 ? '+' : '';
@@ -1037,6 +1047,7 @@ export class UI {
             });
             
             item.addEventListener('mousemove', (e) => {
+                if (window.isMobile) return;
                 const rate = this._rates[resId] || 0;
                 const rounded = Math.round(rate);
                 const sign = rounded >= 0 ? '+' : '';
@@ -1045,7 +1056,15 @@ export class UI {
             });
             
             item.addEventListener('mouseleave', () => {
+                if (window.isMobile) return;
                 this._rateTooltip.style.display = 'none';
+            });
+            
+            item.addEventListener('click', () => {
+                const isShowing = item.dataset.showDerivative === 'true';
+                item.dataset.showDerivative = isShowing ? 'false' : 'true';
+                if (this.app && this.app.soundEngine) this.app.soundEngine.play('click');
+                this.updateDisplay();
             });
         });
     }
