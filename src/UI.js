@@ -334,7 +334,7 @@ export class UI {
             return;
         }
 
-        title.textContent = this.logic.otherBuildings.find(b => b.id === building.type).name + ' Recipes';
+        title.textContent = this.logic.otherBuildings.find(b => b.id === building.type).name;
         const updateInfoText = (recipeKey) => {
             if (!recipeKey) {
                 info.innerHTML = '';
