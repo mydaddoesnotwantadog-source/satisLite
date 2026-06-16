@@ -116,9 +116,8 @@ export class MobileInputManager {
     }
     
     handleTap(clientX, clientY) {
-        const rect = this.domElement.getBoundingClientRect();
-        const x = ((clientX - rect.left) / rect.width) * 2 - 1;
-        const y = -((clientY - rect.top) / rect.height) * 2 + 1;
+        const x = (clientX / window.innerWidth) * 2 - 1;
+        const y = -(clientY / window.innerHeight) * 2 + 1;
         
         if (this.placementSystem) {
             this.placementSystem.mouse.x = x;
