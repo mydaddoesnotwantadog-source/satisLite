@@ -782,28 +782,33 @@ export class UI {
             this.populateMachineSubmenu();
         }
         
+        const buildGoalBar = (label, current, max) => {
+            const percent = Math.min(100, Math.max(0, (current / max) * 100));
+            const isDone = current >= max;
+            const barColor = isDone ? 'rgba(46, 204, 113, 0.8)' : 'rgba(230, 126, 34, 0.8)';
+            return `
+                <div style="position: relative; width: 100%; height: 16px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; overflow: hidden; margin-bottom: 3px; display: flex; align-items: center; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);">
+                    <div style="position: absolute; left: 0; top: 0; height: 100%; width: ${percent}%; background: ${barColor}; transition: width 0.2s; box-shadow: 0 0 5px ${barColor};"></div>
+                    <div style="position: absolute; left: 4px; top: 0; height: 100%; display: flex; align-items: center; z-index: 2; font-size: 0.8em; font-weight: bold; text-shadow: 1px 1px 2px #000; color: #fff;">${label}</div>
+                    <div style="position: absolute; right: 4px; top: 0; height: 100%; display: flex; align-items: center; z-index: 2; font-size: 0.8em; font-family: monospace; font-weight: bold; text-shadow: 1px 1px 2px #000; color: #fff;">${current}/${max}</div>
+                </div>
+            `;
+        };
+
         if (this.logic.currentQuest === 1) {
             subtitle.textContent = "Unlock Constructor";
             const i1 = Math.min(100, Math.floor(this.logic.inventory.ironIngot));
             const i2 = Math.min(100, Math.floor(this.logic.inventory.copperIngot));
-            reqDiv.innerHTML = `
-                <div class="goal-item"><span>Iron Ingots</span><span>${i1} / 100</span></div>
-                <div class="goal-item"><span>Copper Ingots</span><span>${i2} / 100</span></div>
-            `;
+            reqDiv.innerHTML = buildGoalBar('Iron Ingots', i1, 100) + buildGoalBar('Copper Ingots', i2, 100);
         } else if (this.logic.currentQuest === 2) {
             subtitle.textContent = "Unlock Big Constructor";
             const i1 = Math.min(25, Math.floor(this.logic.inventory.ironPlate));
             const i2 = Math.min(25, Math.floor(this.logic.inventory.ironRod));
-            reqDiv.innerHTML = `
-                <div class="goal-item"><span>Iron Plates</span><span>${i1} / 25</span></div>
-                <div class="goal-item"><span>Iron Rods</span><span>${i2} / 25</span></div>
-            `;
+            reqDiv.innerHTML = buildGoalBar('Iron Plates', i1, 25) + buildGoalBar('Iron Rods', i2, 25);
         } else if (this.logic.currentQuest === 3) {
             subtitle.textContent = "Deliver Panels";
             const i1 = Math.min(15, Math.floor(this.logic.inventory.panel));
-            reqDiv.innerHTML = `
-                <div class="goal-item"><span>Panels</span><span>${i1} / 15</span></div>
-            `;
+            reqDiv.innerHTML = buildGoalBar('Panels', i1, 15);
         }
         
         const launchBtn = document.getElementById('btn-launch-rocket');
