@@ -273,9 +273,12 @@ export class UI {
                 
                 this.activeTool = newBtn.getAttribute('data-tool');
                 
-                document.querySelectorAll('.submenu-horizontal').forEach(s => s.classList.remove('show'));
-                const machineBtn = document.getElementById('btn-machine-category');
-                if (machineBtn) machineBtn.textContent = 'Machines ▼';
+                // On mobile, don't close the submenu when selecting a tool
+                if (!window.isMobile || !newBtn.closest('#machine-submenu')) {
+                    document.querySelectorAll('.submenu-horizontal').forEach(s => s.classList.remove('show'));
+                    const machineBtn = document.getElementById('btn-machine-category');
+                    if (machineBtn) machineBtn.textContent = 'Machines ▼';
+                }
                 
                 this.closeRecipeUI();
                 this.closeLeighHighUI();

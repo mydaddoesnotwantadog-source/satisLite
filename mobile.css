@@ -156,3 +156,8 @@ body.mobile-mode #machine-submenu {
     transform: translateX(-50%) !important;
     z-index: 2000 !important;
 }
+
+/* Hide desktop-specific build controls overlay */
+body.mobile-mode #build-controls-overlay {
+    display: none !important;
+}

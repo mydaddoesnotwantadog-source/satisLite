@@ -87,6 +87,8 @@ export class PlacementSystem {
         });
         
         this.domElement.addEventListener('mousedown', (e) => {
+            if (window.isMobile) return; // Handled by executeTap via MobileInputManager
+            
             if (e.button === 0) { // Left click
                 if (this.ui.activeTool === 'select') {
                     this.trySelectBuilding();
@@ -133,14 +135,30 @@ export class PlacementSystem {
 
     executeTap() {
         if (this.ui.activeTool === 'select') {
-            this.updateGhost(); // Raycast to update hoveredBuildingMesh
+            this.updateGhost();
             this.trySelectBuilding();
         } else if (this.ui.activeTool === 'delete') {
+            const prevX = this.hoveredX;
+            const prevZ = this.hoveredZ;
             this.updateGhost();
-            this.tryDeleteBuilding();
+            
+            if (this.hoveredX === prevX && this.hoveredZ === prevZ && this.ghostMesh.visible) {
+                this.tryDeleteBuilding();
+            } else if (this.soundEngine && this.ghostMesh.visible) {
+                this.soundEngine.play('click');
+            }
         } else {
+            // Build mode
+            const prevX = this.hoveredX;
+            const prevZ = this.hoveredZ;
             this.updateGhost();
-            this.tryPlaceBuilding();
+            
+            if (this.hoveredX === prevX && this.hoveredZ === prevZ && this.ghostMesh.visible) {
+                // Second tap on same tile -> place!
+                this.tryPlaceBuilding();
+            } else if (this.soundEngine && this.ghostMesh.visible) {
+                this.soundEngine.play('click');
+            }
         }
     }
 
