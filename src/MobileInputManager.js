@@ -45,13 +45,6 @@ export class MobileInputManager {
         if (e.touches.length === 1) {
             const touch = e.touches[0];
             
-            // Update mouse position for tree fade circle
-            if (this.placementSystem) {
-                const rect = this.domElement.getBoundingClientRect();
-                this.placementSystem.mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
-                this.placementSystem.mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
-            }
-            
             const touchData = this.touches[touch.identifier];
             if (touchData) {
                 const deltaX = touch.clientX - touchData.lastX;
@@ -119,12 +112,6 @@ export class MobileInputManager {
         
         if (e.touches.length < 2) {
             this.initialPinchDist = null;
-        }
-        
-        // Hide tree fade circle when finger lifted
-        if (e.touches.length === 0 && this.placementSystem) {
-            this.placementSystem.mouse.x = -10;
-            this.placementSystem.mouse.y = -10;
         }
     }
     

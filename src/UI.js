@@ -176,12 +176,18 @@ export class UI {
             
             if (window.isMobile) {
                 const invPanel = document.getElementById('inventory-panel');
+                const isMenuOpen = machineSubmenu.classList.contains('show');
+                
                 if (invPanel) {
-                    if (machineSubmenu.classList.contains('show')) {
+                    if (isMenuOpen) {
                         invPanel.style.display = 'none';
                     } else {
                         invPanel.style.display = '';
                     }
+                }
+                
+                if (this.app.scene && this.app.scene.gridSystem) {
+                    this.app.scene.gridSystem.instancedLeaves.visible = !isMenuOpen;
                 }
             }
             
