@@ -48,27 +48,27 @@
             <h2 id="title-subtitle">A BIG THUNE ADVENTURE</h2>
 
             <div id="save-section"
-                style="display: none; flex-direction: column; align-items: center; margin-bottom: 40px;">
-                <button id="btn-continue-game" class="huge-btn highlight">CONTINUE GAME</button>
-                <button id="btn-delete-save" class="small-btn danger" style="margin-top: 20px;">Delete Save</button>
+                style="display: none; flex-direction: column; align-items: center; margin-bottom: 40px; width: 100%; max-width: 400px; margin-left: auto; margin-right: auto;">
+                <button id="btn-continue-game" class="huge-btn highlight" style="width: 100%; margin-bottom: 15px;">CONTINUE GAME</button>
+                <button id="btn-delete-save" class="small-btn danger" style="width: 100%; padding: 12px; font-size: 1.1em; letter-spacing: 2px;">DELETE SAVE</button>
             </div>
 
-            <div id="new-game-section">
-                <h3>NEW GAME - MAP SIZE</h3>
-                <div id="map-size-buttons" class="btn-group">
-                    <button class="map-btn" data-size="100">Large</button>
-                    <button class="map-btn active" data-size="50">Medium</button>
-                    <button class="map-btn" data-size="20">Small</button>
+            <div id="new-game-section" style="display: none; flex-direction: column; align-items: center; margin-bottom: 40px; width: 100%; max-width: 400px; margin-left: auto; margin-right: auto;">
+                <h3 style="color: #fff; letter-spacing: 2px; margin-bottom: 15px; text-shadow: 0 2px 5px #000; font-size: 1.2em;">NEW GAME - MAP SIZE</h3>
+                <div id="map-size-buttons" class="btn-group" style="margin-bottom: 20px; width: 100%; display: flex; gap: 10px;">
+                    <button class="map-btn" data-size="100" style="flex: 1;">Large</button>
+                    <button class="map-btn active" data-size="50" style="flex: 1;">Medium</button>
+                    <button class="map-btn" data-size="25" style="flex: 1;">Small</button>
                 </div>
 
-                <h3 style="margin-top: 25px;">DIFFICULTY</h3>
-                <div id="diff-buttons" class="btn-group">
-                    <button class="diff-btn active" data-diff="easy">Easy</button>
-                    <button class="diff-btn" data-diff="medium">Medium</button>
-                    <button class="diff-btn" data-diff="hard">Hard</button>
+                <h3 style="color: #fff; letter-spacing: 2px; margin-top: 15px; margin-bottom: 15px; text-shadow: 0 2px 5px #000; font-size: 1.2em;">DIFFICULTY</h3>
+                <div id="diff-buttons" class="btn-group" style="margin-bottom: 30px; width: 100%; display: flex; gap: 10px;">
+                    <button class="diff-btn active" data-diff="easy" style="flex: 1;">Easy</button>
+                    <button class="diff-btn" data-diff="medium" style="flex: 1;">Medium</button>
+                    <button class="diff-btn" data-diff="hard" style="flex: 1;">Hard</button>
                 </div>
 
-                <button id="btn-start-game" class="huge-btn" style="margin-top: 40px;">START MISSION</button>
+                <button id="btn-start-game" class="huge-btn highlight" style="width: 100%;">START MISSION</button>
             </div>
         </div>
 
