@@ -116,7 +116,7 @@ class GameApp {
         btnDeleteSave.addEventListener('click', () => {
             this.saveManager.deleteSave();
             saveSection.style.display = 'none';
-            newGameSection.style.display = 'block';
+            newGameSection.style.display = 'flex';
             document.getElementById('title-subtitle').innerText = "A BIG THUNE ADVENTURE";
             document.getElementById('mask-text').textContent = "SATISLITE";
         });
