@@ -164,8 +164,8 @@ body.mobile-mode #build-controls-overlay {
 }
 
 body.mobile-mode #title-subtitle {
-    font-size: 5vw !important;
-    letter-spacing: 1.5vw !important;
+    font-size: 3.5vw !important;
+    letter-spacing: 2.5vw !important;
     margin-bottom: 30px !important;
     line-height: 1.4 !important;
 }
@@ -176,4 +176,5 @@ body.mobile-mode #version-label {
     left: 20px !important;
     font-size: 1rem !important;
 }
+
 
