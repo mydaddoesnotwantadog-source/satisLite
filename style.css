@@ -17,14 +17,6 @@
     padding: 0;
 }
 
-button {
-    transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.15s, border-color 0.15s, box-shadow 0.15s !important;
-}
-
-button:active {
-    transform: scale(0.92) !important;
-}
-
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-weight: bold;
