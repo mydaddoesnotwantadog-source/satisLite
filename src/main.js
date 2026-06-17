@@ -118,7 +118,7 @@ class GameApp {
             saveSection.style.display = 'none';
             newGameSection.style.display = 'flex';
             document.getElementById('title-subtitle').innerText = "A BIG THUNE ADVENTURE";
-            document.getElementById('mask-text').textContent = "SATISLITE";
+            document.getElementById('mask-text').textContent = "satisLite";
         });
         
         const difficultyMap = {
