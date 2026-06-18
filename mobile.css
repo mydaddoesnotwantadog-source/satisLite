@@ -1,4 +1,4 @@
-﻿/* mobile.css */
+/* mobile.css */
 body.mobile-mode {
     /* Prevent pull-to-refresh and selection on mobile */
     overscroll-behavior: none;
@@ -59,6 +59,10 @@ body.mobile-mode #goal-panel {
     font-size: 0.6em !important;
     pointer-events: none;
     z-index: 800;
+}
+
+body.mobile-mode #btn-launch-rocket {
+    pointer-events: auto !important;
 }
 
 body.mobile-mode #goal-panel h2,

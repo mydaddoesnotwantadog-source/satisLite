@@ -531,10 +531,12 @@ export class UI {
                 ${dropdownHtml}
             </div>
             <div id="leigh-item-info" style="font-size: 0.85em; color: #aaa; margin-bottom: 8px; min-height: 20px;"></div>
-            <div style="display: flex; gap: 8px; align-items: center;">
-                <label style="font-size: 0.9em; color: #ccc;">Amount:</label>
-                <input type="number" id="leigh-burn-amount" value="1" min="1" style="width: 60px; padding: 4px; background: #111; color: #fff; border: 1px solid #555; border-radius: 3px;">
-                <button id="leigh-burn-btn" class="tool-btn" style="flex-grow: 1; padding: 6px;">Add to Queue</button>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <label style="font-size: 0.9em; color: #ccc;">Amount:</label>
+                    <input type="number" id="leigh-burn-amount" value="1" min="1" style="width: 60px; padding: 4px; background: #111; color: #fff; border: 1px solid #555; border-radius: 3px;">
+                </div>
+                <button id="leigh-burn-btn" class="tool-btn" style="flex-grow: 1; min-width: 120px; padding: 6px;">Add to Queue</button>
             </div>
         `;
         list.appendChild(inputContainer);
@@ -702,11 +704,11 @@ export class UI {
             <div id="leigh-hotel-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 15px;">
                 <!-- Filled by updateLeighHighProgress -->
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 4px; border-top: 2px solid #2980b9; border-bottom: 2px solid #1a252f; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);">
-                <div style="font-weight: 900; font-family: Impact, sans-serif; font-size: 1.2em; color: #f1c40f; text-shadow: 1px 1px 2px #000; display: flex; align-items: center;">
-                    TOTAL PHONES: <span id="leigh-basket-count" style="color: #fff; background: #000; padding: 2px 8px; border-radius: 3px; border: 1px solid #555; margin-left: 10px; font-family: 'Courier New', monospace;">${this.selectedBuilding.uncollectedPhones || 0}</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 4px; border-top: 2px solid #2980b9; border-bottom: 2px solid #1a252f; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);">
+                <div style="font-weight: 900; font-family: Impact, sans-serif; font-size: 1.1em; color: #f1c40f; text-shadow: 1px 1px 2px #000; display: flex; align-items: center;">
+                    PHONES: <span id="leigh-basket-count" style="color: #fff; background: #000; padding: 2px 8px; border-radius: 3px; border: 1px solid #555; margin-left: 10px; font-family: 'Courier New', monospace;">${this.selectedBuilding.uncollectedPhones || 0}</span>
                 </div>
-                <button id="leigh-collect-btn" class="nuke-btn">CONFISCATE ALL</button>
+                <button id="leigh-collect-btn" class="nuke-btn" style="flex-grow: 1; min-width: 140px; padding: 8px;">CONFISCATE ALL</button>
             </div>
         `;
         list.appendChild(hotelContainer);

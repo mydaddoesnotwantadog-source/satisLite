@@ -40,7 +40,8 @@
             style="position: absolute; top: 0; left: 0; pointer-events: none;">
             <!-- Solid text logo -->
             <text id="mask-text" x="50%" y="28%" text-anchor="middle" dominant-baseline="middle" font-size="18vw"
-                font-family="'Outfit', sans-serif" font-weight="900" fill="#ffffff" letter-spacing="0.2vw">satisLite</text>
+                font-family="'Outfit', sans-serif" font-weight="900" fill="#ffffff"
+                letter-spacing="0.2vw">satisLite</text>
         </svg>
 
         <div id="title-ui-content">
@@ -48,20 +49,29 @@
 
             <div id="save-section"
                 style="display: none; flex-direction: column; align-items: center; margin-bottom: 40px; width: 90%; max-width: 400px; margin-left: auto; margin-right: auto;">
-                <button id="btn-continue-game" class="huge-btn highlight" style="width: 100%; margin-bottom: 15px;">CONTINUE GAME</button>
-                <button id="btn-delete-save" class="small-btn danger" style="width: 100%; padding: 12px; font-size: 1.1em; letter-spacing: 2px;">DELETE SAVE</button>
+                <button id="btn-continue-game" class="huge-btn highlight"
+                    style="width: 100%; margin-bottom: 15px;">CONTINUE GAME</button>
+                <button id="btn-delete-save" class="small-btn danger"
+                    style="width: 100%; padding: 12px; font-size: 1.1em; letter-spacing: 2px;">DELETE SAVE</button>
             </div>
 
-            <div id="new-game-section" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 40px; width: 90%; max-width: 400px; margin-left: auto; margin-right: auto;">
-                <h3 style="color: #fff; letter-spacing: 2px; margin-bottom: 15px; text-shadow: 0 2px 5px #000; font-size: 1.2em;">MAP SIZE</h3>
-                <div id="map-size-buttons" class="btn-group" style="margin-bottom: 20px; width: 100%; display: flex; gap: 10px;">
+            <div id="new-game-section"
+                style="display: flex; flex-direction: column; align-items: center; margin-bottom: 40px; width: 90%; max-width: 400px; margin-left: auto; margin-right: auto;">
+                <h3
+                    style="color: #fff; letter-spacing: 2px; margin-bottom: 15px; text-shadow: 0 2px 5px #000; font-size: 1.2em;">
+                    MAP SIZE</h3>
+                <div id="map-size-buttons" class="btn-group"
+                    style="margin-bottom: 20px; width: 100%; display: flex; gap: 10px;">
                     <button class="map-btn" data-size="100" style="flex: 1;">Large</button>
                     <button class="map-btn active" data-size="50" style="flex: 1;">Medium</button>
                     <button class="map-btn" data-size="25" style="flex: 1;">Small</button>
                 </div>
 
-                <h3 style="color: #fff; letter-spacing: 2px; margin-top: 15px; margin-bottom: 15px; text-shadow: 0 2px 5px #000; font-size: 1.2em;">DIFFICULTY</h3>
-                <div id="diff-buttons" class="btn-group" style="margin-bottom: 30px; width: 100%; display: flex; gap: 10px;">
+                <h3
+                    style="color: #fff; letter-spacing: 2px; margin-top: 15px; margin-bottom: 15px; text-shadow: 0 2px 5px #000; font-size: 1.2em;">
+                    DIFFICULTY</h3>
+                <div id="diff-buttons" class="btn-group"
+                    style="margin-bottom: 30px; width: 100%; display: flex; gap: 10px;">
                     <button class="diff-btn active" data-diff="easy" style="flex: 1;">Easy</button>
                     <button class="diff-btn" data-diff="medium" style="flex: 1;">Medium</button>
                     <button class="diff-btn" data-diff="hard" style="flex: 1;">Hard</button>
@@ -175,31 +185,36 @@
         <!-- Recipe Popup UI -->
         <div id="recipe-popup" class="glass-panel"
             style="display: none; position: absolute; z-index: 1000; left: 5vw; top: 15vh; width: 90vw; max-width: 450px; background: rgba(20, 20, 20, 0.98); box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 0 2px #333; border: 2px solid #e67e22; border-radius: 0; overflow: hidden; padding: 0;">
-            
-            <div style="background: repeating-linear-gradient(45deg, #1a1a1a, #1a1a1a 10px, #2a2a2a 10px, #2a2a2a 20px); border-bottom: 2px solid #e67e22; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
-                <h2 id="recipe-machine-title" style="margin: 0; font-size: 1.5em; font-weight: 900; color: #e67e22; text-transform: uppercase; letter-spacing: 2px; text-shadow: 2px 2px 0 #000;">Machine</h2>
+
+            <div
+                style="background: repeating-linear-gradient(45deg, #1a1a1a, #1a1a1a 10px, #2a2a2a 10px, #2a2a2a 20px); border-bottom: 2px solid #e67e22; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
+                <h2 id="recipe-machine-title"
+                    style="margin: 0; font-size: 1.5em; font-weight: 900; color: #e67e22; text-transform: uppercase; letter-spacing: 2px; text-shadow: 2px 2px 0 #000;">
+                    Machine</h2>
                 <button id="close-recipe-btn"
                     style="background: #c0392b; border: 2px solid #000; color: white; cursor: pointer; font-size: 1.2em; border-radius: 0; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; box-shadow: inset 0 0 5px rgba(0,0,0,0.5), 0 2px 5px rgba(0,0,0,0.5);">✖</button>
             </div>
-            
+
             <div style="padding: 25px;">
                 <div id="recipe-list" style="display: flex; flex-direction: column; gap: 10px;">
                     <!-- Populated by JS -->
                 </div>
-                
+
                 <div id="recipe-info"
                     style="margin-top: 25px; font-size: 1em; min-height: 50px; color: #00ff00; background: #050505; padding: 15px; border-radius: 0; border: 2px inset #333; line-height: 1.6; font-family: 'Courier New', monospace; box-shadow: inset 0 0 15px rgba(0, 255, 0, 0.1);">
                     <!-- Hover info goes here -->
                 </div>
-                
+
                 <div style="margin-top: 20px;">
-                    <div id="recipe-buffer-status" style="font-size: 0.9em; margin-bottom: 10px; display: flex; flex-direction: column; gap: 5px;">
+                    <div id="recipe-buffer-status"
+                        style="font-size: 0.9em; margin-bottom: 10px; display: flex; flex-direction: column; gap: 5px;">
                         <!-- Buffer status goes here -->
                     </div>
                     <div
                         style="width: 100%; height: 20px; background: #111; border: 2px solid #444; border-radius: 0; overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.9);">
                         <div id="recipe-progress-bar"
-                            style="height: 100%; width: 0%; background: #e67e22; box-shadow: 0 0 15px rgba(230, 126, 34, 0.8); transition: width 0.1s linear;"></div>
+                            style="height: 100%; width: 0%; background: #e67e22; box-shadow: 0 0 15px rgba(230, 126, 34, 0.8); transition: width 0.1s linear;">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -280,7 +295,7 @@
 
         <!-- Leigh High UI Popup -->
         <div id="leigh-high-popup" class="glass-panel"
-            style="display: none; position: absolute; z-index: 1000; left: 300px; top: 100px; min-width: 350px;">
+            style="display: none; position: absolute; z-index: 1000; left: 300px; top: 100px; width: 90vw; max-width: 400px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <h2 style="margin: 0;">Leigh High School</h2>
                 <button id="close-leigh-btn"
