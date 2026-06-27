@@ -82,10 +82,9 @@ export class UI {
             
             toast.innerHTML = `
                 <div style="position: relative; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
-                        <circle cx="12" cy="12" r="10" fill="none" stroke="#0A84FF" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="63" stroke-dashoffset="63" style="animation: drawRing 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;" />
+                    <svg width="24" height="24" viewBox="0 0 24 24" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg); overflow: visible;">
+                        <circle cx="12" cy="12" r="10" fill="none" stroke="#0A84FF" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="63" stroke-dashoffset="63" style="transform-origin: center; animation: drawRing 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards, ringPop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 2.5s forwards;" />
                     </svg>
-                    <div style="font-size: 13px; opacity: 0; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s forwards; line-height: 1; filter: sepia(1) hue-rotate(180deg) saturate(5);">💾</div>
                 </div>
                 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; font-weight: 500; letter-spacing: -0.2px; color: #111;">
                     ${text}
@@ -94,9 +93,9 @@ export class UI {
                     @keyframes drawRing {
                         to { stroke-dashoffset: 0; }
                     }
-                    @keyframes popIn {
-                        from { opacity: 0; transform: scale(0.2); }
-                        to { opacity: 1; transform: scale(1); }
+                    @keyframes ringPop {
+                        0% { transform: scale(1); opacity: 1; stroke-width: 2.5; }
+                        100% { transform: scale(1.5); opacity: 0; stroke-width: 0; }
                     }
                 </style>
             `;
