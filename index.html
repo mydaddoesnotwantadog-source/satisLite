@@ -103,12 +103,6 @@
         <!-- Bottom Left: Resources Split -->
         <div id="inventory-panel" class="glass-panel">
             <div class="drag-handle"></div>
-            <div id="inventory-header"
-                style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; grid-column: 1 / -1;">
-                <h2 style="margin: 0; padding: 0; border: none;">Menu</h2>
-                <span id="inventory-toggle-arrow"
-                    style="transition: transform 0.2s; font-size: 1.2em; line-height: 1;">▼</span>
-            </div>
 
             <div id="inventory-content" style="display: contents;">
                 <!-- Raw Materials -->
@@ -327,18 +321,26 @@
             </div>
         </div>
 
-        <div id="bottom-toolbar" class="glass-panel full-width-bar">
-            <div class="toolbar-group">
-                <button class="tool-btn active" data-tool="select">Select</button>
-                <button class="tool-btn" data-tool="delete" id="btn-delete-tool">Delete</button>
+        <div id="bottom-toolbar" class="glass-panel ios-dock">
+            <!-- Menu Button (Left) -->
+            <button id="btn-open-menu" class="dock-btn menu-btn">
+                <span style="font-size: 1.5em; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">📦</span>
+            </button>
+            
+            <!-- Flip Flop Switch (Center) -->
+            <div class="flip-flop-switch">
+                <div class="switch-thumb"></div>
+                <button class="switch-btn active" data-tool="select">Select</button>
+                <button class="switch-btn" data-tool="delete" id="btn-delete-tool">Delete</button>
             </div>
+            
             <div class="toolbar-group">
                 <div class="menu-container">
-                    <button class="tool-btn" id="btn-machine-category">Machines ▼</button>
+                    <button class="dock-btn tool-btn" id="btn-machine-category">Machines ▼</button>
                 </div>
             </div>
             <div class="toolbar-group">
-                <button class="tool-btn highlight" data-tool="school">Leigh High</button>
+                <button class="dock-btn tool-btn highlight" data-tool="school">Leigh High</button>
             </div>
         </div>
 

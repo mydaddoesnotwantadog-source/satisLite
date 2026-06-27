@@ -171,31 +171,20 @@ export class UI {
             });
         }
         
-        const invHeader = document.getElementById('inventory-header');
-        if (invHeader) {
+        const btnOpenMenu = document.getElementById('btn-open-menu');
+        if (btnOpenMenu) {
             const content = document.getElementById('inventory-content');
-            const arrow = document.getElementById('inventory-toggle-arrow');
             const panel = document.getElementById('inventory-panel');
-
-            // Default to collapsed on mobile
-            if (window.isMobile) {
-                content.style.display = 'none';
-                arrow.style.transform = 'rotate(180deg)';
-                panel.style.minWidth = 'auto';
-                panel.classList.remove('mobile-expanded');
-            }
-
             const techToggle = document.getElementById('tech-tree-toggle');
             const techPage = document.getElementById('tech-tree-page');
-
             const backdrop = document.getElementById('mobile-backdrop');
 
             const toggleMenuState = (open) => {
                 if (!open) {
-                    content.style.display = 'none';
-                    arrow.style.transform = 'rotate(180deg)';
-                    panel.style.minWidth = 'auto';
-                    if (window.isMobile) panel.classList.remove('mobile-expanded');
+                    panel.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s';
+                    panel.style.transformOrigin = 'bottom left';
+                    panel.style.transform = 'translateY(30vh) scale(0.2)';
+                    panel.style.opacity = '0';
                     
                     if (techPage) techPage.classList.remove('active');
                     panel.classList.remove('swiped-left');
@@ -204,18 +193,40 @@ export class UI {
                         techToggle.style.display = 'none';
                     }
                     if (backdrop) backdrop.classList.remove('active');
+                    
+                    setTimeout(() => {
+                        panel.style.display = 'none';
+                        content.style.display = 'none';
+                        panel.style.transition = '';
+                        panel.style.transform = '';
+                        panel.style.opacity = '';
+                    }, 300);
                 } else {
+                    panel.style.display = 'block';
                     content.style.display = 'contents';
-                    arrow.style.transform = 'rotate(0deg)';
-                    panel.style.minWidth = '320px';
-                    if (window.isMobile) panel.classList.add('mobile-expanded');
+                    panel.style.transformOrigin = 'bottom left';
+                    panel.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s';
+                    panel.style.transform = 'translateY(30vh) scale(0.2)';
+                    panel.style.opacity = '0';
+                    
+                    // Trigger reflow
+                    void panel.offsetWidth;
+                    
+                    panel.style.transform = 'translateY(0) scale(1)';
+                    panel.style.opacity = '1';
+                    
                     if (techToggle) techToggle.style.display = '';
                     if (backdrop) backdrop.classList.add('active');
+                    
+                    setTimeout(() => {
+                        panel.style.transition = '';
+                    }, 400);
                 }
             };
 
-            invHeader.addEventListener('click', () => {
-                toggleMenuState(content.style.display === 'none');
+            btnOpenMenu.addEventListener('click', () => {
+                if (this.app.soundEngine) this.app.soundEngine.play('whoosh');
+                toggleMenuState(panel.style.display === 'none' || panel.style.display === '');
             });
 
             if (techToggle && techPage) {
@@ -374,7 +385,12 @@ export class UI {
                 machineBtn.classList.add('active');
                 machineBtn.textContent = 'Machines ▲';
             } else {
-                document.querySelector('.tool-btn[data-tool="select"]').classList.add('active');
+                const selBtn = document.querySelector('.switch-btn[data-tool="select"], .tool-btn[data-tool="select"]');
+                if (selBtn) {
+                    selBtn.classList.add('active');
+                    const thumb = document.querySelector('.switch-thumb');
+                    if (thumb) thumb.classList.remove('pos-right');
+                }
                 machineBtn.textContent = 'Machines ▼';
             }
         });
@@ -395,7 +411,7 @@ export class UI {
         window.addEventListener('keydown', (e) => {
             if (e.key.toLowerCase() === 'b') {
                 if (this.activeTool === 'delete') {
-                    const selBtn = document.querySelector('.tool-btn[data-tool="select"]');
+                    const selBtn = document.querySelector('.switch-btn[data-tool="select"], .tool-btn[data-tool="select"]');
                     if (selBtn) selBtn.click();
                 } else {
                     const delBtn = document.getElementById('btn-delete-tool');
@@ -430,7 +446,7 @@ export class UI {
     }
     
     bindToolButtons() {
-        const toolBtns = document.querySelectorAll('.tool-btn:not(#btn-machine-category):not(#btn-save-game)');
+        const toolBtns = document.querySelectorAll('.tool-btn:not(#btn-machine-category):not(#btn-save-game), .switch-btn');
         toolBtns.forEach(btn => {
             const newBtn = btn.cloneNode(true);
             btn.parentNode.replaceChild(newBtn, btn);
@@ -439,7 +455,19 @@ export class UI {
                 if (newBtn.disabled) return;
                 if (this.app.soundEngine) this.app.soundEngine.play('click');
                 
-                document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                // Flip Flop Switch UI update
+                if (newBtn.classList.contains('switch-btn')) {
+                    const thumb = document.querySelector('.switch-thumb');
+                    if (thumb) {
+                        if (newBtn.getAttribute('data-tool') === 'delete') {
+                            thumb.classList.add('pos-right');
+                        } else {
+                            thumb.classList.remove('pos-right');
+                        }
+                    }
+                }
+                
+                document.querySelectorAll('.tool-btn:not(.highlight), .switch-btn').forEach(b => b.classList.remove('active'));
                 newBtn.classList.add('active');
                 
                 if (newBtn.closest('#machine-submenu')) {

@@ -69,24 +69,103 @@ body.mobile-mode #inventory-panel.mobile-expanded {
     align-content: start;
 }
 
-/* Except for toolbars or small panels if we want them docked */
-body.mobile-mode #bottom-toolbar {
+/* Industrial iOS Dock */
+body.mobile-mode #bottom-toolbar.ios-dock {
     position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
+    bottom: max(env(safe-area-inset-bottom), 15px) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: max-content !important;
+    max-width: 95vw !important;
     height: auto !important;
     top: auto !important;
-    transform: none !important;
+    display: flex;
     flex-direction: row;
-    overflow-x: auto;
-    padding: 8px 8px max(env(safe-area-inset-bottom), 15px) 8px !important;
-    border-radius: 0;
-    background: rgba(20, 20, 25, 0.55) !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px !important;
+    border-radius: 30px !important;
+    background: rgba(30, 30, 35, 0.65) !important;
     backdrop-filter: blur(25px) saturate(1.8) !important;
     -webkit-backdrop-filter: blur(25px) saturate(1.8) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.1) !important;
     z-index: 900;
+}
+
+body.mobile-mode .dock-btn {
+    width: auto;
+    min-width: 50px;
+    height: 44px;
+    padding: 0 16px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9em;
+    transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), background 0.2s;
+}
+
+body.mobile-mode .dock-btn:active {
+    transform: scale(0.92);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+body.mobile-mode .menu-btn {
+    background: linear-gradient(135deg, #0A84FF, #005bb5);
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 0 12px;
+}
+
+/* Flip-Flop Switch */
+body.mobile-mode .flip-flop-switch {
+    position: relative;
+    display: flex;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 22px;
+    padding: 4px;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+    width: 140px;
+    height: 44px;
+    box-sizing: border-box;
+}
+
+body.mobile-mode .switch-thumb {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    height: calc(100% - 8px);
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.mobile-mode .switch-thumb.pos-right {
+    transform: translateX(100%);
+    background: rgba(231, 76, 60, 0.8);
+}
+
+body.mobile-mode .switch-btn {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8em;
+    font-weight: 700;
+    transition: color 0.3s;
+}
+
+body.mobile-mode .switch-btn.active {
+    color: white;
 }
 
 body.mobile-mode #goal-panel {
@@ -210,29 +289,7 @@ body.mobile-mode .desktop-only {
     display: none !important;
 }
 
-/* Hide drag handle when menu is closed */
-body.mobile-mode #inventory-panel:not(.mobile-expanded) .drag-handle {
-    display: none !important;
-}
-
-/* Default minimized state for inventory panel on mobile */
-body.mobile-mode #inventory-panel:not(.mobile-expanded) {
-    position: fixed !important;
-    bottom: 80px !important; /* Above the taller toolbar */
-    left: 10px !important;
-    width: auto !important;
-    height: auto !important;
-    min-width: 120px;
-    padding: 10px 15px;
-    font-size: 0.85em;
-    z-index: 1000;
-    background: rgba(20, 20, 25, 0.6) !important;
-    backdrop-filter: blur(15px) !important;
-    -webkit-backdrop-filter: blur(15px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-radius: 20px !important;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.3) !important;
-}
+/* Closed inventory state is no longer used; panel is pure overlay */
 
 /* Fix machine submenu clipping in scrollable toolbar */
 body.mobile-mode #machine-submenu {
