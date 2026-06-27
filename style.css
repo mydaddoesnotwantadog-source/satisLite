@@ -242,6 +242,16 @@ body {
     text-align: center;
 }
 
+.machine-arrow {
+    display: inline-block;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transform-origin: center center;
+}
+
+.tool-btn.active .machine-arrow {
+    transform: rotate(180deg);
+}
+
 @keyframes floatUp {
     0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
     50% { transform: translate(-50%, calc(-50% - 30px)) scale(1.1); opacity: 1; }

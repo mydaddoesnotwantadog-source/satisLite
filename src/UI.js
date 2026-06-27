@@ -399,7 +399,6 @@ export class UI {
             
             if (machineSubmenu.classList.contains('show')) {
                 machineBtn.classList.add('active');
-                machineBtn.textContent = 'Machines ▲';
             } else {
                 const selBtn = document.querySelector('.switch-btn[data-tool="select"], .tool-btn[data-tool="select"]');
                 if (selBtn) {
@@ -407,7 +406,6 @@ export class UI {
                     const thumb = document.querySelector('.switch-thumb');
                     if (thumb) thumb.classList.remove('pos-right');
                 }
-                machineBtn.textContent = 'Machines ▼';
             }
         });
 
@@ -496,7 +494,7 @@ export class UI {
                 if (!window.isMobile || !newBtn.closest('#machine-submenu')) {
                     document.querySelectorAll('.submenu-horizontal').forEach(s => s.classList.remove('show'));
                     const machineBtn = document.getElementById('btn-machine-category');
-                    if (machineBtn) machineBtn.textContent = 'Machines ▼';
+                    if (machineBtn) machineBtn.classList.remove('active');
                 }
                 
                 this.closeRecipeUI();
