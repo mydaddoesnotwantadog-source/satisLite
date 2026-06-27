@@ -19,13 +19,17 @@ body.mobile-mode #mobile-backdrop.active {
 
 body.mobile-mode .drag-handle {
     display: block !important;
-    width: 35vw;
-    max-width: 160px;
-    height: 5px;
+    position: absolute;
+    top: max(env(safe-area-inset-top), 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 45vw;
+    max-width: 220px;
+    height: 6px;
     background: rgba(255, 255, 255, 0.4);
-    border-radius: 5px;
-    margin: 0 auto 15px auto;
-    flex-shrink: 0;
+    border-radius: 6px;
+    z-index: 10001;
+    pointer-events: none;
 }
 
 body.mobile-mode {
@@ -55,7 +59,7 @@ body.mobile-mode #inventory-panel.mobile-expanded {
     z-index: 10000;
     margin: 0;
     padding: 20px;
-    padding-top: max(env(safe-area-inset-top), 20px) !important;
+    padding-top: max(env(safe-area-inset-top), 35px) !important;
     padding-bottom: max(env(safe-area-inset-bottom), 20px) !important;
     background: rgba(20, 20, 25, 0.55) !important;
     backdrop-filter: blur(25px) saturate(1.8) !important;
@@ -277,7 +281,7 @@ body.mobile-mode .tech-tree-container {
     background: rgba(20, 20, 25, 0.55) !important;
     backdrop-filter: blur(25px) saturate(1.8) !important;
     -webkit-backdrop-filter: blur(25px) saturate(1.8) !important;
-    padding-top: max(env(safe-area-inset-top), 20px) !important;
+    padding-top: max(env(safe-area-inset-top), 35px) !important;
     padding-bottom: max(env(safe-area-inset-bottom), 20px) !important;
     transform: translateX(100vw);
     transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);

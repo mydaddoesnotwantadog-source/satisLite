@@ -274,8 +274,8 @@ export class UI {
                     const activePanel = (techPage && techPage.classList.contains('active')) ? techPage : panel;
                     
                     // Track downwards and scale down towards the menu button area
-                    const scale = Math.max(0.5, 1 - (dy / 600));
-                    activePanel.style.transformOrigin = 'bottom left';
+                    const scale = Math.max(0.75, 1 - (dy / 800));
+                    activePanel.style.transformOrigin = 'bottom center';
                     activePanel.style.transform = `translateY(${dy}px) scale(${scale})`;
                     
                     // Fade out backdrop dynamically

@@ -92,8 +92,14 @@
     <!-- MAIN UI (Hidden initially) -->
     <div id="ui-layer" style="display: none;">
         <div id="mobile-backdrop" style="display: none;"></div>
-        <!-- Top Left: Main Currency (Removed) -->
-        
+        <!-- Top Left: Main Currency -->
+        <div id="resource-panel" style="pointer-events: none; position: fixed; top: env(safe-area-inset-top, 10px); left: env(safe-area-inset-left, 10px); z-index: 800; background: transparent !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; padding: 10px;">
+            <div class="resource-item" style="display: flex; align-items: center; font-weight: 900; font-size: 1.5em; text-shadow: 0 2px 5px rgba(0,0,0,0.8); margin: 0; padding: 0;">
+                <span style="margin-right: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); font-size: 1.2em;">📱</span>
+                <span class="resource-value" id="res-phones" style="color: #fff; font-family: 'Courier New', monospace;">0</span>
+            </div>
+        </div>
+
         <!-- Bottom Left: Resources Split -->
         <div id="inventory-panel" class="glass-panel">
             <div class="drag-handle"></div>
@@ -178,7 +184,7 @@
             <!-- Tech Tree Toggle Arrow (Desktop) -->
             <div id="tech-tree-toggle" title="Open Tech Tree">
                 <svg viewBox="0 0 24 24" width="24" height="24">
-                    <path d="M8 5v14l11-7z" fill="var(--accent)"/>
+                    <path d="M8 5v14l11-7z" fill="var(--accent)" />
                 </svg>
             </div>
         </div>
@@ -187,7 +193,9 @@
         <div id="tech-tree-page" class="glass-panel tech-tree-container">
             <div class="drag-handle"></div>
             <div class="tech-tree-header">
-                <h2>Tech Tree <span style="font-size: 0.5em; color: var(--text-primary); opacity: 0.5; vertical-align: middle;">v3.2</span></h2>
+                <h2>Tech Tree <span
+                        style="font-size: 0.5em; color: var(--text-primary); opacity: 0.5; vertical-align: middle;">v3.2</span>
+                </h2>
             </div>
             <div class="tech-tree-content">
                 <!-- Tech tree content will be populated here later -->
@@ -333,7 +341,7 @@
                 <button class="tool-btn highlight" data-tool="school">Leigh High</button>
             </div>
         </div>
-        
+
         <!-- Machine Submenu (Moved outside to prevent clipping) -->
         <div class="submenu-horizontal glass-panel" id="machine-submenu">
             <!-- Populated by JS -->
