@@ -200,10 +200,12 @@ body.mobile-mode .tech-tree-container {
     background: var(--bg-color);
     transform: translateX(100vw);
     transition: transform 0.3s ease-out;
+    animation: none !important;
 }
 
 body.mobile-mode .tech-tree-container.active {
     transform: translateX(0);
+    animation: none !important;
 }
 
 body.mobile-mode #inventory-panel {
