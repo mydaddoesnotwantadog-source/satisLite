@@ -153,19 +153,71 @@ export class UI {
                 panel.classList.remove('mobile-expanded');
             }
 
+            const techToggle = document.getElementById('tech-tree-toggle');
+            const techPage = document.getElementById('tech-tree-page');
+
             invHeader.addEventListener('click', () => {
                 if (content.style.display !== 'none') {
                     content.style.display = 'none';
                     arrow.style.transform = 'rotate(180deg)';
                     panel.style.minWidth = 'auto';
                     if (window.isMobile) panel.classList.remove('mobile-expanded');
+                    
+                    // Close tech tree if inventory is closed
+                    if (techPage) techPage.classList.remove('active');
+                    if (techToggle) {
+                        techToggle.classList.remove('open');
+                        techToggle.style.display = 'none';
+                    }
                 } else {
                     content.style.display = 'contents';
                     arrow.style.transform = 'rotate(0deg)';
                     panel.style.minWidth = '320px';
                     if (window.isMobile) panel.classList.add('mobile-expanded');
+                    if (techToggle) techToggle.style.display = '';
                 }
             });
+
+            if (techToggle && techPage) {
+                techToggle.addEventListener('click', () => {
+                    if (content.style.display === 'none') return;
+                    if (this.app.soundEngine) this.app.soundEngine.play('whoosh');
+                    techPage.classList.toggle('active');
+                    techToggle.classList.toggle('open');
+                });
+            }
+
+            // Mobile swipe logic
+            let touchStartX = 0;
+            panel.addEventListener('touchstart', (e) => {
+                if (content.style.display === 'none') return;
+                touchStartX = e.changedTouches[0].screenX;
+            }, {passive: true});
+
+            panel.addEventListener('touchend', (e) => {
+                if (content.style.display === 'none') return;
+                let touchEndX = e.changedTouches[0].screenX;
+                if (touchEndX > touchStartX + 50 || touchEndX < touchStartX - 50) { // allow both swipe directions to open
+                    if (this.app.soundEngine && !techPage.classList.contains('active')) this.app.soundEngine.play('whoosh');
+                    techPage.classList.add('active');
+                    if (techToggle) techToggle.classList.add('open');
+                }
+            }, {passive: true});
+
+            if (techPage) {
+                techPage.addEventListener('touchstart', (e) => {
+                    touchStartX = e.changedTouches[0].screenX;
+                }, {passive: true});
+
+                techPage.addEventListener('touchend', (e) => {
+                    let touchEndX = e.changedTouches[0].screenX;
+                    if (touchEndX > touchStartX + 50 || touchEndX < touchStartX - 50) { // allow both directions to close
+                        if (this.app.soundEngine && techPage.classList.contains('active')) this.app.soundEngine.play('whoosh');
+                        techPage.classList.remove('active');
+                        if (techToggle) techToggle.classList.remove('open');
+                    }
+                }, {passive: true});
+            }
         }
         const machineBtn = document.getElementById('btn-machine-category');
         const machineSubmenu = document.getElementById('machine-submenu');
