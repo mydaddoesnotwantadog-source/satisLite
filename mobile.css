@@ -48,7 +48,7 @@ body.mobile-mode * {
 /* Make specific popups take up full screen when active */
 body.mobile-mode #recipe-popup,
 body.mobile-mode #leigh-high-popup,
-body.mobile-mode #inventory-panel.mobile-expanded {
+body.mobile-mode #inventory-panel {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;

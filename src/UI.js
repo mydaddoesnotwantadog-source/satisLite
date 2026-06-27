@@ -67,7 +67,7 @@ export class UI {
         toast.style.boxShadow = `0 10px 30px rgba(0,0,0,0.8), inset 0 10px 20px rgba(0,0,0,0.5), 0 0 15px ${color}40`;
         toast.style.pointerEvents = 'none';
 
-        if (text.toLowerCase().includes('save')) {
+        if (text.toLowerCase().includes('sav')) {
             toast.className = ''; // Remove default glass-panel to avoid conflicts
             toast.style.background = 'rgba(250, 250, 255, 0.85)';
             toast.style.backdropFilter = 'blur(20px) saturate(1.5)';
