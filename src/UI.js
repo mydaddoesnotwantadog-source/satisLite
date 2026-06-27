@@ -67,17 +67,50 @@ export class UI {
         toast.style.boxShadow = `0 10px 30px rgba(0,0,0,0.8), inset 0 10px 20px rgba(0,0,0,0.5), 0 0 15px ${color}40`;
         toast.style.pointerEvents = 'none';
 
-        let icon = 'ℹ️';
-        if (text.toLowerCase().includes('save')) icon = '💾';
-        if (text.toLowerCase().includes('phone')) icon = '📱';
-
-        toast.innerHTML = `
-            <div style="font-size: 2em; filter: drop-shadow(0 0 5px ${color});">${icon}</div>
-            <div style="display: flex; flex-direction: column;">
-                <span style="font-family: var(--font-display, Orbitron, sans-serif); color: ${color}; font-size: 1.1em; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">Notification</span>
-                <span style="font-size: 0.95em; color: #fff; font-family: var(--font-main, Rajdhani, sans-serif);">${text}</span>
-            </div>
-        `;
+        if (text.toLowerCase().includes('save')) {
+            toast.className = ''; // Remove default glass-panel to avoid conflicts
+            toast.style.background = 'rgba(250, 250, 255, 0.85)';
+            toast.style.backdropFilter = 'blur(20px) saturate(1.5)';
+            toast.style.webkitBackdropFilter = 'blur(20px) saturate(1.5)';
+            toast.style.borderRadius = '999px';
+            toast.style.border = '1px solid rgba(0, 0, 0, 0.05)';
+            toast.style.borderTop = '1px solid rgba(0, 0, 0, 0.05)';
+            toast.style.boxShadow = '0 8px 32px rgba(0,0,0,0.12)';
+            toast.style.color = '#000';
+            toast.style.padding = '12px 24px';
+            toast.style.gap = '12px';
+            
+            toast.innerHTML = `
+                <div style="position: relative; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
+                        <circle cx="12" cy="12" r="10" fill="none" stroke="#0A84FF" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="63" stroke-dashoffset="63" style="animation: drawRing 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;" />
+                    </svg>
+                    <div style="font-size: 13px; opacity: 0; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s forwards; line-height: 1; filter: sepia(1) hue-rotate(180deg) saturate(5);">💾</div>
+                </div>
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; font-weight: 500; letter-spacing: -0.2px; color: #111;">
+                    ${text}
+                </div>
+                <style>
+                    @keyframes drawRing {
+                        to { stroke-dashoffset: 0; }
+                    }
+                    @keyframes popIn {
+                        from { opacity: 0; transform: scale(0.2); }
+                        to { opacity: 1; transform: scale(1); }
+                    }
+                </style>
+            `;
+        } else {
+            let icon = 'ℹ️';
+            if (text.toLowerCase().includes('phone')) icon = '📱';
+            toast.innerHTML = `
+                <div style="font-size: 2em; filter: drop-shadow(0 0 5px ${color});">${icon}</div>
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-family: var(--font-display, Orbitron, sans-serif); color: ${color}; font-size: 1.1em; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">Notification</span>
+                    <span style="font-size: 0.95em; color: #fff; font-family: var(--font-main, Rajdhani, sans-serif);">${text}</span>
+                </div>
+            `;
+        }
         
         document.getElementById('ui-layer').appendChild(toast);
         

@@ -91,21 +91,13 @@
 
     <!-- MAIN UI (Hidden initially) -->
     <div id="ui-layer" style="display: none;">
-        <!-- Top Left: Main Currency -->
-        <div id="resource-panel" class="glass-panel">
-            <h2>Currency</h2>
-            <div class="resource-item">
-                <span class="resource-icon" style="background: #2c3e50;"></span>
-                <span class="resource-name">Confiscated Phones</span>
-                <span class="resource-value" id="res-phones">0</span>
-            </div>
-        </div>
-
+        <!-- Top Left: Main Currency (Removed) -->
+        
         <!-- Bottom Left: Resources Split -->
         <div id="inventory-panel" class="glass-panel">
             <div id="inventory-header"
                 style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; grid-column: 1 / -1;">
-                <h2 style="margin: 0; padding: 0; border: none;">Stored Materials</h2>
+                <h2 style="margin: 0; padding: 0; border: none;">Menu</h2>
                 <span id="inventory-toggle-arrow"
                     style="transition: transform 0.2s; font-size: 1.2em; line-height: 1;">▼</span>
             </div>
@@ -332,14 +324,16 @@
             <div class="toolbar-group">
                 <div class="menu-container">
                     <button class="tool-btn" id="btn-machine-category">Machines ▼</button>
-                    <div class="submenu-horizontal glass-panel" id="machine-submenu">
-                        <!-- Populated by JS -->
-                    </div>
                 </div>
             </div>
             <div class="toolbar-group">
                 <button class="tool-btn highlight" data-tool="school">Leigh High</button>
             </div>
+        </div>
+        
+        <!-- Machine Submenu (Moved outside to prevent clipping) -->
+        <div class="submenu-horizontal glass-panel" id="machine-submenu">
+            <!-- Populated by JS -->
         </div>
     </div>
 
