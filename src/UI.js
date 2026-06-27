@@ -165,6 +165,7 @@ export class UI {
                     
                     // Close tech tree if inventory is closed
                     if (techPage) techPage.classList.remove('active');
+                    panel.classList.remove('swiped-left');
                     if (techToggle) {
                         techToggle.classList.remove('open');
                         techToggle.style.display = 'none';
@@ -211,6 +212,7 @@ export class UI {
                     swipeHandled = true;
                     if (this.app.soundEngine && !techPage.classList.contains('active')) this.app.soundEngine.play('whoosh');
                     techPage.classList.add('active');
+                    panel.classList.add('swiped-left');
                     if (techToggle) techToggle.classList.add('open');
                 }
             }, {passive: true});
@@ -233,6 +235,7 @@ export class UI {
                         swipeHandled = true;
                         if (this.app.soundEngine && techPage.classList.contains('active')) this.app.soundEngine.play('whoosh');
                         techPage.classList.remove('active');
+                        panel.classList.remove('swiped-left');
                         if (techToggle) techToggle.classList.remove('open');
                     }
                 }, {passive: true});
