@@ -83,7 +83,7 @@ export class UI {
             toast.innerHTML = `
                 <div style="position: relative; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
                     <svg width="24" height="24" viewBox="0 0 24 24" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg); overflow: visible;">
-                        <circle cx="12" cy="12" r="10" fill="none" stroke="#0A84FF" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="63" stroke-dashoffset="63" style="transform-origin: center; animation: drawRing 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards, ringPop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 2.5s forwards;" />
+                        <circle cx="12" cy="12" r="10" fill="none" stroke="#0A84FF" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="63" stroke-dashoffset="63" style="transform-origin: center; animation: drawRing 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 1s forwards, ringPop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 2.5s forwards;" />
                     </svg>
                 </div>
                 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; font-weight: 500; letter-spacing: -0.2px; color: #111;">
