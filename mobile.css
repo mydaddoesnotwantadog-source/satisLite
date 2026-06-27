@@ -96,9 +96,10 @@ body.mobile-mode #bottom-toolbar.ios-dock {
 
 body.mobile-mode .dock-btn {
     width: auto;
-    min-width: 44px;
+    min-width: 0;
+    flex: 1 1 auto;
     height: 38px;
-    padding: 0 12px;
+    padding: 0 10px;
     border-radius: 19px;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -121,6 +122,8 @@ body.mobile-mode .menu-btn {
     background: linear-gradient(135deg, #0A84FF, #005bb5);
     border: 1px solid rgba(255,255,255,0.3);
     padding: 0 12px;
+    margin-left: 5px;
+    flex: 0 0 auto;
 }
 
 /* Flip-Flop Switch */
@@ -134,7 +137,9 @@ body.mobile-mode .flip-flop-switch {
     width: 120px;
     height: 38px;
     box-sizing: border-box;
-    flex-shrink: 0;
+    flex: 1 1 auto;
+    min-width: 100px;
+    max-width: 130px;
 }
 
 body.mobile-mode .switch-thumb {
