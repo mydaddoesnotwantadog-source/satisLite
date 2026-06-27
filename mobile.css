@@ -4,6 +4,12 @@ body.mobile-mode {
     overscroll-behavior: none;
     user-select: none;
     -webkit-user-select: none;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+}
+
+body.mobile-mode * {
+    font-family: inherit;
 }
 
 /* Make specific popups take up full screen when active */
@@ -20,7 +26,12 @@ body.mobile-mode #inventory-panel.mobile-expanded {
     z-index: 10000;
     margin: 0;
     padding: 20px;
-    background: rgba(10, 15, 25, 0.95);
+    padding-top: max(env(safe-area-inset-top), 20px) !important;
+    padding-bottom: max(env(safe-area-inset-bottom), 20px) !important;
+    background: rgba(20, 20, 25, 0.55) !important;
+    backdrop-filter: blur(25px) saturate(1.8) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(1.8) !important;
+    border: none !important;
     overflow-y: auto;
     align-content: start;
 }
@@ -36,9 +47,12 @@ body.mobile-mode #bottom-toolbar {
     transform: none !important;
     flex-direction: row;
     overflow-x: auto;
-    padding: 5px 5px 25px 5px !important; /* Extra bottom padding for curved phone screens */
+    padding: 8px 8px max(env(safe-area-inset-bottom), 15px) 8px !important;
     border-radius: 0;
-    background: rgba(10, 15, 25, 0.85);
+    background: rgba(20, 20, 25, 0.55) !important;
+    backdrop-filter: blur(25px) saturate(1.8) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(1.8) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
     z-index: 900;
 }
 
@@ -52,10 +66,13 @@ body.mobile-mode #goal-panel {
     height: auto !important;
     max-width: 38vw !important;
     min-width: 0 !important;
-    padding: 6px !important;
-    background: rgba(10, 15, 25, 0.6);
-    border: none;
-    box-shadow: none;
+    padding: 10px !important;
+    background: rgba(20, 20, 25, 0.45) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2) !important;
     font-size: 0.6em !important;
     pointer-events: none;
     z-index: 800;
@@ -92,13 +109,19 @@ body.mobile-mode #resource-panel {
     width: auto !important;
     height: auto !important;
     max-width: 48vw !important;
-    padding: 2px 4px !important;
+    padding: 8px !important;
+    background: rgba(20, 20, 25, 0.45) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2) !important;
     font-size: 0.65em !important;
     z-index: 800;
 }
 
 body.mobile-mode #resource-panel .resource-item {
-    margin: 0 !important;
+    margin: 2px 0 !important;
     padding: 0 !important;
 }
 
@@ -117,12 +140,26 @@ body.mobile-mode #close-inventory-btn {
 body.mobile-mode .tool-btn {
     width: auto !important;
     min-width: 60px;
-    height: 45px;
-    padding: 5px 10px;
-    font-size: 0.8em !important;
-    margin-right: 5px;
+    height: 40px;
+    padding: 5px 15px;
+    font-size: 0.85em !important;
+    font-weight: 500 !important;
+    margin-right: 8px;
     margin-bottom: 0;
     flex-shrink: 0;
+    border-radius: 9999px !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+    transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.2s !important;
+}
+
+body.mobile-mode .tool-btn:active {
+    transform: scale(0.92) !important;
+    opacity: 0.7 !important;
+}
 }
 
 /* Hide hover tooltips */
@@ -144,13 +181,19 @@ body.mobile-mode .desktop-only {
 body.mobile-mode #inventory-panel:not(.mobile-expanded) {
     position: fixed !important;
     bottom: 80px !important; /* Above the taller toolbar */
-    left: 5px !important;
+    left: 10px !important;
     width: auto !important;
     height: auto !important;
     min-width: 120px;
-    padding: 5px 10px;
-    font-size: 0.8em;
+    padding: 10px 15px;
+    font-size: 0.85em;
     z-index: 1000;
+    background: rgba(20, 20, 25, 0.6) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3) !important;
 }
 
 /* Fix machine submenu clipping in scrollable toolbar */
@@ -197,9 +240,13 @@ body.mobile-mode .tech-tree-container {
     z-index: 4000 !important;
     border-radius: 0;
     border: none;
-    background: var(--bg-color);
+    background: rgba(20, 20, 25, 0.55) !important;
+    backdrop-filter: blur(25px) saturate(1.8) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(1.8) !important;
+    padding-top: max(env(safe-area-inset-top), 20px) !important;
+    padding-bottom: max(env(safe-area-inset-bottom), 20px) !important;
     transform: translateX(100vw);
-    transition: transform 0.3s ease-out;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
     animation: none !important;
 }
 
