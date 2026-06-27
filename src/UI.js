@@ -188,57 +188,94 @@ export class UI {
                 });
             }
 
-            // Mobile swipe logic
+            // Mobile swipe logic (Native 1:1 tracking)
             let touchStartX = 0;
             let touchStartY = 0;
-            let swipeHandled = false;
+            let isSwiping = false;
 
-            panel.addEventListener('touchstart', (e) => {
+            const onTouchStart = (e) => {
                 if (content.style.display === 'none') return;
                 touchStartX = e.touches[0].clientX;
                 touchStartY = e.touches[0].clientY;
-                swipeHandled = false;
-            }, {passive: true});
+                isSwiping = true;
+                
+                // Disable transitions during drag for 1:1 tracking
+                panel.style.transition = 'none';
+                if (techPage) techPage.style.transition = 'none';
+            };
 
-            panel.addEventListener('touchmove', (e) => {
-                if (content.style.display === 'none' || swipeHandled) return;
+            const onTouchMove = (e) => {
+                if (!isSwiping || content.style.display === 'none') return;
                 let touchCurX = e.touches[0].clientX;
                 let touchCurY = e.touches[0].clientY;
-                let dx = Math.abs(touchCurX - touchStartX);
+                let dx = touchCurX - touchStartX;
                 let dy = Math.abs(touchCurY - touchStartY);
                 
-                // If it's a mostly horizontal swipe and large enough
-                if (dx > 40 && dx > dy * 1.2) {
-                    swipeHandled = true;
-                    if (this.app.soundEngine && !techPage.classList.contains('active')) this.app.soundEngine.play('whoosh');
-                    techPage.classList.add('active');
-                    panel.classList.add('swiped-left');
-                    if (techToggle) techToggle.classList.add('open');
-                }
-            }, {passive: true});
-
-            if (techPage) {
-                techPage.addEventListener('touchstart', (e) => {
-                    touchStartX = e.touches[0].clientX;
-                    touchStartY = e.touches[0].clientY;
-                    swipeHandled = false;
-                }, {passive: true});
-
-                techPage.addEventListener('touchmove', (e) => {
-                    if (swipeHandled) return;
-                    let touchCurX = e.touches[0].clientX;
-                    let touchCurY = e.touches[0].clientY;
-                    let dx = Math.abs(touchCurX - touchStartX);
-                    let dy = Math.abs(touchCurY - touchStartY);
+                // Lock into horizontal swipe if dx > dy
+                if (Math.abs(dx) > dy) {
+                    if (e.cancelable) e.preventDefault();
                     
-                    if (dx > 40 && dx > dy * 1.2) { 
-                        swipeHandled = true;
-                        if (this.app.soundEngine && techPage.classList.contains('active')) this.app.soundEngine.play('whoosh');
-                        techPage.classList.remove('active');
+                    const isTechActive = techPage && techPage.classList.contains('active');
+                    
+                    if (!isTechActive && dx < 0) {
+                        // Dragging to open (swiping left)
+                        panel.style.transform = `translateX(${dx}px)`;
+                        if (techPage) techPage.style.transform = `translateX(calc(100vw + ${dx}px))`;
+                    } else if (isTechActive && dx > 0) {
+                        // Dragging to close (swiping right)
+                        panel.style.transform = `translateX(calc(-100vw + ${dx}px))`;
+                        if (techPage) techPage.style.transform = `translateX(${dx}px)`;
+                    }
+                }
+            };
+
+            const onTouchEnd = (e) => {
+                if (!isSwiping || content.style.display === 'none') return;
+                isSwiping = false;
+                
+                let touchEndX = e.changedTouches[0].clientX;
+                let dx = touchEndX - touchStartX;
+                
+                // Restore transitions to let CSS snap it
+                panel.style.transition = '';
+                if (techPage) techPage.style.transition = '';
+                
+                // Clear inline transforms so classes take over completely
+                panel.style.transform = '';
+                if (techPage) techPage.style.transform = '';
+
+                const isTechActive = techPage && techPage.classList.contains('active');
+
+                if (!isTechActive) {
+                    // Check if dragged far enough left to snap open
+                    if (dx < -60) {
+                        if (this.app.soundEngine) this.app.soundEngine.play('whoosh');
+                        if (techPage) techPage.classList.add('active');
+                        panel.classList.add('swiped-left');
+                        if (techToggle) techToggle.classList.add('open');
+                    }
+                } else {
+                    // Check if dragged far enough right to snap closed
+                    if (dx > 60) {
+                        if (this.app.soundEngine) this.app.soundEngine.play('whoosh');
+                        if (techPage) techPage.classList.remove('active');
                         panel.classList.remove('swiped-left');
                         if (techToggle) techToggle.classList.remove('open');
                     }
-                }, {passive: true});
+                }
+            };
+
+            // {passive: false} on touchmove is necessary to allow e.preventDefault() for native feeling
+            panel.addEventListener('touchstart', onTouchStart, {passive: true});
+            panel.addEventListener('touchmove', onTouchMove, {passive: false});
+            panel.addEventListener('touchend', onTouchEnd, {passive: true});
+            panel.addEventListener('touchcancel', onTouchEnd, {passive: true});
+
+            if (techPage) {
+                techPage.addEventListener('touchstart', onTouchStart, {passive: true});
+                techPage.addEventListener('touchmove', onTouchMove, {passive: false});
+                techPage.addEventListener('touchend', onTouchEnd, {passive: true});
+                techPage.addEventListener('touchcancel', onTouchEnd, {passive: true});
             }
         }
         const machineBtn = document.getElementById('btn-machine-category');

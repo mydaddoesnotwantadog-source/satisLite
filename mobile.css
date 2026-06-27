@@ -211,5 +211,5 @@ body.mobile-mode #inventory-panel {
 }
 
 body.mobile-mode #inventory-panel.swiped-left {
-    transform: translateX(-100vw) !important;
+    transform: translateX(-100vw);
 }
