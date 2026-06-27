@@ -181,12 +181,22 @@ export class UI {
 
             const toggleMenuState = (open) => {
                 if (!open) {
+                    const isTechActive = techPage && techPage.classList.contains('active');
+                    
                     panel.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s';
                     panel.style.transformOrigin = 'bottom left';
                     panel.style.transform = 'translateY(30vh) scale(0.2)';
                     panel.style.opacity = '0';
                     
-                    if (techPage) techPage.classList.remove('active');
+                    if (isTechActive) {
+                        techPage.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s';
+                        techPage.style.transformOrigin = 'bottom left';
+                        techPage.style.transform = 'translateX(-100vw) translateY(30vh) scale(0.2)';
+                        techPage.style.opacity = '0';
+                    } else {
+                        if (techPage) techPage.classList.remove('active');
+                    }
+                    
                     panel.classList.remove('swiped-left');
                     if (techToggle) {
                         techToggle.classList.remove('open');
@@ -200,6 +210,12 @@ export class UI {
                         panel.style.transition = '';
                         panel.style.transform = '';
                         panel.style.opacity = '';
+                        if (isTechActive) {
+                            techPage.classList.remove('active');
+                            techPage.style.transition = '';
+                            techPage.style.transform = '';
+                            techPage.style.opacity = '';
+                        }
                     }, 300);
                 } else {
                     panel.style.display = 'block';
