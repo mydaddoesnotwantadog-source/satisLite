@@ -112,6 +112,7 @@ body.mobile-mode .dock-btn {
     font-size: 0.8em;
     transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), background 0.2s;
     white-space: nowrap;
+    margin: 0 !important;
 }
 
 body.mobile-mode .dock-btn:active {
@@ -123,7 +124,7 @@ body.mobile-mode .menu-btn {
     background: linear-gradient(135deg, #0A84FF, #005bb5);
     border: 1px solid rgba(255,255,255,0.3);
     padding: 0 12px;
-    margin-right: 6px;
+    margin-right: 6px !important;
     flex: 0 0 auto;
 }
 
