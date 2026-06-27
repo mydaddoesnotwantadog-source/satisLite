@@ -83,7 +83,7 @@ body.mobile-mode #bottom-toolbar.ios-dock {
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 2px;
     padding: 6px 30px !important;
     border-radius: 30px !important;
     background: rgba(30, 30, 35, 0.65) !important;
@@ -123,6 +123,7 @@ body.mobile-mode .menu-btn {
     background: linear-gradient(135deg, #0A84FF, #005bb5);
     border: 1px solid rgba(255,255,255,0.3);
     padding: 0 12px;
+    margin-right: 6px;
     flex: 0 0 auto;
 }
 
