@@ -31,13 +31,18 @@ class GameApp {
         
         this.setupTitleScreen();
         
-        // Auto-save every 30 seconds
-        setInterval(() => {
-            if (this.isRunning && document.getElementById('ui-layer').style.display !== 'none') {
-                this.saveManager.saveGame(this.scene.gridSystem.mapSize, this.logic.inventory.confiscatedPhones);
-                this.ui.showNotification("Auto-saved!");
-            }
-        }, 30000);
+        let saveInterval = 30000;
+        const scheduleNextSave = () => {
+            setTimeout(() => {
+                if (this.isRunning && document.getElementById('ui-layer').style.display !== 'none') {
+                    this.saveManager.saveGame(this.scene.gridSystem.mapSize, this.logic.inventory.confiscatedPhones);
+                    this.ui.showNotification("Auto-saving!");
+                }
+                saveInterval = 60000; // Increase to 1 minute after the first save
+                scheduleNextSave();
+            }, saveInterval);
+        };
+        scheduleNextSave();
         
         // Auto-save on page refresh/close
         window.addEventListener('beforeunload', () => {
