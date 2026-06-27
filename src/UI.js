@@ -273,8 +273,10 @@ export class UI {
                     if (e.cancelable) e.preventDefault();
                     const activePanel = (techPage && techPage.classList.contains('active')) ? techPage : panel;
                     
-                    // Track 1:1 downwards
-                    activePanel.style.transform = `translateY(${dy}px)`;
+                    // Track downwards and scale down towards the menu button area
+                    const scale = Math.max(0.5, 1 - (dy / 600));
+                    activePanel.style.transformOrigin = 'bottom left';
+                    activePanel.style.transform = `translateY(${dy}px) scale(${scale})`;
                     
                     // Fade out backdrop dynamically
                     const fade = Math.max(0, 1 - (dy / 300));
@@ -295,7 +297,9 @@ export class UI {
                 if (techPage) techPage.style.transition = '';
                 if (backdrop) backdrop.style.transition = '';
                 
+                panel.style.transformOrigin = '';
                 panel.style.transform = '';
+                if (techPage) techPage.style.transformOrigin = '';
                 if (techPage) techPage.style.transform = '';
                 if (backdrop) backdrop.style.opacity = '';
 

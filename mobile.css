@@ -3,7 +3,7 @@ body.mobile-mode #mobile-backdrop {
     display: block !important;
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     z-index: 950;
@@ -19,9 +19,10 @@ body.mobile-mode #mobile-backdrop.active {
 
 body.mobile-mode .drag-handle {
     display: block !important;
-    width: 40px;
+    width: 35vw;
+    max-width: 160px;
     height: 5px;
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.4);
     border-radius: 5px;
     margin: 0 auto 15px auto;
     flex-shrink: 0;
@@ -202,6 +203,11 @@ body.mobile-mode #btn-save-game {
 
 /* Hide desktop-specific labels */
 body.mobile-mode .desktop-only {
+    display: none !important;
+}
+
+/* Hide drag handle when menu is closed */
+body.mobile-mode #inventory-panel:not(.mobile-expanded) .drag-handle {
     display: none !important;
 }
 
