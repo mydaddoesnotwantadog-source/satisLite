@@ -525,6 +525,40 @@ export class UI {
                 });
             }
         });
+
+        // Touch sliding support for flip-flop switch
+        const flipFlopContainer = document.querySelector('.flip-flop-switch');
+        if (flipFlopContainer) {
+            let startX = 0;
+            let isDraggingSwitch = false;
+            
+            flipFlopContainer.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                isDraggingSwitch = true;
+            });
+            
+            flipFlopContainer.addEventListener('touchmove', (e) => {
+                if (!isDraggingSwitch) return;
+                e.preventDefault(); // Prevent scrolling
+            }, { passive: false });
+            
+            flipFlopContainer.addEventListener('touchend', (e) => {
+                if (!isDraggingSwitch) return;
+                isDraggingSwitch = false;
+                const endX = e.changedTouches[0].clientX;
+                const dx = endX - startX;
+                
+                if (Math.abs(dx) > 20) { // Require at least 20px drag
+                    const targetTool = dx > 0 ? 'delete' : 'select';
+                    
+                    // Manually trigger the click on the corresponding button to reuse its logic
+                    const targetBtn = flipFlopContainer.querySelector(`[data-tool="${targetTool}"]`);
+                    if (targetBtn && !targetBtn.classList.contains('active')) {
+                        targetBtn.click();
+                    }
+                }
+            });
+        }
     }
 
     openRecipeUI(building) {
