@@ -189,15 +189,22 @@ export class UI {
 
             // Mobile swipe logic
             let touchStartX = 0;
+            let touchStartY = 0;
             panel.addEventListener('touchstart', (e) => {
                 if (content.style.display === 'none') return;
-                touchStartX = e.changedTouches[0].screenX;
+                touchStartX = e.changedTouches[0].clientX;
+                touchStartY = e.changedTouches[0].clientY;
             }, {passive: true});
 
             panel.addEventListener('touchend', (e) => {
                 if (content.style.display === 'none') return;
-                let touchEndX = e.changedTouches[0].screenX;
-                if (touchEndX > touchStartX + 50 || touchEndX < touchStartX - 50) { // allow both swipe directions to open
+                let touchEndX = e.changedTouches[0].clientX;
+                let touchEndY = e.changedTouches[0].clientY;
+                let dx = Math.abs(touchEndX - touchStartX);
+                let dy = Math.abs(touchEndY - touchStartY);
+                
+                // If it's a mostly horizontal swipe and large enough
+                if (dx > 40 && dx > dy) {
                     if (this.app.soundEngine && !techPage.classList.contains('active')) this.app.soundEngine.play('whoosh');
                     techPage.classList.add('active');
                     if (techToggle) techToggle.classList.add('open');
@@ -206,12 +213,17 @@ export class UI {
 
             if (techPage) {
                 techPage.addEventListener('touchstart', (e) => {
-                    touchStartX = e.changedTouches[0].screenX;
+                    touchStartX = e.changedTouches[0].clientX;
+                    touchStartY = e.changedTouches[0].clientY;
                 }, {passive: true});
 
                 techPage.addEventListener('touchend', (e) => {
-                    let touchEndX = e.changedTouches[0].screenX;
-                    if (touchEndX > touchStartX + 50 || touchEndX < touchStartX - 50) { // allow both directions to close
+                    let touchEndX = e.changedTouches[0].clientX;
+                    let touchEndY = e.changedTouches[0].clientY;
+                    let dx = Math.abs(touchEndX - touchStartX);
+                    let dy = Math.abs(touchEndY - touchStartY);
+                    
+                    if (dx > 40 && dx > dy) { 
                         if (this.app.soundEngine && techPage.classList.contains('active')) this.app.soundEngine.play('whoosh');
                         techPage.classList.remove('active');
                         if (techToggle) techToggle.classList.remove('open');

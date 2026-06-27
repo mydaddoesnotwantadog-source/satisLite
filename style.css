@@ -660,9 +660,9 @@ body {
 .tech-tree-container {
     display: none;
     position: absolute;
-    left: 360px; 
+    left: 450px; 
     bottom: 60px;
-    width: calc(100vw - 390px); 
+    width: calc(100vw - 480px); 
     height: calc(100vh - 120px);
     z-index: 2000;
     pointer-events: auto;
