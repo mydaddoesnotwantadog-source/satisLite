@@ -1,4 +1,32 @@
 /* mobile.css */
+body.mobile-mode #mobile-backdrop {
+    display: block !important;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    z-index: 950;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.mobile-mode #mobile-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+body.mobile-mode .drag-handle {
+    display: block !important;
+    width: 40px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+    margin: 0 auto 15px auto;
+    flex-shrink: 0;
+}
+
 body.mobile-mode {
     /* Prevent pull-to-refresh and selection on mobile */
     overscroll-behavior: none;

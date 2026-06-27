@@ -84,17 +84,19 @@
         <!-- Version Label -->
         <div id="version-label"
             style="position: absolute; bottom: 20px; left: 30px; font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; font-weight: 700; color: rgba(255, 255, 255, 0.4); letter-spacing: 4px; border-left: 2px solid var(--primary-color, #74b9ff); padding-left: 10px; z-index: 10;">
-            v0.3.0
+            v3.2
         </div>
     </div>
 
 
     <!-- MAIN UI (Hidden initially) -->
     <div id="ui-layer" style="display: none;">
+        <div id="mobile-backdrop" style="display: none;"></div>
         <!-- Top Left: Main Currency (Removed) -->
         
         <!-- Bottom Left: Resources Split -->
         <div id="inventory-panel" class="glass-panel">
+            <div class="drag-handle"></div>
             <div id="inventory-header"
                 style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; grid-column: 1 / -1;">
                 <h2 style="margin: 0; padding: 0; border: none;">Menu</h2>
@@ -183,6 +185,7 @@
 
         <!-- Tech Tree Page (Hidden by default) -->
         <div id="tech-tree-page" class="glass-panel tech-tree-container">
+            <div class="drag-handle"></div>
             <div class="tech-tree-header">
                 <h2>Tech Tree <span style="font-size: 0.5em; color: var(--text-primary); opacity: 0.5; vertical-align: middle;">v3.2</span></h2>
             </div>

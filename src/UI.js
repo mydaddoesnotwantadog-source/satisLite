@@ -189,27 +189,34 @@ export class UI {
             const techToggle = document.getElementById('tech-tree-toggle');
             const techPage = document.getElementById('tech-tree-page');
 
-            invHeader.addEventListener('click', () => {
-                if (content.style.display !== 'none') {
+            const backdrop = document.getElementById('mobile-backdrop');
+
+            const toggleMenuState = (open) => {
+                if (!open) {
                     content.style.display = 'none';
                     arrow.style.transform = 'rotate(180deg)';
                     panel.style.minWidth = 'auto';
                     if (window.isMobile) panel.classList.remove('mobile-expanded');
                     
-                    // Close tech tree if inventory is closed
                     if (techPage) techPage.classList.remove('active');
                     panel.classList.remove('swiped-left');
                     if (techToggle) {
                         techToggle.classList.remove('open');
                         techToggle.style.display = 'none';
                     }
+                    if (backdrop) backdrop.classList.remove('active');
                 } else {
                     content.style.display = 'contents';
                     arrow.style.transform = 'rotate(0deg)';
                     panel.style.minWidth = '320px';
                     if (window.isMobile) panel.classList.add('mobile-expanded');
                     if (techToggle) techToggle.style.display = '';
+                    if (backdrop) backdrop.classList.add('active');
                 }
+            };
+
+            invHeader.addEventListener('click', () => {
+                toggleMenuState(content.style.display === 'none');
             });
 
             if (techToggle && techPage) {
@@ -225,16 +232,18 @@ export class UI {
             let touchStartX = 0;
             let touchStartY = 0;
             let isSwiping = false;
+            let swipeDirection = null; // 'horizontal' or 'vertical'
 
             const onTouchStart = (e) => {
                 if (content.style.display === 'none') return;
                 touchStartX = e.touches[0].clientX;
                 touchStartY = e.touches[0].clientY;
                 isSwiping = true;
+                swipeDirection = null;
                 
-                // Disable transitions during drag for 1:1 tracking
                 panel.style.transition = 'none';
                 if (techPage) techPage.style.transition = 'none';
+                if (backdrop) backdrop.style.transition = 'none';
             };
 
             const onTouchMove = (e) => {
@@ -242,23 +251,35 @@ export class UI {
                 let touchCurX = e.touches[0].clientX;
                 let touchCurY = e.touches[0].clientY;
                 let dx = touchCurX - touchStartX;
-                let dy = Math.abs(touchCurY - touchStartY);
+                let dy = touchCurY - touchStartY;
                 
-                // Lock into horizontal swipe if dx > dy
-                if (Math.abs(dx) > dy) {
+                if (!swipeDirection) {
+                    if (Math.abs(dx) > Math.abs(dy)) swipeDirection = 'horizontal';
+                    else if (dy > 0) swipeDirection = 'vertical'; // Only allow swiping DOWN
+                    else return;
+                }
+                
+                if (swipeDirection === 'horizontal') {
                     if (e.cancelable) e.preventDefault();
-                    
                     const isTechActive = techPage && techPage.classList.contains('active');
                     
                     if (!isTechActive && dx < 0) {
-                        // Dragging to open (swiping left)
                         panel.style.transform = `translateX(${dx}px)`;
                         if (techPage) techPage.style.transform = `translateX(calc(100vw + ${dx}px))`;
                     } else if (isTechActive && dx > 0) {
-                        // Dragging to close (swiping right)
                         panel.style.transform = `translateX(calc(-100vw + ${dx}px))`;
                         if (techPage) techPage.style.transform = `translateX(${dx}px)`;
                     }
+                } else if (swipeDirection === 'vertical' && dy > 0) {
+                    if (e.cancelable) e.preventDefault();
+                    const activePanel = (techPage && techPage.classList.contains('active')) ? techPage : panel;
+                    
+                    // Track 1:1 downwards
+                    activePanel.style.transform = `translateY(${dy}px)`;
+                    
+                    // Fade out backdrop dynamically
+                    const fade = Math.max(0, 1 - (dy / 300));
+                    if (backdrop) backdrop.style.opacity = fade.toString();
                 }
             };
 
@@ -267,38 +288,45 @@ export class UI {
                 isSwiping = false;
                 
                 let touchEndX = e.changedTouches[0].clientX;
+                let touchEndY = e.changedTouches[0].clientY;
                 let dx = touchEndX - touchStartX;
+                let dy = touchEndY - touchStartY;
                 
-                // Restore transitions to let CSS snap it
                 panel.style.transition = '';
                 if (techPage) techPage.style.transition = '';
+                if (backdrop) backdrop.style.transition = '';
                 
-                // Clear inline transforms so classes take over completely
                 panel.style.transform = '';
                 if (techPage) techPage.style.transform = '';
+                if (backdrop) backdrop.style.opacity = '';
 
                 const isTechActive = techPage && techPage.classList.contains('active');
 
-                if (!isTechActive) {
-                    // Check if dragged far enough left to snap open
-                    if (dx < -60) {
-                        if (this.app.soundEngine) this.app.soundEngine.play('whoosh');
-                        if (techPage) techPage.classList.add('active');
-                        panel.classList.add('swiped-left');
-                        if (techToggle) techToggle.classList.add('open');
+                if (swipeDirection === 'horizontal') {
+                    if (!isTechActive) {
+                        if (dx < -60) {
+                            if (this.app.soundEngine) this.app.soundEngine.play('whoosh');
+                            if (techPage) techPage.classList.add('active');
+                            panel.classList.add('swiped-left');
+                            if (techToggle) techToggle.classList.add('open');
+                        }
+                    } else {
+                        if (dx > 60) {
+                            if (this.app.soundEngine) this.app.soundEngine.play('whoosh');
+                            if (techPage) techPage.classList.remove('active');
+                            panel.classList.remove('swiped-left');
+                            if (techToggle) techToggle.classList.remove('open');
+                        }
                     }
-                } else {
-                    // Check if dragged far enough right to snap closed
-                    if (dx > 60) {
+                } else if (swipeDirection === 'vertical') {
+                    if (dy > 100) {
+                        // Close completely
                         if (this.app.soundEngine) this.app.soundEngine.play('whoosh');
-                        if (techPage) techPage.classList.remove('active');
-                        panel.classList.remove('swiped-left');
-                        if (techToggle) techToggle.classList.remove('open');
+                        toggleMenuState(false);
                     }
                 }
             };
 
-            // {passive: false} on touchmove is necessary to allow e.preventDefault() for native feeling
             panel.addEventListener('touchstart', onTouchStart, {passive: true});
             panel.addEventListener('touchmove', onTouchMove, {passive: false});
             panel.addEventListener('touchend', onTouchEnd, {passive: true});
