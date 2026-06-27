@@ -191,7 +191,7 @@ export class UI {
                     if (isTechActive) {
                         techPage.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s';
                         techPage.style.transformOrigin = 'bottom left';
-                        techPage.style.transform = 'translateX(-100vw) translateY(30vh) scale(0.2)';
+                        techPage.style.transform = 'translateY(30vh) scale(0.2)';
                         techPage.style.opacity = '0';
                     } else {
                         if (techPage) techPage.classList.remove('active');
