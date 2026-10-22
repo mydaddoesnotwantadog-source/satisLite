@@ -2501,7 +2501,7 @@ var LiquidGlass = class _LiquidGlass {
    * glasses can check whether they need to refresh too.
    */
   _renderGlassElement(child, rootRect, dpr, isDragging, dirtyTargets, renderedThisFrame) {
-    if ((child.id === "resource-panel" || child.id === "goal-panel") && document.body.classList.contains("mobile-menu-open")) {
+    if ((child.id === "resource-panel" || child.id === "goal-panel") && (document.body.classList.contains("mobile-menu-open") || document.body.classList.contains("building-menu-open"))) {
       return;
     }
     const config = this._getConfig(child);

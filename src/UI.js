@@ -321,7 +321,7 @@ export class UI {
             }
         });
 
-        // Initialize desktop collapse state
+        // Initialize desktop collapse state or mobile closed state
         if (!window.isMobile && panel) {
             panel.style.display = '';
             panel.style.opacity = '';
@@ -329,6 +329,10 @@ export class UI {
             const savedState = localStorage.getItem('satislite_inventory_collapsed');
             const shouldCollapse = (savedState === null) ? true : (savedState === 'true');
             setCollapsedState(shouldCollapse);
+        } else if (window.isMobile && panel) {
+            panel.style.display = 'none';
+            panel.style.opacity = '0';
+            if (content) content.style.display = 'none';
         }
 
         if (btnOpenMenu) {
@@ -381,6 +385,8 @@ export class UI {
                 } else {
                     const machineSubmenu = document.getElementById('machine-submenu');
                     if (machineSubmenu) machineSubmenu.classList.remove('show');
+                    const machineTooltip = document.getElementById('machine-tooltip');
+                    if (machineTooltip) machineTooltip.style.display = 'none';
 
                     document.body.classList.add('mobile-menu-open');
                     if (bottomToolbar) {
@@ -413,7 +419,7 @@ export class UI {
 
             btnOpenMenu.addEventListener('click', () => {
                 if (this.app.soundEngine) this.app.soundEngine.play('whoosh');
-                const isOpen = panel.style.display !== 'none' && panel.style.opacity !== '0';
+                const isOpen = document.body.classList.contains('mobile-menu-open');
                 toggleMenuState(!isOpen);
             });
 
@@ -727,6 +733,7 @@ export class UI {
         const info = document.getElementById('recipe-info');
         
         popup.style.display = 'block';
+        document.body.classList.add('building-menu-open');
         list.innerHTML = '';
         this.injectPowerSwitch(list, building);
         
@@ -853,6 +860,10 @@ export class UI {
     closeRecipeUI() {
         this.selectedBuilding = null;
         document.getElementById('recipe-popup').style.display = 'none';
+        const leighPopup = document.getElementById('leigh-high-popup');
+        if (!leighPopup || leighPopup.style.display === 'none') {
+            document.body.classList.remove('building-menu-open');
+        }
     }
 
     injectPowerSwitch(container, building) {
@@ -905,6 +916,7 @@ export class UI {
         const popup = document.getElementById('leigh-high-popup');
         const list = document.getElementById('leigh-items-list');
         popup.style.display = 'block';
+        document.body.classList.add('building-menu-open');
         list.innerHTML = '';
         this.injectPowerSwitch(list, building);
         
@@ -1149,6 +1161,10 @@ export class UI {
     closeLeighHighUI() {
         this.selectedBuilding = null;
         document.getElementById('leigh-high-popup').style.display = 'none';
+        const recipePopup = document.getElementById('recipe-popup');
+        if (!recipePopup || recipePopup.style.display === 'none') {
+            document.body.classList.remove('building-menu-open');
+        }
     }
 
     updateDisplay() {

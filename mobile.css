@@ -69,6 +69,15 @@ body.mobile-mode #leigh-high-popup {
     border: none !important;
     overflow-y: auto;
     align-content: start;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+/* Hide building menus when Mobile Inventory is open so the background is always the actual map */
+body.mobile-mode.mobile-menu-open #recipe-popup,
+body.mobile-mode.mobile-menu-open #leigh-high-popup {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
 }
 
 /* Inventory panel sits over #mobile-backdrop (which already owns the stationary full-screen blur),
@@ -682,9 +691,11 @@ body.mobile-mode #resource-panel {
     transition: opacity 0.24s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* Hide floating top-left Phones & top-right Demands HUD panels when Mobile Inventory is open */
+/* Hide floating top-left Phones & top-right Demands HUD panels when Mobile Inventory or a Building Menu is open */
 body.mobile-mode.mobile-menu-open #resource-panel,
-body.mobile-mode.mobile-menu-open #goal-panel {
+body.mobile-mode.mobile-menu-open #goal-panel,
+body.mobile-mode.building-menu-open #resource-panel,
+body.mobile-mode.building-menu-open #goal-panel {
     opacity: 0 !important;
     transform: translateY(-14px) scale(0.92) !important;
     pointer-events: none !important;
