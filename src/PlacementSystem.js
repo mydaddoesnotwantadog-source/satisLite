@@ -104,9 +104,82 @@ export class PlacementSystem {
         this.screenMouse.y = e.clientY;
     }
 
+    findNearestNodeTile(worldX, worldZ, maxRadiusTiles = 2.0) {
+        const ts = this.gridSystem.tileSize;
+        const baseX = Math.floor(worldX / ts);
+        const baseZ = Math.floor(worldZ / ts);
+        const searchR = Math.ceil(maxRadiusTiles);
+        let bestTile = null;
+        let bestDistSq = (maxRadiusTiles * ts) * (maxRadiusTiles * ts);
+
+        for (let dx = -searchR; dx <= searchR; dx++) {
+            for (let dz = -searchR; dz <= searchR; dz++) {
+                const nx = baseX + dx;
+                const nz = baseZ + dz;
+                const occ = this.gridSystem.getOccupantAt(nx, nz);
+                if (occ && occ.type === 'node') {
+                    const cx = (nx + 0.5) * ts;
+                    const cz = (nz + 0.5) * ts;
+                    const distSq = (worldX - cx) * (worldX - cx) + (worldZ - cz) * (worldZ - cz);
+                    if (distSq <= bestDistSq) {
+                        bestDistSq = distSq;
+                        bestTile = { x: nx, z: nz };
+                    }
+                }
+            }
+        }
+        return bestTile;
+    }
+
+    resolveMobileGridFromRay(maxMinerSnapRadius = 1.9) {
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        const hit = this.raycaster.ray.intersectPlane(this.plane, this._tempPlaneTarget);
+        if (!hit) return null;
+
+        const ts = this.gridSystem.tileSize;
+        let gridX = Math.floor(this._tempPlaneTarget.x / ts);
+        let gridZ = Math.floor(this._tempPlaneTarget.z / ts);
+
+        if (this.ui && this.ui.activeTool === 'miner') {
+            const snapped = this.findNearestNodeTile(this._tempPlaneTarget.x, this._tempPlaneTarget.z, maxMinerSnapRadius);
+            if (snapped) {
+                gridX = snapped.x;
+                gridZ = snapped.z;
+            }
+        }
+        return { x: gridX, z: gridZ };
+    }
+
+    isTouchOnGhost(clientX, clientY, radiusPx = 58) {
+        if (!this.ghostMesh || !this.ghostMesh.visible) return false;
+        this._tempVec.copy(this.ghostMesh.position).project(this.camera);
+        const sx = (this._tempVec.x * 0.5 + 0.5) * window.innerWidth;
+        const sy = (-this._tempVec.y * 0.5 + 0.5) * window.innerHeight;
+        return Math.hypot(clientX - sx, clientY - sy) <= radiusPx;
+    }
+
+    moveGhostFromTouch(clientX, clientY) {
+        this.mouse.x = (clientX / window.innerWidth) * 2 - 1;
+        this.mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+        this.screenMouse.x = clientX;
+        this.screenMouse.y = clientY;
+
+        const resolved = this.resolveMobileGridFromRay(1.9);
+        if (resolved) {
+            const changed = !this.mobileLockedTile || this.mobileLockedTile.x !== resolved.x || this.mobileLockedTile.y !== resolved.z;
+            this.mobileLockedTile = { x: resolved.x, z: resolved.z };
+            this.updateGhost();
+        }
+    }
+
     centerGhostOnScreen() {
         this.mouse.set(0, 0);
-        this.screenMouse.set(window.innerWidth * 0.5, window.innerHeight * 0.5);
+        this.screenMouse.x = window.innerWidth * 0.5;
+        this.screenMouse.y = window.innerHeight * 0.5;
+        const resolved = this.resolveMobileGridFromRay(5.0);
+        if (resolved) {
+            this.mobileLockedTile = { x: resolved.x, z: resolved.z };
+        }
         this.updateGhost();
     }
 
@@ -178,9 +251,21 @@ export class PlacementSystem {
                 this.soundEngine.play('click');
             }
         } else {
-            // Build mode
+            // Build mode on mobile:
+            // 1. If tapping directly on/near the currently visible hologram, place immediately!
+            const tappedExistingGhost = this.isTouchOnGhost(this.screenMouse.x, this.screenMouse.y, 52);
             const prevX = this.hoveredX;
             const prevZ = this.hoveredZ;
+
+            const resolved = this.resolveMobileGridFromRay(1.9);
+            if (tappedExistingGhost && this.ghostMesh.visible && this.ghostMesh.material === this.ghostMatValid) {
+                this.tryPlaceBuilding();
+                return;
+            }
+
+            if (resolved) {
+                this.mobileLockedTile = { x: resolved.x, z: resolved.z };
+            }
             this.updateGhost();
             
             if (this.hoveredX === prevX && this.hoveredZ === prevZ && this.ghostMesh.visible) {
@@ -273,13 +358,22 @@ export class PlacementSystem {
             this.ghostMesh.geometry = this.ghostGeometries['1x1'];
         }
 
-        this.raycaster.setFromCamera(this.mouse, this.camera);
-        const hit = this.raycaster.ray.intersectPlane(this.plane, this._tempPlaneTarget);
+        let gridX = null;
+        let gridZ = null;
+
+        if (window.isMobile && this.mobileLockedTile) {
+            gridX = this.mobileLockedTile.x;
+            gridZ = this.mobileLockedTile.z;
+        } else {
+            this.raycaster.setFromCamera(this.mouse, this.camera);
+            const hit = this.raycaster.ray.intersectPlane(this.plane, this._tempPlaneTarget);
+            if (hit) {
+                gridX = Math.floor(this._tempPlaneTarget.x / this.gridSystem.tileSize);
+                gridZ = Math.floor(this._tempPlaneTarget.z / this.gridSystem.tileSize);
+            }
+        }
         
-        if (hit) {
-            const gridX = Math.floor(this._tempPlaneTarget.x / this.gridSystem.tileSize);
-            const gridZ = Math.floor(this._tempPlaneTarget.z / this.gridSystem.tileSize);
-            
+        if (gridX !== null && gridZ !== null) {
             this.hoveredX = gridX;
             this.hoveredZ = gridZ;
             
@@ -643,10 +737,9 @@ export class PlacementSystem {
     tryPlaceBuilding() {
         if (!this.ghostMesh.visible || this.ghostMesh.material === this.ghostMatInvalid) return;
         
-        this.raycaster.setFromCamera(this.mouse, this.camera);
-        this.raycaster.ray.intersectPlane(this.plane, this._tempPlaneTarget);
-        const gridX = Math.floor(this._tempPlaneTarget.x / this.gridSystem.tileSize);
-        const gridZ = Math.floor(this._tempPlaneTarget.z / this.gridSystem.tileSize);
+        const gridX = this.hoveredX;
+        const gridZ = this.hoveredZ;
+        if (gridX === undefined || gridZ === undefined || gridX === null || gridZ === null) return;
         
         const toolId = this.ui.activeTool;
         const fp = this.getToolFootprint(toolId);
@@ -718,6 +811,14 @@ export class PlacementSystem {
                 }
             }
             
+            if (window.isMobile && toolId === 'miner') {
+                const ts = this.gridSystem.tileSize;
+                const nextNode = this.findNearestNodeTile((gridX + 0.5) * ts, (gridZ + 0.5) * ts, 3.5);
+                if (nextNode) {
+                    this.mobileLockedTile = { x: nextNode.x, z: nextNode.z };
+                }
+            }
+
             this.ui.updateDisplay();
             this.updateGhost();
             this._hoveredBldUuid = null;

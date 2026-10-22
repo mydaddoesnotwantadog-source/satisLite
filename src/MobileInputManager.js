@@ -25,14 +25,19 @@ export class MobileInputManager {
     onTouchStart(e) {
         if (e.cancelable) e.preventDefault();
         
+        const ps = this.placementSystem;
+        const isBuildMode = ps && ps.ui && ps.ui.activeTool !== 'select' && ps.ui.activeTool !== 'delete';
+
         for (let i = 0; i < e.changedTouches.length; i++) {
             const touch = e.changedTouches[i];
+            const isDraggingGhost = e.touches.length === 1 && isBuildMode && ps.isTouchOnGhost(touch.clientX, touch.clientY, 64);
             this.touches[touch.identifier] = {
                 startX: touch.clientX,
                 startY: touch.clientY,
                 lastX: touch.clientX,
                 lastY: touch.clientY,
-                isTap: true
+                isTap: true,
+                isDraggingGhost: isDraggingGhost
             };
         }
         
@@ -50,20 +55,24 @@ export class MobileInputManager {
                 const deltaX = touch.clientX - touchData.lastX;
                 const deltaY = touch.clientY - touchData.lastY;
                 
-                if (Math.abs(touch.clientX - touchData.startX) > 5 || Math.abs(touch.clientY - touchData.startY) > 5) {
+                if (Math.hypot(touch.clientX - touchData.startX, touch.clientY - touchData.startY) > 14) {
                     touchData.isTap = false;
                 }
                 
-                // Calculate exact world units per pixel to keep 1:1 touch mapping
-                const frustumSize = 12; // Matches GameScene
-                // X mapping
-                const factorX = (frustumSize * (this.domElement.clientWidth / this.domElement.clientHeight)) / (this.domElement.clientWidth * this.cameraController.camera.zoom);
-                // Y mapping is scaled because the ground plane is viewed at an angle
-                const factorY = frustumSize / (this.domElement.clientHeight * this.cameraController.camera.zoom) * 1.2; 
-                
-                this.cameraController.target.addScaledVector(this.cameraController.right, -deltaX * factorX);
-                this.cameraController.target.addScaledVector(this.cameraController.forward, deltaY * factorY);
-                this.cameraController.updateCameraPosition();
+                if (touchData.isDraggingGhost && this.placementSystem) {
+                    this.placementSystem.moveGhostFromTouch(touch.clientX, touch.clientY);
+                } else {
+                    // Calculate exact world units per pixel to keep 1:1 touch mapping
+                    const frustumSize = 12; // Matches GameScene
+                    // X mapping
+                    const factorX = (frustumSize * (this.domElement.clientWidth / this.domElement.clientHeight)) / (this.domElement.clientWidth * this.cameraController.camera.zoom);
+                    // Y mapping is scaled because the ground plane is viewed at an angle
+                    const factorY = frustumSize / (this.domElement.clientHeight * this.cameraController.camera.zoom) * 1.2; 
+                    
+                    this.cameraController.target.addScaledVector(this.cameraController.right, -deltaX * factorX);
+                    this.cameraController.target.addScaledVector(this.cameraController.forward, deltaY * factorY);
+                    this.cameraController.updateCameraPosition();
+                }
                 
                 touchData.lastX = touch.clientX;
                 touchData.lastY = touch.clientY;
@@ -72,8 +81,14 @@ export class MobileInputManager {
             const touch1 = e.touches[0];
             const touch2 = e.touches[1];
             
-            if (this.touches[touch1.identifier]) this.touches[touch1.identifier].isTap = false;
-            if (this.touches[touch2.identifier]) this.touches[touch2.identifier].isTap = false;
+            if (this.touches[touch1.identifier]) {
+                this.touches[touch1.identifier].isTap = false;
+                this.touches[touch1.identifier].isDraggingGhost = false;
+            }
+            if (this.touches[touch2.identifier]) {
+                this.touches[touch2.identifier].isTap = false;
+                this.touches[touch2.identifier].isDraggingGhost = false;
+            }
             
             const dx = touch1.clientX - touch2.clientX;
             const dy = touch1.clientY - touch2.clientY;
@@ -119,6 +134,8 @@ export class MobileInputManager {
         if (this.placementSystem) {
             this.placementSystem.mouse.x = x;
             this.placementSystem.mouse.y = y;
+            this.placementSystem.screenMouse.x = clientX;
+            this.placementSystem.screenMouse.y = clientY;
             this.placementSystem.executeTap();
         }
     }

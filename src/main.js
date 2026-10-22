@@ -1,9 +1,9 @@
-import { GameScene } from './GameScene.js?v=3.2.12';
-import { UI } from './UI.js?v=3.2.12';
+import { GameScene } from './GameScene.js?v=3.2.13';
+import { UI } from './UI.js?v=3.2.13';
 import { GameLogic } from './GameLogic.js';
 import { SaveManager } from './SaveManager.js';
-import { MobileInputManager } from './MobileInputManager.js';
-import { GlassManager } from './GlassManager.js?v=3.2.12';
+import { MobileInputManager } from './MobileInputManager.js?v=3.2.13';
+import { GlassManager } from './GlassManager.js?v=3.2.13';
 
 class GameApp {
     constructor() {

@@ -4,7 +4,9 @@ import { RESOURCES } from './Config.js';
 export class GridSystem {
     constructor(scene, mapSize = 50) {
         this.scene = scene;
-        this.mapSize = mapSize;
+        // Ensure mapSize is always an even integer so halfSize is an exact integer
+        // and grid cells/ores align 1:1 with Math.floor() integer coordinates in PlacementSystem
+        this.mapSize = Math.max(2, Math.round(mapSize / 2) * 2);
         this.tileSize = 1.0;
         
         // Materials
@@ -175,7 +177,7 @@ export class GridSystem {
     
     // Helper to get chunk data instead of creating meshes
     getChunkData(level, colorHex, hashVal, px, py, pz) {
-        const isGold = colorHex === 0xF4D03F;
+        const isGold = colorHex === 0xF4D03F || colorHex === 0xFFD700;
         const isCoal = colorHex === 0x34495E;
         const isCopper = colorHex === 0xE67E22;
         const isIron = colorHex === 0xBDC3C7;
@@ -249,7 +251,7 @@ export class GridSystem {
 
     generateMap() {
         const mapGroup = new THREE.Group();
-        const halfSize = this.mapSize / 2;
+        const halfSize = Math.floor(this.mapSize / 2);
         
         this.mapData = new Map();
         for (let x = -halfSize; x < halfSize; x++) {
