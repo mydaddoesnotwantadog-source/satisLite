@@ -78,11 +78,11 @@ export class UI {
     showNotification(text, color = '#2ecc71') {
         const toast = document.createElement('div');
         toast.className = 'glass-panel';
-        toast.style.position = 'absolute';
+        toast.style.position = 'fixed';
         toast.style.left = '50%';
         toast.style.top = '-100px'; // Start off-screen
         toast.style.transform = 'translateX(-50%)';
-        toast.style.zIndex = '2500';
+        toast.style.zIndex = '25000';
         toast.style.transition = 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; // Springy effect
         toast.style.display = 'flex';
         toast.style.alignItems = 'center';
@@ -137,13 +137,15 @@ export class UI {
             `;
         }
         
-        document.getElementById('ui-layer').appendChild(toast);
+        document.body.appendChild(toast);
         
         // Trigger reflow
         void toast.offsetWidth;
         
         // Slide in
-        toast.style.top = '30px';
+        toast.style.top = (window.isMobile || document.body.classList.contains('mobile-mode'))
+            ? 'max(env(safe-area-inset-top, 0px) + 14px, 20px)'
+            : '30px';
         
         // Slide out after 3 seconds
         setTimeout(() => {
@@ -176,6 +178,24 @@ export class UI {
                 btn.textContent = mac.name;
             }
             
+            const showMachineTooltip = () => {
+                const tooltip = document.getElementById('machine-tooltip');
+                if (!tooltip) return;
+                document.getElementById('mt-name').textContent = mac.name;
+                document.getElementById('mt-desc').textContent = mac.desc || '';
+                document.getElementById('mt-size').textContent = mac.size || '1×1';
+                document.getElementById('mt-cost').textContent = mac.cost;
+                
+                tooltip.style.display = 'block';
+                tooltip.style.bottom = 'auto';
+                
+                const rect = btn.getBoundingClientRect();
+                const maxLeft = Math.max(8, window.innerWidth - tooltip.offsetWidth - 8);
+                const clampedLeft = Math.max(8, Math.min(rect.left, maxLeft));
+                tooltip.style.left = `${clampedLeft}px`;
+                tooltip.style.top = `${rect.top - tooltip.offsetHeight - 10}px`;
+            };
+
             btn.addEventListener('click', () => {
                 if (btn.disabled) return;
                 if (this.app.soundEngine) this.app.soundEngine.play('click');
@@ -191,31 +211,19 @@ export class UI {
                     this.app.scene.placementSystem.centerGhostOnScreen();
                 }
                 
-                // On mobile, don't close the submenu when selecting a tool
+                // On mobile, don't close the submenu when selecting a tool, and keep the metal gray building description visible
                 if (!window.isMobile) {
                     document.querySelectorAll('.submenu-horizontal').forEach(s => s.classList.remove('show'));
                     if (machineBtn) machineBtn.classList.remove('active');
+                } else {
+                    showMachineTooltip();
                 }
                 
                 this.closeRecipeUI();
                 this.closeLeighHighUI();
             });
 
-            btn.addEventListener('mouseenter', () => {
-                const tooltip = document.getElementById('machine-tooltip');
-                if (!tooltip) return;
-                document.getElementById('mt-name').textContent = mac.name;
-                document.getElementById('mt-desc').textContent = mac.desc || '';
-                document.getElementById('mt-size').textContent = mac.size || '1×1';
-                document.getElementById('mt-cost').textContent = mac.cost;
-                
-                tooltip.style.display = 'block';
-                tooltip.style.bottom = 'auto';
-                
-                const rect = btn.getBoundingClientRect();
-                tooltip.style.left = `${rect.left}px`;
-                tooltip.style.top = `${rect.top - tooltip.offsetHeight - 10}px`;
-            });
+            btn.addEventListener('mouseenter', showMachineTooltip);
 
             btn.addEventListener('mouseleave', () => {
                 const tooltip = document.getElementById('machine-tooltip');
@@ -622,6 +630,8 @@ export class UI {
         });
         const thumb = document.querySelector('.switch-thumb');
         if (thumb) thumb.classList.add('hidden-thumb');
+        const machineTooltip = document.getElementById('machine-tooltip');
+        if (machineTooltip) machineTooltip.style.display = 'none';
     }
 
     bindToolButtons() {

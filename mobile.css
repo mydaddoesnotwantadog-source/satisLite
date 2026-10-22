@@ -166,11 +166,17 @@ body.mobile-mode .mobile-launch-btn {
     margin: 2px 0 0 0 !important;
 }
 
-/* Integrated Demand Progress Rows inside Mobile Inventory List */
+/* Integrated Demand Progress Rows inside Mobile Inventory List — Desktop Metal Gray Accent Texture */
 body.mobile-mode #inventory-panel .resource-item {
     position: relative;
     overflow: hidden;
-    border-radius: 8px;
+    border-radius: 6px;
+    background: linear-gradient(180deg, var(--panel-bg-light, #555) 0%, var(--panel-bg-dark, #2a2a2a) 100%) !important;
+    border: 2px solid var(--panel-border-dark, #111) !important;
+    border-top: 2px solid var(--panel-border-light, #777) !important;
+    border-left: 2px solid var(--panel-border-light, #777) !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.65), inset 0 0 10px rgba(0, 0, 0, 0.5) !important;
+    padding: 5px 10px !important;
 }
 
 body.mobile-mode #inventory-panel .resource-item .resource-icon,
@@ -180,14 +186,33 @@ body.mobile-mode #inventory-panel .resource-item .resource-value {
     z-index: 1;
 }
 
+body.mobile-mode #inventory-panel .resource-item .resource-name {
+    color: #f0f0f0 !important;
+    font-weight: 600 !important;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.85) !important;
+}
+
+body.mobile-mode #inventory-panel .resource-item .resource-value {
+    background: #141416 !important;
+    border: 1px solid #000 !important;
+    border-bottom: 1px solid #444 !important;
+    border-right: 1px solid #444 !important;
+    border-radius: 4px !important;
+    padding: 2px 7px !important;
+}
+
 body.mobile-mode #inventory-panel .resource-item.demanded-item {
-    border-color: rgba(230, 126, 34, 0.55) !important;
-    box-shadow: 0 0 12px rgba(230, 126, 34, 0.15), inset 0 0 0 1px rgba(243, 156, 18, 0.18);
+    border-color: rgba(230, 126, 34, 0.65) !important;
+    border-top-color: rgba(243, 156, 18, 0.85) !important;
+    border-left-color: rgba(243, 156, 18, 0.85) !important;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.65), 0 0 12px rgba(230, 126, 34, 0.18), inset 0 0 10px rgba(0, 0, 0, 0.5) !important;
 }
 
 body.mobile-mode #inventory-panel .resource-item.demanded-item[data-demand-met="true"] {
-    border-color: rgba(46, 204, 113, 0.65) !important;
-    box-shadow: 0 0 12px rgba(46, 204, 113, 0.18), inset 0 0 0 1px rgba(46, 204, 113, 0.22);
+    border-color: rgba(46, 204, 113, 0.7) !important;
+    border-top-color: rgba(88, 214, 141, 0.9) !important;
+    border-left-color: rgba(88, 214, 141, 0.9) !important;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.65), 0 0 12px rgba(46, 204, 113, 0.22), inset 0 0 10px rgba(0, 0, 0, 0.5) !important;
 }
 
 body.mobile-mode #inventory-panel .demand-row-fill {
@@ -379,14 +404,17 @@ body.mobile-mode #bottom-toolbar .tool-btn.active {
     transform: none !important;
 }
 
+/* Desktop Metal Gray Accent behind Inventory Box Icon inside the Liquid Glass Dock */
 body.mobile-mode .dock-btn.menu-btn,
 body.mobile-mode #btn-open-menu {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    background: transparent !important;
-    border: 1px solid transparent !important;
-    box-shadow: none !important;
+    background: linear-gradient(180deg, var(--panel-bg-light, #555) 0%, var(--panel-bg-dark, #2a2a2a) 100%) !important;
+    border: 1.5px solid var(--panel-border-dark, #111) !important;
+    border-top-color: var(--panel-border-light, #777) !important;
+    border-left-color: var(--panel-border-light, #777) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.65), inset 0 0 8px rgba(0, 0, 0, 0.5) !important;
     width: 36px !important;
     height: 36px !important;
     padding: 0 !important;
@@ -395,7 +423,7 @@ body.mobile-mode #btn-open-menu {
     flex: 0 0 36px !important;
     pointer-events: auto !important;
     will-change: transform;
-    transition: background 0.15s ease !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease !important;
     z-index: 2;
 }
 
@@ -411,7 +439,11 @@ body.mobile-mode #bottom-toolbar.ios-dock.dock-compressed #btn-open-menu .menu-p
 }
 
 body.mobile-mode #btn-open-menu:active {
-    background: rgba(255, 255, 255, 0.22) !important;
+    background: linear-gradient(180deg, #2a2a2a 0%, #444 100%) !important;
+    border-color: #111 !important;
+    border-bottom-color: #666 !important;
+    border-right-color: #666 !important;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.75) !important;
 }
 
 body.mobile-mode #btn-open-menu:active .menu-pkg-icon,
@@ -722,9 +754,19 @@ body.mobile-mode .tool-btn:active {
     opacity: 0.85 !important;
 }
 
-/* Hide hover tooltips */
+/* Hide generic hover tooltips, but preserve desktop metal gray building descriptions (#machine-tooltip) */
 body.mobile-mode .tooltip {
     display: none !important;
+}
+
+body.mobile-mode #machine-tooltip {
+    position: fixed !important;
+    z-index: 3000 !important;
+    background: linear-gradient(180deg, var(--panel-bg-light, #555) 0%, var(--panel-bg-dark, #2a2a2a) 100%) !important;
+    border: 2px solid var(--panel-border-dark, #111) !important;
+    border-top: 2px solid var(--panel-border-light, #777) !important;
+    border-left: 2px solid var(--panel-border-light, #777) !important;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.8), inset 0px 0px 10px rgba(0, 0, 0, 0.5) !important;
 }
 
 /* Save button completely hidden on mobile */
