@@ -1,7 +1,9 @@
+import { RESOURCES, CRAFTED_ITEMS, BUILDING_DEFINITIONS } from './Config.js';
+
 export class GameLogic {
     constructor() {
         this.inventory = {
-            confiscatedPhones: 1000, // starting funds
+            confiscatedPhones: 1000,
             iron: 0, copper: 0, coal: 0, gold: 0, water: 0, poop: 0,
             ironIngot: 0, copperIngot: 0, ironRod: 0, ironPlate: 0, copperWire: 0, frame: 0, panel: 0
         };
@@ -9,36 +11,19 @@ export class GameLogic {
         // Quests
         this.currentQuest = 1;
 
-        // Recipes dictionary
-        this.recipes = {
-            'ironIngot': { name: 'Iron Ingot', machine: 'smelter', inputs: { iron: 1 }, outputs: { ironIngot: 1 }, time: 1 },
-            'copperIngot': { name: 'Copper Ingot', machine: 'smelter', inputs: { copper: 1 }, outputs: { copperIngot: 1 }, time: 1 },
-            
-            'ironPlate': { name: 'Iron Plate', machine: 'constructor', inputs: { ironIngot: 2 }, outputs: { ironPlate: 1 }, time: 2 },
-            'ironRod': { name: 'Iron Rod', machine: 'constructor', inputs: { ironIngot: 1 }, outputs: { ironRod: 1 }, time: 1.5 },
-            'copperWire': { name: 'Copper Wire', machine: 'constructor', inputs: { copperIngot: 1 }, outputs: { copperWire: 2 }, time: 1 },
-            'frame': { name: 'Frame', machine: 'constructor', inputs: { ironRod: 4 }, outputs: { frame: 1 }, time: 3 },
-            'panel': { name: 'Panel', machine: 'bigConstructor', inputs: { frame: 1, ironPlate: 2 }, outputs: { panel: 1 }, time: 5 }
-        };
+        // Recipes dictionary from Config
+        this.recipes = CRAFTED_ITEMS;
         
-        // Exchange rates for Leigh High
-        this.phoneExchangeRates = {
-            'iron': 0.01, 'copper': 0.01, 'coal': 0.02, 'gold': 0.05, 'water': 0.01, 'poop': 0.05,
-            'ironIngot': 0.02, 'copperIngot': 0.02, 'ironPlate': 0.1, 'ironRod': 0.05, 'copperWire': 0.02,
-            'frame': 0.5, 'panel': 2.0
-        };
+        // Exchange rates for Leigh High from Config
+        this.phoneExchangeRates = {};
+        for (const [k, v] of Object.entries(RESOURCES)) this.phoneExchangeRates[k] = v.exchangeRate;
+        for (const [k, v] of Object.entries(CRAFTED_ITEMS)) this.phoneExchangeRates[k] = v.exchangeRate;
 
-        // Data Definitions for UI and Logic
-        this.baseRates = { iron: 1, copper: 1, coal: 2, gold: 0.5, water: 5, poop: 1 };
+        // Base rates from Config
+        this.baseRates = {};
+        for (const [k, v] of Object.entries(RESOURCES)) this.baseRates[k] = v.baseRate;
         
-        this.otherBuildings = [
-            { id: 'miner', name: 'Miner', cost: 15, unlocked: true, size: '1×1', desc: 'Extracts resources from a node' },
-            { id: 'smelter', name: 'Smelter', cost: 50, unlocked: true, size: '2×1', desc: 'Forges raw ore into refined ingots' },
-            { id: 'constructor', name: 'Constructor', cost: 150, unlocked: false, size: '2×1', desc: 'Shapes and assembles a single material' },
-            { id: 'bigConstructor', name: 'Big Constructor', cost: 500, unlocked: false, size: '2×2', desc: 'Heavy-duty fabricator' },
-            { id: 'school', name: 'Leigh High', cost: 200, unlocked: true, size: '1×1', desc: 'Where phones go to be confiscated' },
-            { id: 'storage', name: 'Storage Box', cost: 20, unlocked: true, size: '1×2', desc: 'Stores up to 2048 of a single item' }
-        ];
+        this.otherBuildings = BUILDING_DEFINITIONS.map(b => ({ ...b }));
         
         this.buildings = []; 
         this.drones = [];
@@ -179,6 +164,12 @@ export class GameLogic {
         return Math.sqrt((b1.x - b2.x) ** 2 + (b1.z - b2.z) ** 2);
     }
 
+    getDistSq(b1, b2) {
+        const dx = b1.x - b2.x;
+        const dz = b1.z - b2.z;
+        return dx * dx + dz * dz;
+    }
+
     update(deltaTime) {
         // Process Drones
         for (let i = this.drones.length - 1; i >= 0; i--) {
@@ -312,7 +303,11 @@ export class GameLogic {
         this._droneTimer = (this._droneTimer || 0) + deltaTime;
         if (this._droneTimer > 0.1) {
             this._droneTimer = 0;
-            for (const b of this.buildings) {
+            
+            for (let bi = 0; bi < this.buildings.length; bi++) {
+                const b = this.buildings[bi];
+                if (b.isEnabled === false) continue;
+                
                 let availableOutputs = {};
                 if (b.type === 'storage' && b.inventoryCount > 0 && b.storageFilter) {
                     availableOutputs[b.storageFilter] = b.inventoryCount;
@@ -324,72 +319,93 @@ export class GameLogic {
                 
                 for (const item of Object.keys(availableOutputs)) {
                     let amountToSend = availableOutputs[item];
+                    
                     while (amountToSend > 0) {
                         let bestTarget = null;
-                        let bestDist = Infinity;
+                        let bestDistSq = Infinity;
+                        let maxAccepted = 0;
                         
-                        for (const tb of this.buildings) {
-                            if (tb === b) continue;
-                            const dist = this.getDist(b, tb);
+                        // 1. Check Machines & School
+                        for (let tbi = 0; tbi < this.buildings.length; tbi++) {
+                            const tb = this.buildings[tbi];
+                            if (tb === b || tb.isEnabled === false) continue;
+                            const distSq = this.getDistSq(b, tb);
                             
-                            // 1. Machine
+                            // Machine
                             if (tb.activeRecipe && tb.type !== 'school' && tb.type !== 'storage') {
-                                if (this.recipes[tb.activeRecipe].inputs[item]) {
-                                    if ((tb.inputBuffer[item] || 0) + (tb.inboundCount[item] || 0) < 50) {
-                                        if (dist < bestDist) { bestDist = dist; bestTarget = tb; }
+                                if (this.recipes[tb.activeRecipe] && this.recipes[tb.activeRecipe].inputs[item]) {
+                                    const space = 50 - ((tb.inputBuffer[item] || 0) + (tb.inboundCount[item] || 0));
+                                    if (space > 0 && distSq < bestDistSq) {
+                                        bestDistSq = distSq;
+                                        bestTarget = tb;
+                                        maxAccepted = space;
                                     }
                                 }
                             }
-                            // 2. School
-                            if (tb.type === 'school' && tb.burnQueue) {
+                            // School
+                            else if (tb.type === 'school' && tb.burnQueue) {
                                 let needed = 0;
                                 for (const q of tb.burnQueue) if (q.itemKey === item) needed += q.amount;
-                                let incoming = (tb.inputBuffer[item] || 0) + (tb.inboundCount[item] || 0);
-                                if (incoming < needed) {
-                                    if (dist < bestDist) { bestDist = dist; bestTarget = tb; }
+                                const incoming = (tb.inputBuffer[item] || 0) + (tb.inboundCount[item] || 0);
+                                const space = needed - incoming;
+                                if (space > 0 && distSq < bestDistSq) {
+                                    bestDistSq = distSq;
+                                    bestTarget = tb;
+                                    maxAccepted = space;
                                 }
                             }
                         }
                         
-                        // 3. Storage (fallback)
+                        // 2. Storage fallback
                         if (!bestTarget && b.type !== 'storage') {
-                            for (const tb of this.buildings) {
-                                if (tb.type === 'storage' && tb !== b) {
-                                    if (tb.storageFilter === item) {
-                                        if ((tb.inventoryCount || 0) + (tb.inboundCount[item] || 0) < 2048) {
-                                            const dist = this.getDist(b, tb);
-                                            if (dist < bestDist) { bestDist = dist; bestTarget = tb; }
+                            for (let tbi = 0; tbi < this.buildings.length; tbi++) {
+                                const tb = this.buildings[tbi];
+                                if (tb === b || tb.type !== 'storage' || tb.isEnabled === false) continue;
+                                if (tb.storageFilter === item) {
+                                    const space = 2048 - ((tb.inventoryCount || 0) + (tb.inboundCount[item] || 0));
+                                    if (space > 0) {
+                                        const distSq = this.getDistSq(b, tb);
+                                        if (distSq < bestDistSq) {
+                                            bestDistSq = distSq;
+                                            bestTarget = tb;
+                                            maxAccepted = space;
                                         }
                                     }
                                 }
                             }
                         }
                         
-                        if (bestTarget) {
-                            amountToSend--;
-                            if (b.type === 'storage') b.inventoryCount--;
-                            else b.outputBuffer[item]--;
+                        if (bestTarget && maxAccepted > 0) {
+                            const batchCount = Math.min(amountToSend, maxAccepted);
+                            amountToSend -= batchCount;
                             
-                            bestTarget.inboundCount[item] = (bestTarget.inboundCount[item] || 0) + 1;
+                            if (b.type === 'storage') b.inventoryCount -= batchCount;
+                            else b.outputBuffer[item] -= batchCount;
                             
-                            this.drones.push({
-                                sourceUuid: b.uuid,
-                                targetUuid: bestTarget.uuid,
-                                sourceX: b.x,
-                                sourceZ: b.z,
-                                itemKey: item,
-                                progress: 0,
-                                tripDist: bestDist
-                            });
+                            bestTarget.inboundCount[item] = (bestTarget.inboundCount[item] || 0) + batchCount;
+                            
+                            const realDist = Math.sqrt(bestDistSq);
+                            for (let d = 0; d < batchCount; d++) {
+                                this.drones.push({
+                                    sourceUuid: b.uuid,
+                                    targetUuid: bestTarget.uuid,
+                                    sourceX: b.x,
+                                    sourceZ: b.z,
+                                    itemKey: item,
+                                    progress: 0,
+                                    tripDist: realDist
+                                });
+                            }
                         } else {
                             break;
                         }
                     }
                 }
             }
+            
+            this.computeGlobalInventory();
         }
 
-        this.computeGlobalInventory();
         this.checkQuests();
     }
     

@@ -39,12 +39,15 @@ export class CameraController {
         this.camera.position.set(x, y, z);
         this.camera.lookAt(this.target);
 
-        // Recalculate movement vectors based on new camera angle
-        this.forward = new THREE.Vector3(0, 0, -1).applyQuaternion(this.camera.quaternion);
+        // Recalculate movement vectors based on new camera angle without allocating new objects
+        if (!this.forward) this.forward = new THREE.Vector3();
+        if (!this.right) this.right = new THREE.Vector3();
+        
+        this.forward.set(0, 0, -1).applyQuaternion(this.camera.quaternion);
         this.forward.y = 0;
         if (this.forward.lengthSq() > 0) this.forward.normalize();
 
-        this.right = new THREE.Vector3(1, 0, 0).applyQuaternion(this.camera.quaternion);
+        this.right.set(1, 0, 0).applyQuaternion(this.camera.quaternion);
         this.right.y = 0;
         if (this.right.lengthSq() > 0) this.right.normalize();
     }
@@ -64,11 +67,8 @@ export class CameraController {
 
                 const factor = (1 / this.camera.zoom) * (this.panSpeedMouse / window.innerHeight);
 
-                const moveRight = this.right.clone().multiplyScalar(-deltaX * factor);
-                const moveForward = this.forward.clone().multiplyScalar(deltaY * factor);
-
-                this.target.add(moveRight);
-                this.target.add(moveForward);
+                this.target.addScaledVector(this.right, -deltaX * factor);
+                this.target.addScaledVector(this.forward, deltaY * factor);
                 this.updateCameraPosition();
 
                 this.previousMousePosition = { x: e.offsetX, y: e.offsetY };
@@ -150,16 +150,17 @@ export class CameraController {
 
         // Keyboard Panning
         let moved = false;
-        const moveVec = new THREE.Vector3(0, 0, 0);
+        if (!this._moveVec) this._moveVec = new THREE.Vector3();
+        this._moveVec.set(0, 0, 0);
 
-        if (this.keys.w) { moveVec.add(this.forward); moved = true; }
-        if (this.keys.s) { moveVec.sub(this.forward); moved = true; }
-        if (this.keys.a) { moveVec.sub(this.right); moved = true; }
-        if (this.keys.d) { moveVec.add(this.right); moved = true; }
+        if (this.keys.w) { this._moveVec.add(this.forward); moved = true; }
+        if (this.keys.s) { this._moveVec.sub(this.forward); moved = true; }
+        if (this.keys.a) { this._moveVec.sub(this.right); moved = true; }
+        if (this.keys.d) { this._moveVec.add(this.right); moved = true; }
 
         if (moved) {
-            moveVec.normalize().multiplyScalar(this.panSpeedKey * deltaTime * (1 / this.camera.zoom));
-            this.target.add(moveVec);
+            this._moveVec.normalize().multiplyScalar(this.panSpeedKey * deltaTime * (1 / this.camera.zoom));
+            this.target.add(this._moveVec);
             this.updateCameraPosition();
         }
     }

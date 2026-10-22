@@ -1,8 +1,9 @@
-import { GameScene } from './GameScene.js';
-import { UI } from './UI.js';
+import { GameScene } from './GameScene.js?v=3.2.4';
+import { UI } from './UI.js?v=3.2.4';
 import { GameLogic } from './GameLogic.js';
 import { SaveManager } from './SaveManager.js';
 import { MobileInputManager } from './MobileInputManager.js';
+import { GlassManager } from './GlassManager.js?v=3.2.4';
 
 class GameApp {
     constructor() {
@@ -11,10 +12,15 @@ class GameApp {
         if (window.isMobile) {
             document.body.classList.add('mobile-mode');
         }
+        window.addEventListener('resize', () => {
+            window.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 800;
+            document.body.classList.toggle('mobile-mode', window.isMobile);
+        });
 
         this.logic = new GameLogic();
         this.scene = new GameScene(document.getElementById('game-container'), this.logic, null);
         this.ui = new UI(this, this.logic);
+        this.glassManager = new GlassManager(this);
         
         // Pass UI to scene after instantiation
         this.scene.ui = this.ui;
@@ -174,7 +180,7 @@ class GameApp {
                 if (onComplete) {
                     onComplete();
                 } else {
-                    mainUi.style.display = 'block';
+                    this.revealMainUi();
                 }
             }, 4500);
         };
@@ -197,11 +203,23 @@ class GameApp {
                 this.ui.updateDisplay();
                 doZoomTransition(() => {
                     this.saveManager.loadGame(this.scene.placementSystem, () => {
-                        mainUi.style.display = 'block';
+                        this.revealMainUi();
                     });
                 });
             }
         });
+    }
+
+    revealMainUi() {
+        const mainUi = document.getElementById('ui-layer');
+        if (mainUi) mainUi.style.display = 'block';
+        const resPanel = document.getElementById('resource-panel');
+        if (resPanel) resPanel.style.display = 'block';
+        const goalPanel = document.getElementById('goal-panel');
+        if (goalPanel) goalPanel.style.display = 'block';
+        const botToolbar = document.getElementById('bottom-toolbar');
+        if (botToolbar) botToolbar.style.display = 'flex';
+        this.glassManager.init();
     }
 
     animate() {
@@ -215,6 +233,9 @@ class GameApp {
         this.logic.update(deltaTime);
         this.scene.update(deltaTime);
         this.ui.update(deltaTime);
+        if (this.glassManager) {
+            this.glassManager.markChanged();
+        }
     }
 }
 

@@ -26,6 +26,8 @@ try {
                 ".jpg"  { $mime = "image/jpeg" }
             }
             $response.ContentType = $mime
+            $response.Headers.Add("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+            $response.Headers.Add("Pragma", "no-cache")
             
             $fileStream = [System.IO.File]::OpenRead($filePath)
             $response.ContentLength64 = $fileStream.Length

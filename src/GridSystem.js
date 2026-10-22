@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { RESOURCES } from './Config.js';
 
 export class GridSystem {
     constructor(scene, mapSize = 50) {
@@ -20,12 +21,12 @@ export class GridSystem {
         // Spatial Registry mapping "x,z" to { type, mesh }
         this.worldRegistry = new Map();
         
-        // Resource node definitions
+        // Resource node definitions from Config
         this.resourceTypes = [
-            { type: 'iron', color: 0xBDC3C7, prob: 0.35 },
-            { type: 'copper', color: 0xE67E22, prob: 0.35 },
-            { type: 'coal', color: 0x34495E, prob: 0.25 },
-            { type: 'gold', color: 0xFFD700, prob: 0.05 }
+            RESOURCES.iron,
+            RESOURCES.copper,
+            RESOURCES.coal,
+            RESOURCES.gold
         ];
         
         // Tree Geometries -> Redesigned as dominating lush trees
@@ -286,8 +287,11 @@ export class GridSystem {
         const lines = new THREE.LineSegments(lineGeo, this.gridLineMaterial);
         mapGroup.add(lines);
         
-        this.treeGrid = new Set();
+        const mapW = this.mapSize;
+        const toGridIdx = (gx, gz) => (gx + halfSize) * mapW + (gz + halfSize);
+        const treeGrid = new Uint8Array(mapW * mapW);
         let treeCount = 0;
+        
         for (let x = -halfSize; x < halfSize; x++) {
             for (let z = -halfSize; z < halfSize; z++) {
                 if (!this.mapData.get(`${x},${z}`)) {
@@ -303,12 +307,20 @@ export class GridSystem {
                         // Check neighbors to prevent canopy overlap (minimum 2 tiles apart)
                         let overlap = false;
                         for (let dx = -2; dx <= 2; dx++) {
+                            const nx = x + dx;
+                            if (nx < -halfSize || nx >= halfSize) continue;
                             for (let dz = -2; dz <= 2; dz++) {
-                                if (this.treeGrid.has(`${x+dx},${z+dz}`)) overlap = true;
+                                const nz = z + dz;
+                                if (nz < -halfSize || nz >= halfSize) continue;
+                                if (treeGrid[toGridIdx(nx, nz)] === 1) {
+                                    overlap = true;
+                                    break;
+                                }
                             }
+                            if (overlap) break;
                         }
                         if (!overlap) {
-                            this.treeGrid.add(`${x},${z}`);
+                            treeGrid[toGridIdx(x, z)] = 1;
                             treeCount++;
                         }
                     }
@@ -337,7 +349,7 @@ export class GridSystem {
                 const data = this.mapData.get(`${x},${z}`);
                 
                 if (!data) {
-                    if (this.treeGrid.has(`${x},${z}`)) {
+                    if (treeGrid[toGridIdx(x, z)] === 1) {
                         const offsetX = (this.hash(x + 200, z + 200) - 0.5) * 0.4;
                         const offsetZ = (this.hash(x + 300, z + 300) - 0.5) * 0.4;
                         const rotY = this.hash(x + 400, z + 400) * Math.PI * 2;
@@ -527,7 +539,31 @@ export class GridSystem {
             }
         }
 
+        this.group = mapGroup;
         this.scene.add(mapGroup);
+    }
+    
+    // Clean up all resources when switching or resetting maps
+    dispose() {
+        if (this.group) {
+            this.scene.remove(this.group);
+            this.group.traverse((child) => {
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) {
+                    if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+                    else child.material.dispose();
+                }
+            });
+            this.group = null;
+        }
+        if (this.treeTrunkGeo) this.treeTrunkGeo.dispose();
+        if (this.treeLeavesGeo) this.treeLeavesGeo.dispose();
+        if (this.treeTrunkMat) this.treeTrunkMat.dispose();
+        if (this.treeLeavesMat) this.treeLeavesMat.dispose();
+        if (this.gridMaterial) this.gridMaterial.dispose();
+        if (this.gridLineMaterial) this.gridLineMaterial.dispose();
+        if (this.worldRegistry) this.worldRegistry.clear();
+        if (this.mapData) this.mapData.clear();
     }
     
     // API for Placement System

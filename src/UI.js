@@ -1,3 +1,5 @@
+import { ALL_ITEM_KEYS } from './Config.js';
+
 export class UI {
     constructor(app, logic) {
         this.app = app;
@@ -6,7 +8,7 @@ export class UI {
         this.activeTool = 'select';
         
         // Rate tracking: sample inventory every second to compute derivatives
-        this._rateResources = ['phones', 'iron', 'copper', 'coal', 'gold', 'water', 'poop', 'ironIngot', 'copperIngot', 'ironPlate', 'ironRod', 'copperWire', 'frame', 'panel'];
+        this._rateResources = ALL_ITEM_KEYS;
         this._rateKeys = {};
         for (const r of this._rateResources) {
             this._rateKeys[r] = r === 'phones' ? 'confiscatedPhones' : r;
@@ -19,6 +21,25 @@ export class UI {
         }
         this._rateTimer = 0;
         this._rateSampleInterval = 1.0; // seconds
+
+        // Cache DOM elements
+        this._resourceEls = {};
+        for (const res of this._rateResources) {
+            this._resourceEls[res] = document.getElementById(`res-${res}`);
+        }
+        this.elGoalSubtitle = document.getElementById('goal-subtitle');
+        this.elGoalReqDiv = document.getElementById('goal-requirements');
+        this.elLaunchBtn = document.getElementById('btn-launch-rocket');
+        this.elRecipeProgressBar = document.getElementById('recipe-progress-bar');
+        this.elRecipeBufferStatus = document.getElementById('recipe-buffer-status');
+        this.elLeighPopup = document.getElementById('leigh-high-popup');
+        this.elBurnProgressBar = document.getElementById('burn-progress-bar');
+        this.elBurnStatusText = document.getElementById('burn-status-text');
+        
+        this._lastUnlockedCount = 0;
+        this._lastGoalQuest = null;
+        this._goalBars = null;
+        this._uiTimer = 0;
         
         this.bindEvents();
         this.populateMachineSubmenu();
@@ -67,26 +88,26 @@ export class UI {
         toast.style.boxShadow = `0 10px 30px rgba(0,0,0,0.8), inset 0 10px 20px rgba(0,0,0,0.5), 0 0 15px ${color}40`;
         toast.style.pointerEvents = 'none';
 
-        if (text.toLowerCase().includes('sav')) {
-            toast.className = ''; // Remove default glass-panel to avoid conflicts
-            toast.style.background = 'rgba(250, 250, 255, 0.85)';
-            toast.style.backdropFilter = 'blur(20px) saturate(1.5)';
-            toast.style.webkitBackdropFilter = 'blur(20px) saturate(1.5)';
+        if (text.toLowerCase().includes('sav') && (window.isMobile || document.body.classList.contains('mobile-mode'))) {
+            toast.className = 'save-toast';
+            toast.style.background = 'rgba(255, 255, 255, 0.12)';
+            toast.style.backdropFilter = 'url(#apple-liquid-glass) blur(16px) saturate(180%)';
+            toast.style.webkitBackdropFilter = 'blur(18px) saturate(180%)';
             toast.style.borderRadius = '999px';
-            toast.style.border = '1px solid rgba(0, 0, 0, 0.05)';
-            toast.style.borderTop = '1px solid rgba(0, 0, 0, 0.05)';
-            toast.style.boxShadow = '0 8px 32px rgba(0,0,0,0.12)';
-            toast.style.color = '#000';
-            toast.style.padding = '12px 24px';
+            toast.style.border = '1px solid rgba(255, 255, 255, 0.28)';
+            toast.style.boxShadow = '0 10px 28px rgba(0, 0, 0, 0.22), inset 0 1px 1px rgba(255, 255, 255, 0.58), inset 0 -1px 1px rgba(255, 255, 255, 0.16)';
+            toast.style.color = '#ffffff';
+            toast.style.padding = '10px 22px';
             toast.style.gap = '12px';
             
             toast.innerHTML = `
-                <div style="position: relative; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg); overflow: visible;">
-                        <circle cx="12" cy="12" r="10" fill="none" stroke="#0A84FF" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="63" stroke-dashoffset="63" style="transform-origin: center; animation: drawRing 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 1s forwards, ringPop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 2.5s forwards;" />
+                <div style="position: relative; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg); overflow: visible; filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.65));">
+                        <circle cx="12" cy="12" r="9.5" fill="none" stroke="rgba(255, 255, 255, 0.24)" stroke-width="2.5" />
+                        <circle cx="12" cy="12" r="9.5" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="60" stroke-dashoffset="60" style="transform-origin: center; animation: drawRing 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.4s forwards, ringPop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 2.2s forwards;" />
                     </svg>
                 </div>
-                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; font-weight: 500; letter-spacing: -0.2px; color: #111;">
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.9rem; font-weight: 600; letter-spacing: -0.01em; color: #ffffff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.52), 0 0 10px rgba(0, 0, 0, 0.22);">
                     ${text}
                 </div>
                 <style>
@@ -95,7 +116,7 @@ export class UI {
                     }
                     @keyframes ringPop {
                         0% { transform: scale(1); opacity: 1; stroke-width: 2.5; }
-                        100% { transform: scale(1.5); opacity: 0; stroke-width: 0; }
+                        100% { transform: scale(1.45); opacity: 0; stroke-width: 0; }
                     }
                 </style>
             `;
@@ -132,6 +153,7 @@ export class UI {
 
     populateMachineSubmenu() {
         const submenu = document.getElementById('machine-submenu');
+        if (!submenu) return;
         submenu.innerHTML = '';
         
         const machines = this.logic.otherBuildings.filter(b => b.id !== 'school');
@@ -149,10 +171,51 @@ export class UI {
                 btn.textContent = mac.name;
             }
             
+            btn.addEventListener('click', () => {
+                if (btn.disabled) return;
+                if (this.app.soundEngine) this.app.soundEngine.play('click');
+                
+                this.clearAllToolSelections();
+                btn.classList.add('active');
+                
+                const machineBtn = document.getElementById('btn-machine-category');
+                if (machineBtn) machineBtn.classList.add('active');
+                
+                this.activeTool = mac.id;
+                
+                // On mobile, don't close the submenu when selecting a tool
+                if (!window.isMobile) {
+                    document.querySelectorAll('.submenu-horizontal').forEach(s => s.classList.remove('show'));
+                    if (machineBtn) machineBtn.classList.remove('active');
+                }
+                
+                this.closeRecipeUI();
+                this.closeLeighHighUI();
+            });
+
+            btn.addEventListener('mouseenter', () => {
+                const tooltip = document.getElementById('machine-tooltip');
+                if (!tooltip) return;
+                document.getElementById('mt-name').textContent = mac.name;
+                document.getElementById('mt-desc').textContent = mac.desc || '';
+                document.getElementById('mt-size').textContent = mac.size || '1×1';
+                document.getElementById('mt-cost').textContent = mac.cost;
+                
+                tooltip.style.display = 'block';
+                tooltip.style.bottom = 'auto';
+                
+                const rect = btn.getBoundingClientRect();
+                tooltip.style.left = `${rect.left}px`;
+                tooltip.style.top = `${rect.top - tooltip.offsetHeight - 10}px`;
+            });
+
+            btn.addEventListener('mouseleave', () => {
+                const tooltip = document.getElementById('machine-tooltip');
+                if (tooltip) tooltip.style.display = 'none';
+            });
+
             submenu.appendChild(btn);
         });
-        
-        this.bindToolButtons();
     }
 
     bindEvents() {
@@ -172,13 +235,73 @@ export class UI {
         }
         
         const btnOpenMenu = document.getElementById('btn-open-menu');
-        if (btnOpenMenu) {
-            const content = document.getElementById('inventory-content');
-            const panel = document.getElementById('inventory-panel');
-            const techToggle = document.getElementById('tech-tree-toggle');
-            const techPage = document.getElementById('tech-tree-page');
-            const backdrop = document.getElementById('mobile-backdrop');
+        const content = document.getElementById('inventory-content');
+        const panel = document.getElementById('inventory-panel');
+        const techToggle = document.getElementById('tech-tree-toggle');
+        const techPage = document.getElementById('tech-tree-page');
+        const backdrop = document.getElementById('mobile-backdrop');
+        const collapseBtn = document.getElementById('inventory-collapse-btn');
+        const invHeader = document.getElementById('inventory-header');
 
+        // Setup desktop inventory collapse logic
+        const setCollapsedState = (collapsed) => {
+            if (!panel) return;
+            const collapseIcon = collapseBtn ? collapseBtn.querySelector('.collapse-icon') : null;
+            if (collapsed) {
+                panel.classList.add('collapsed');
+                if (collapseIcon) collapseIcon.textContent = '▶';
+                if (collapseBtn) collapseBtn.title = 'Expand panel (show item names)';
+            } else {
+                panel.classList.remove('collapsed');
+                if (collapseIcon) collapseIcon.textContent = '◀';
+                if (collapseBtn) collapseBtn.title = 'Collapse panel (hide item names)';
+            }
+        };
+
+        const toggleCollapse = () => {
+            if (!panel) return;
+            const nextState = !panel.classList.contains('collapsed');
+            setCollapsedState(nextState);
+            localStorage.setItem('satislite_inventory_collapsed', nextState ? 'true' : 'false');
+            if (this.app.soundEngine) this.app.soundEngine.play('click');
+        };
+
+        if (collapseBtn) {
+            collapseBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleCollapse();
+            });
+        }
+
+        if (invHeader) {
+            invHeader.addEventListener('click', (e) => {
+                if (e.target.closest('#inventory-collapse-btn')) return;
+                if (panel && panel.classList.contains('collapsed')) {
+                    toggleCollapse();
+                }
+            });
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key.toLowerCase() === 'i') {
+                if (!window.isMobile) {
+                    toggleCollapse();
+                }
+            }
+        });
+
+        // Initialize desktop collapse state
+        if (!window.isMobile && panel) {
+            panel.style.display = '';
+            panel.style.opacity = '';
+            panel.style.transform = '';
+            const savedState = localStorage.getItem('satislite_inventory_collapsed');
+            const shouldCollapse = (savedState === null) ? true : (savedState === 'true');
+            setCollapsedState(shouldCollapse);
+        }
+
+        if (btnOpenMenu) {
             const toggleMenuState = (open) => {
                 if (!open) {
                     const isTechActive = techPage && techPage.classList.contains('active');
@@ -198,7 +321,7 @@ export class UI {
                     }
                     
                     panel.classList.remove('swiped-left');
-                    if (techToggle) {
+                    if (techToggle && window.isMobile) {
                         techToggle.classList.remove('open');
                         techToggle.style.display = 'none';
                     }
@@ -231,7 +354,7 @@ export class UI {
                     panel.style.transform = 'translateY(0) scale(1)';
                     panel.style.opacity = '1';
                     
-                    if (techToggle) techToggle.style.display = '';
+                    if (techToggle && window.isMobile) techToggle.style.display = '';
                     if (backdrop) backdrop.classList.add('active');
                     
                     setTimeout(() => {
@@ -242,15 +365,16 @@ export class UI {
 
             btnOpenMenu.addEventListener('click', () => {
                 if (this.app.soundEngine) this.app.soundEngine.play('whoosh');
-                toggleMenuState(panel.style.display === 'none' || panel.style.display === '');
+                const isOpen = panel.style.display !== 'none' && panel.style.opacity !== '0';
+                toggleMenuState(!isOpen);
             });
 
             if (techToggle && techPage) {
                 techToggle.addEventListener('click', () => {
-                    if (content.style.display === 'none') return;
                     if (this.app.soundEngine) this.app.soundEngine.play('whoosh');
-                    techPage.classList.toggle('active');
-                    techToggle.classList.toggle('open');
+                    const isActive = techPage.classList.toggle('active');
+                    techToggle.classList.toggle('active', isActive);
+                    techToggle.classList.toggle('open', isActive);
                 });
             }
 
@@ -393,8 +517,8 @@ export class UI {
                 }
             }
             
-            // Turn off build mode and depress other buttons
-            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            // Turn off build mode and depress all other buttons (including Select, Delete, and Leigh)
+            this.clearAllToolSelections();
             this.activeTool = 'select';
             
             if (machineSubmenu.classList.contains('show')) {
@@ -404,7 +528,10 @@ export class UI {
                 if (selBtn) {
                     selBtn.classList.add('active');
                     const thumb = document.querySelector('.switch-thumb');
-                    if (thumb) thumb.classList.remove('pos-right');
+                    if (thumb) {
+                        thumb.classList.remove('pos-right');
+                        thumb.classList.remove('hidden-thumb');
+                    }
                 }
             }
         });
@@ -459,8 +586,16 @@ export class UI {
         };
     }
     
+    clearAllToolSelections() {
+        document.querySelectorAll('#bottom-toolbar .tool-btn, #bottom-toolbar .switch-btn, #machine-submenu .tool-btn').forEach(b => {
+            b.classList.remove('active');
+        });
+        const thumb = document.querySelector('.switch-thumb');
+        if (thumb) thumb.classList.add('hidden-thumb');
+    }
+
     bindToolButtons() {
-        const toolBtns = document.querySelectorAll('.tool-btn:not(#btn-machine-category):not(#btn-save-game), .switch-btn');
+        const toolBtns = document.querySelectorAll('#bottom-toolbar .tool-btn:not(#btn-machine-category):not(#btn-save-game), #bottom-toolbar .switch-btn');
         toolBtns.forEach(btn => {
             const newBtn = btn.cloneNode(true);
             btn.parentNode.replaceChild(newBtn, btn);
@@ -469,10 +604,14 @@ export class UI {
                 if (newBtn.disabled) return;
                 if (this.app.soundEngine) this.app.soundEngine.play('click');
                 
+                this.clearAllToolSelections();
+                newBtn.classList.add('active');
+
                 // Flip Flop Switch UI update
+                const thumb = document.querySelector('.switch-thumb');
                 if (newBtn.classList.contains('switch-btn')) {
-                    const thumb = document.querySelector('.switch-thumb');
                     if (thumb) {
+                        thumb.classList.remove('hidden-thumb');
                         if (newBtn.getAttribute('data-tool') === 'delete') {
                             thumb.classList.add('pos-right');
                         } else {
@@ -481,81 +620,52 @@ export class UI {
                     }
                 }
                 
-                document.querySelectorAll('.tool-btn:not(.highlight), .switch-btn').forEach(b => b.classList.remove('active'));
-                newBtn.classList.add('active');
-                
-                if (newBtn.closest('#machine-submenu')) {
-                    document.getElementById('btn-machine-category').classList.add('active');
-                }
-                
                 this.activeTool = newBtn.getAttribute('data-tool');
                 
-                // On mobile, don't close the submenu when selecting a tool
-                if (!window.isMobile || !newBtn.closest('#machine-submenu')) {
-                    document.querySelectorAll('.submenu-horizontal').forEach(s => s.classList.remove('show'));
-                    const machineBtn = document.getElementById('btn-machine-category');
-                    if (machineBtn) machineBtn.classList.remove('active');
+                document.querySelectorAll('.submenu-horizontal').forEach(s => s.classList.remove('show'));
+                if (window.isMobile && this.app.scene && this.app.scene.gridSystem && this.app.scene.gridSystem.instancedLeaves) {
+                    this.app.scene.gridSystem.instancedLeaves.visible = true;
                 }
                 
                 this.closeRecipeUI();
                 this.closeLeighHighUI();
             });
-            
-            const extId = newBtn.getAttribute('data-tool');
-            const mac = this.logic.otherBuildings.find(b => b.id === extId);
-            if (mac) {
-                newBtn.addEventListener('mouseenter', (e) => {
-                    const tooltip = document.getElementById('machine-tooltip');
-                    document.getElementById('mt-name').textContent = mac.name;
-                    document.getElementById('mt-desc').textContent = mac.desc || '';
-                    document.getElementById('mt-size').textContent = mac.size || '1×1';
-                    document.getElementById('mt-cost').textContent = mac.cost;
-                    
-                    tooltip.style.display = 'block';
-                    tooltip.style.bottom = 'auto';
-                    
-                    const rect = newBtn.getBoundingClientRect();
-                    tooltip.style.left = `${rect.left}px`;
-                    tooltip.style.top = `${rect.top - tooltip.offsetHeight - 10}px`;
-                });
-                newBtn.addEventListener('mouseleave', () => {
-                    document.getElementById('machine-tooltip').style.display = 'none';
-                });
-            }
         });
 
-        // Touch sliding support for flip-flop switch
-        const flipFlopContainer = document.querySelector('.flip-flop-switch');
-        if (flipFlopContainer) {
-            let startX = 0;
-            let isDraggingSwitch = false;
-            
-            flipFlopContainer.addEventListener('touchstart', (e) => {
-                startX = e.touches[0].clientX;
-                isDraggingSwitch = true;
-            });
-            
-            flipFlopContainer.addEventListener('touchmove', (e) => {
-                if (!isDraggingSwitch) return;
-                e.preventDefault(); // Prevent scrolling
-            }, { passive: false });
-            
-            flipFlopContainer.addEventListener('touchend', (e) => {
-                if (!isDraggingSwitch) return;
-                isDraggingSwitch = false;
-                const endX = e.changedTouches[0].clientX;
-                const dx = endX - startX;
+        // Touch sliding support for flip-flop switch (bound once)
+        if (!this._flipFlopBound) {
+            this._flipFlopBound = true;
+            const flipFlopContainer = document.querySelector('.flip-flop-switch');
+            if (flipFlopContainer) {
+                let startX = 0;
+                let isDraggingSwitch = false;
                 
-                if (Math.abs(dx) > 20) { // Require at least 20px drag
-                    const targetTool = dx > 0 ? 'delete' : 'select';
+                flipFlopContainer.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                    isDraggingSwitch = true;
+                });
+                
+                flipFlopContainer.addEventListener('touchmove', (e) => {
+                    if (!isDraggingSwitch) return;
+                    e.preventDefault(); // Prevent scrolling
+                }, { passive: false });
+                
+                flipFlopContainer.addEventListener('touchend', (e) => {
+                    if (!isDraggingSwitch) return;
+                    isDraggingSwitch = false;
+                    const endX = e.changedTouches[0].clientX;
+                    const dx = endX - startX;
                     
-                    // Manually trigger the click on the corresponding button to reuse its logic
-                    const targetBtn = flipFlopContainer.querySelector(`[data-tool="${targetTool}"]`);
-                    if (targetBtn && !targetBtn.classList.contains('active')) {
-                        targetBtn.click();
+                    if (Math.abs(dx) > 20) { // Require at least 20px drag
+                        const targetTool = dx > 0 ? 'delete' : 'select';
+                        
+                        const targetBtn = flipFlopContainer.querySelector(`[data-tool="${targetTool}"]`);
+                        if (targetBtn && !targetBtn.classList.contains('active')) {
+                            targetBtn.click();
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     }
 
@@ -999,84 +1109,118 @@ export class UI {
     }
 
     updateDisplay() {
-        // Update Inventory UI
-        const resources = ['phones', 'iron', 'copper', 'coal', 'gold', 'water', 'poop', 'ironIngot', 'copperIngot', 'ironPlate', 'ironRod', 'copperWire', 'frame', 'panel'];
-        for (const res of resources) {
-            const el = document.getElementById(`res-${res}`);
+        // Update Inventory UI with dirty checks
+        for (const res of this._rateResources) {
+            const el = this._resourceEls[res];
             if (el) {
-                let key = res;
-                if (res === 'phones') key = 'confiscatedPhones';
+                const key = this._rateKeys[res];
                 
-                if (el.parentElement.dataset.showDerivative === 'true') {
+                if (el.parentElement && el.parentElement.dataset.showDerivative === 'true') {
                     const rate = this._rates[res] || 0;
                     const rounded = Math.round(rate);
                     const sign = rounded >= 0 ? '+' : '';
                     const color = rounded > 0 ? '#5f5' : rounded < 0 ? '#f55' : '#aaa';
-                    el.innerHTML = `<span style="color:${color}; font-family:'Courier New',monospace; font-weight:bold;">${sign}${rounded}/s</span>`;
+                    const html = `<span style="color:${color}; font-family:'Courier New',monospace; font-weight:bold;">${sign}${rounded}/s</span>`;
+                    if (el._lastDerivativeHtml !== html) {
+                        el.innerHTML = html;
+                        el._lastDerivativeHtml = html;
+                    }
                 } else {
-                    el.textContent = Math.floor(this.logic.inventory[key] || 0);
+                    const val = Math.floor(this.logic.inventory[key] || 0);
+                    if (el._lastVal !== val) {
+                        el.textContent = val;
+                        el._lastVal = val;
+                        el._lastDerivativeHtml = null;
+                    }
                 }
             }
         }
         
-        // Update Goal UI
-        const subtitle = document.getElementById('goal-subtitle');
-        const reqDiv = document.getElementById('goal-requirements');
-        
-        // Re-populate machines menu if any machine was just unlocked
-        let updatedLocks = false;
-        this.logic.otherBuildings.forEach(mac => {
-            const btn = document.querySelector(`.tool-btn[data-tool="${mac.id}"]`);
-            if (btn && mac.unlocked && btn.classList.contains('locked')) {
-                updatedLocks = true;
-            }
-        });
-        if (updatedLocks) {
+        // Re-populate machines menu only when unlocked count changes
+        let unlockedCount = 0;
+        for (let i = 0; i < this.logic.otherBuildings.length; i++) {
+            if (this.logic.otherBuildings[i].unlocked) unlockedCount++;
+        }
+        if (this._lastUnlockedCount !== unlockedCount) {
+            this._lastUnlockedCount = unlockedCount;
             this.populateMachineSubmenu();
         }
         
-        const buildGoalBar = (label, current, max) => {
-            const percent = Math.min(100, Math.max(0, (current / max) * 100));
-            const isDone = current >= max;
-            const barColor = isDone ? 'rgba(46, 204, 113, 0.8)' : 'rgba(230, 126, 34, 0.8)';
-            return `
-                <div style="position: relative; width: 100%; height: 16px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; overflow: hidden; margin-bottom: 3px; display: flex; align-items: center; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);">
-                    <div style="position: absolute; left: 0; top: 0; height: 100%; width: ${percent}%; background: ${barColor}; transition: width 0.2s; box-shadow: 0 0 5px ${barColor};"></div>
-                    <div style="position: absolute; left: 4px; top: 0; height: 100%; display: flex; align-items: center; z-index: 2; font-size: 0.8em; font-weight: bold; text-shadow: 1px 1px 2px #000; color: #fff;">${label}</div>
-                    <div style="position: absolute; right: 4px; top: 0; height: 100%; display: flex; align-items: center; z-index: 2; font-size: 0.8em; font-family: monospace; font-weight: bold; text-shadow: 1px 1px 2px #000; color: #fff;">${current}/${max}</div>
-                </div>
-            `;
-        };
-
-        if (this.logic.currentQuest === 1) {
-            subtitle.textContent = "Unlock Constructor";
-            const i1 = Math.min(100, Math.floor(this.logic.inventory.ironIngot));
-            const i2 = Math.min(100, Math.floor(this.logic.inventory.copperIngot));
-            reqDiv.innerHTML = buildGoalBar('Iron Ingots', i1, 100) + buildGoalBar('Copper Ingots', i2, 100);
-        } else if (this.logic.currentQuest === 2) {
-            subtitle.textContent = "Unlock Big Constructor";
-            const i1 = Math.min(25, Math.floor(this.logic.inventory.ironPlate));
-            const i2 = Math.min(25, Math.floor(this.logic.inventory.ironRod));
-            reqDiv.innerHTML = buildGoalBar('Iron Plates', i1, 25) + buildGoalBar('Iron Rods', i2, 25);
-        } else if (this.logic.currentQuest === 3) {
-            subtitle.textContent = "Deliver Panels";
-            const i1 = Math.min(15, Math.floor(this.logic.inventory.panel));
-            reqDiv.innerHTML = buildGoalBar('Panels', i1, 15);
+        // Update Goal UI with cached structure
+        if (this.elGoalSubtitle && this.elGoalReqDiv) {
+            if (this._lastGoalQuest !== this.logic.currentQuest) {
+                this._lastGoalQuest = this.logic.currentQuest;
+                this.elGoalReqDiv.innerHTML = '';
+                this._goalBars = [];
+                
+                let barsConfig = [];
+                if (this.logic.currentQuest === 1) {
+                    this.elGoalSubtitle.textContent = "Unlock Constructor";
+                    barsConfig = [
+                        { key: 'ironIngot', label: 'Iron Ingots', max: 100 },
+                        { key: 'copperIngot', label: 'Copper Ingots', max: 100 }
+                    ];
+                } else if (this.logic.currentQuest === 2) {
+                    this.elGoalSubtitle.textContent = "Unlock Big Constructor";
+                    barsConfig = [
+                        { key: 'ironPlate', label: 'Iron Plates', max: 25 },
+                        { key: 'ironRod', label: 'Iron Rods', max: 25 }
+                    ];
+                } else if (this.logic.currentQuest === 3) {
+                    this.elGoalSubtitle.textContent = "Deliver Panels";
+                    barsConfig = [
+                        { key: 'panel', label: 'Panels', max: 15 }
+                    ];
+                }
+                
+                for (const cfg of barsConfig) {
+                    const row = document.createElement('div');
+                    row.style.cssText = 'position:relative; width:100%; height:16px; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.15); border-radius:2px; overflow:hidden; margin-bottom:3px; display:flex; align-items:center; box-shadow:inset 0 1px 3px rgba(0,0,0,0.5);';
+                    
+                    const fill = document.createElement('div');
+                    fill.style.cssText = 'position:absolute; left:0; top:0; height:100%; width:0%; transition:width 0.2s;';
+                    row.appendChild(fill);
+                    
+                    const label = document.createElement('div');
+                    label.style.cssText = 'position:absolute; left:4px; top:0; height:100%; display:flex; align-items:center; z-index:2; font-size:0.8em; font-weight:bold; text-shadow:1px 1px 2px #000; color:#fff;';
+                    label.textContent = cfg.label;
+                    row.appendChild(label);
+                    
+                    const count = document.createElement('div');
+                    count.style.cssText = 'position:absolute; right:4px; top:0; height:100%; display:flex; align-items:center; z-index:2; font-size:0.8em; font-family:monospace; font-weight:bold; text-shadow:1px 1px 2px #000; color:#fff;';
+                    row.appendChild(count);
+                    
+                    this.elGoalReqDiv.appendChild(row);
+                    this._goalBars.push({ key: cfg.key, max: cfg.max, fill, count });
+                }
+            }
+            
+            // Fast direct update of goal bar fills and counts without string rebuilds
+            if (this._goalBars) {
+                for (const gb of this._goalBars) {
+                    const current = Math.min(gb.max, Math.floor(this.logic.inventory[gb.key] || 0));
+                    const pct = Math.min(100, Math.max(0, (current / gb.max) * 100));
+                    const isDone = current >= gb.max;
+                    const barColor = isDone ? 'rgba(46, 204, 113, 0.8)' : 'rgba(230, 126, 34, 0.8)';
+                    gb.fill.style.width = pct + '%';
+                    gb.fill.style.background = barColor;
+                    gb.fill.style.boxShadow = `0 0 5px ${barColor}`;
+                    gb.count.textContent = `${current}/${gb.max}`;
+                }
+            }
         }
         
-        const launchBtn = document.getElementById('btn-launch-rocket');
-        if (launchBtn) {
+        if (this.elLaunchBtn) {
             if (this.logic.isCurrentQuestReady() && !this.app.isLaunchingRockets) {
-                launchBtn.style.display = 'block';
-                reqDiv.style.display = 'none';
+                this.elLaunchBtn.style.display = 'block';
+                if (this.elGoalReqDiv) this.elGoalReqDiv.style.display = 'none';
             } else {
-                launchBtn.style.display = 'none';
-                reqDiv.style.display = 'block';
+                this.elLaunchBtn.style.display = 'none';
+                if (this.elGoalReqDiv) this.elGoalReqDiv.style.display = 'block';
             }
         }
         
         // Update Recipe Progress Bar and Buffer Status
-        const bufferStatusEl = document.getElementById('recipe-buffer-status');
         if (this.selectedBuilding) {
             if (this.selectedBuilding.activeRecipe) {
                 const recipeData = this.logic.recipes[this.selectedBuilding.activeRecipe];
@@ -1084,12 +1228,12 @@ export class UI {
                 if (this.selectedBuilding.isWorking && recipeData && recipeData.time > 0) {
                     percent = Math.min(100, Math.max(0, (this.selectedBuilding.progress / recipeData.time) * 100));
                 }
-                document.getElementById('recipe-progress-bar').style.width = percent + '%';
+                if (this.elRecipeProgressBar) this.elRecipeProgressBar.style.width = percent + '%';
             } else {
-                document.getElementById('recipe-progress-bar').style.width = '0%';
+                if (this.elRecipeProgressBar) this.elRecipeProgressBar.style.width = '0%';
             }
 
-            if (bufferStatusEl) {
+            if (this.elRecipeBufferStatus) {
                 const bld = this.selectedBuilding;
                 let inParts = [];
                 let outParts = [];
@@ -1108,11 +1252,17 @@ export class UI {
                 if (inParts.length > 0) html += `<div style="background: rgba(243, 156, 18, 0.1); border-left: 3px solid #f39c12; padding: 4px 8px;"><strong style="color:#f39c12; font-size:0.85em; text-transform:uppercase; letter-spacing:1px;">Input</strong><br>${inParts.join(' | ')}</div>`;
                 if (outParts.length > 0) html += `<div style="background: rgba(52, 152, 219, 0.1); border-left: 3px solid #3498db; padding: 4px 8px;"><strong style="color:#3498db; font-size:0.85em; text-transform:uppercase; letter-spacing:1px;">Output</strong><br>${outParts.join(' | ')}</div>`;
                 
-                bufferStatusEl.innerHTML = html;
+                if (this.elRecipeBufferStatus._lastHtml !== html) {
+                    this.elRecipeBufferStatus.innerHTML = html;
+                    this.elRecipeBufferStatus._lastHtml = html;
+                }
             }
         } else {
-            document.getElementById('recipe-progress-bar').style.width = '0%';
-            if (bufferStatusEl) bufferStatusEl.textContent = '';
+            if (this.elRecipeProgressBar) this.elRecipeProgressBar.style.width = '0%';
+            if (this.elRecipeBufferStatus) {
+                this.elRecipeBufferStatus.textContent = '';
+                this.elRecipeBufferStatus._lastHtml = '';
+            }
         }
         
         this.updateLeighHighProgress();
@@ -1290,15 +1440,20 @@ export class UI {
             
             // Extract the resource key from the id (e.g. "res-iron" -> "iron")
             const resId = valueEl.id.replace('res-', '');
+            const nameEl = item.querySelector('.resource-name');
+            const resName = nameEl ? nameEl.textContent.trim() : resId;
             
-            item.addEventListener('mouseenter', (e) => {
-                if (window.isMobile) return;
+            const formatTooltip = () => {
                 const rate = this._rates[resId] || 0;
                 const rounded = Math.round(rate);
                 const sign = rounded >= 0 ? '+' : '';
                 const color = rounded > 0 ? '#5f5' : rounded < 0 ? '#f55' : '#aaa';
-                
-                this._rateTooltip.innerHTML = `<span style="color:${color}; font-family:'Courier New',monospace; font-weight:bold;">${sign}${rounded}/s</span>`;
+                return `<div style="font-size:0.85rem; color:#fff; font-weight:700; margin-bottom:2px;">${resName}</div><span style="color:${color}; font-family:'Courier New',monospace; font-weight:bold;">${sign}${rounded}/s</span>`;
+            };
+
+            item.addEventListener('mouseenter', (e) => {
+                if (window.isMobile) return;
+                this._rateTooltip.innerHTML = formatTooltip();
                 this._rateTooltip.style.display = 'block';
                 
                 const rect = item.getBoundingClientRect();
@@ -1308,11 +1463,7 @@ export class UI {
             
             item.addEventListener('mousemove', (e) => {
                 if (window.isMobile) return;
-                const rate = this._rates[resId] || 0;
-                const rounded = Math.round(rate);
-                const sign = rounded >= 0 ? '+' : '';
-                const color = rounded > 0 ? '#5f5' : rounded < 0 ? '#f55' : '#aaa';
-                this._rateTooltip.innerHTML = `<span style="color:${color}; font-family:'Courier New',monospace; font-weight:bold;">${sign}${rounded}/s</span>`;
+                this._rateTooltip.innerHTML = formatTooltip();
             });
             
             item.addEventListener('mouseleave', () => {
@@ -1341,7 +1492,23 @@ export class UI {
             }
         }
         
-        this.updateDisplay();
-        this.updateLeighHighProgress();
+        // Throttled UI update (10 Hz) eliminates layout thrashing & GC pauses
+        this._uiTimer = (this._uiTimer || 0) + deltaTime;
+        if (this._uiTimer >= 0.1) {
+            this._uiTimer = 0;
+            this.updateDisplay();
+        } else if (this.selectedBuilding && this.selectedBuilding.isWorking && this.elRecipeProgressBar) {
+            // Smooth 60 FPS update only for the open modal's single progress bar
+            const recipeData = this.logic.recipes[this.selectedBuilding.activeRecipe];
+            if (recipeData && recipeData.time > 0) {
+                const percent = Math.min(100, Math.max(0, (this.selectedBuilding.progress / recipeData.time) * 100));
+                this.elRecipeProgressBar.style.width = percent + '%';
+            }
+        }
+        
+        // Only animate Leigh High progress bar if popup is open
+        if (this.elLeighPopup && this.elLeighPopup.style.display !== 'none') {
+            this.updateLeighHighProgress();
+        }
     }
 }

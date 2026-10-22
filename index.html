@@ -11,23 +11,57 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="mobile.css">
+    <link rel="stylesheet" href="style.css?v=3.2.4">
+    <link rel="stylesheet" href="mobile.css?v=3.2.4">
 
-    <!-- Import map for Three.js so we can use modern ES imports without a bundler -->
+    <!-- Import map for Three.js and LiquidGlass so we can use modern ES imports without a bundler -->
     <script type="importmap">
     {
         "imports": {
             "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+            "liquidglass": "./lib-liquidglass/dist/index.js?v=3.2.4"
         }
     }
     </script>
 </head>
 
 <body>
+    <!-- Inline SVG Liquid Glass & Chromatic Aberration Filter (Apple Liquid Glass / Web Squadron pattern) -->
+    <svg width="0" height="0" style="position: absolute; width: 0; height: 0; pointer-events: none; overflow: hidden;" aria-hidden="true">
+        <defs>
+            <filter id="apple-liquid-glass" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+                <!-- Organic liquid surface waves -->
+                <feTurbulence type="fractalNoise" baseFrequency="0.012 0.028" numOctaves="2" seed="17" result="noise" />
+                <feGaussianBlur in="noise" stdDeviation="3" result="smoothNoise" />
+                <!-- Primary optical displacement -->
+                <feDisplacementMap in="SourceGraphic" in2="smoothNoise" scale="18" xChannelSelector="R" yChannelSelector="G" result="refracted" />
+                <!-- Prismatic RGB Chromatic Aberration split -->
+                <feColorMatrix in="refracted" type="matrix"
+                    values="1 0 0 0 0
+                            0 0 0 0 0
+                            0 0 0 0 0
+                            0 0 0 1 0" result="redChan" />
+                <feOffset in="redChan" dx="1.6" dy="-0.6" result="redShifted" />
+                <feColorMatrix in="refracted" type="matrix"
+                    values="0 0 0 0 0
+                            0 1 0 0 0
+                            0 0 0 0 0
+                            0 0 0 1 0" result="greenChan" />
+                <feColorMatrix in="refracted" type="matrix"
+                    values="0 0 0 0 0
+                            0 0 0 0 0
+                            0 0 1 0 0
+                            0 0 0 1 0" result="blueChan" />
+                <feOffset in="blueChan" dx="-1.6" dy="0.6" result="blueShifted" />
+                <feBlend in="redShifted" in2="greenChan" mode="screen" result="rg" />
+                <feBlend in="rg" in2="blueShifted" mode="screen" result="prismGlass" />
+            </filter>
+        </defs>
+    </svg>
+
     <!-- 3D Canvas Container -->
-    <div id="game-container"></div>
+    <div id="game-container" data-dynamic="true" data-canvas-container="true"></div>
 
     <!-- TITLE SCREEN -->
     <div id="title-container">
@@ -92,17 +126,18 @@
     <!-- MAIN UI (Hidden initially) -->
     <div id="ui-layer" style="display: none;">
         <div id="mobile-backdrop" style="display: none;"></div>
-        <!-- Top Left: Main Currency -->
-        <div id="resource-panel" style="pointer-events: none; position: fixed; top: env(safe-area-inset-top, 10px); left: env(safe-area-inset-left, 10px); z-index: 800; padding: 10px;">
-            <div class="resource-item" style="display: inline-flex; align-items: center; font-weight: 700; font-size: 1.1em; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px) saturate(1.5); -webkit-backdrop-filter: blur(20px) saturate(1.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 6px 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
-                <span style="margin-right: 6px; font-size: 1.1em;">📱</span>
-                <span class="resource-value" id="res-phones" style="color: #fff; font-family: 'Rajdhani', sans-serif;">0</span>
-            </div>
-        </div>
 
         <!-- Bottom Left: Resources Split -->
         <div id="inventory-panel" class="glass-panel">
             <div class="drag-handle"></div>
+
+            <!-- Panel Header with Collapse Toggle -->
+            <div class="inventory-header" id="inventory-header">
+                <span class="inventory-title">STORAGE</span>
+                <button id="inventory-collapse-btn" class="inventory-collapse-btn" type="button" title="Collapse Panel (Hide item names)" aria-label="Toggle storage panel collapse">
+                    <span class="collapse-icon">◀</span>
+                </button>
+            </div>
 
             <div id="inventory-content" style="display: contents;">
                 <!-- Raw Materials -->
@@ -174,13 +209,6 @@
                     <span class="resource-value" id="res-panel">0</span>
                 </div>
             </div> <!-- Close inventory-content -->
-
-            <!-- Tech Tree Toggle Arrow (Desktop) -->
-            <div id="tech-tree-toggle" title="Open Tech Tree">
-                <svg viewBox="0 0 24 24" width="24" height="24">
-                    <path d="M8 5v14l11-7z" fill="var(--accent)" />
-                </svg>
-            </div>
         </div>
 
         <!-- Tech Tree Page (Hidden by default) -->
@@ -235,6 +263,22 @@
             </div>
         </div>
 
+        <!-- Tech Tree Button (Top Right, to the left of Save Button) -->
+        <div id="tech-tree-toggle" class="tool-btn"
+            style="position: absolute; top: 10px; right: 370px; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; cursor: pointer; padding: 0; user-select: none; pointer-events: auto;"
+            title="Tech Tree">
+            <svg viewBox="0 0 24 24"
+                style="width: 28px; height: 28px; fill: none; stroke: var(--primary-color, #74b9ff); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;">
+                <circle cx="12" cy="5" r="2.5"></circle>
+                <circle cx="5" cy="19" r="2.5"></circle>
+                <circle cx="12" cy="19" r="2.5"></circle>
+                <circle cx="19" cy="19" r="2.5"></circle>
+                <path d="M12 7.5v5.5"></path>
+                <path d="M5 16.5v-3.5h14v3.5"></path>
+                <path d="M12 13v3.5"></path>
+            </svg>
+        </div>
+
         <!-- Save Button (Top Right) -->
         <div id="btn-save-game" class="tool-btn"
             style="position: absolute; top: 10px; right: 300px; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; cursor: pointer; padding: 0; user-select: none; pointer-events: auto;"
@@ -245,18 +289,6 @@
                 <polyline points="17 21 17 13 7 13 7 21"></polyline>
                 <polyline points="7 3 7 8 15 8"></polyline>
             </svg>
-        </div>
-
-        <!-- Top Right: Big Thune's Demands -->
-        <div id="goal-panel" class="glass-panel">
-            <h2>Big Thune's Demands</h2>
-            <p class="subtitle" id="goal-subtitle">Quest 1</p>
-            <div id="goal-requirements">
-                <!-- Dynamically populated -->
-            </div>
-            <button id="btn-launch-rocket" class="nuke-btn"
-                style="display: none; margin-top: 15px; width: 100%; font-size: 1.2em; box-shadow: 0 0 15px #e74c3c;">LAUNCH
-                RESOURCES</button>
         </div>
 
         <!-- Build Controls Overlay -->
@@ -321,37 +353,62 @@
             </div>
         </div>
 
-        <div id="bottom-toolbar" class="glass-panel ios-dock">
-            <!-- Menu Button (Left) -->
-            <button id="btn-open-menu" class="dock-btn menu-btn">
-                <span style="font-size: 1.5em; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">📦</span>
-            </button>
-            
-            <!-- Flip Flop Switch (Center) -->
-            <div class="flip-flop-switch">
-                <div class="switch-thumb"></div>
-                <button class="switch-btn active" data-tool="select">Select</button>
-                <button class="switch-btn" data-tool="delete" id="btn-delete-tool">Delete</button>
-            </div>
-            
-            <div class="toolbar-group">
-                <div class="menu-container">
-                    <button class="dock-btn tool-btn" id="btn-machine-category">Machines <span class="machine-arrow">▼</span></button>
-                </div>
-            </div>
-            <div class="toolbar-group">
-                <button class="dock-btn tool-btn highlight" data-tool="school">Leigh</button>
-            </div>
-        </div>
-
         <!-- Machine Submenu (Moved outside to prevent clipping) -->
         <div class="submenu-horizontal glass-panel" id="machine-submenu">
             <!-- Populated by JS -->
         </div>
     </div>
 
+    <!-- Top Left: Main Currency (Direct child of body for LiquidGlass WebGL physical refraction) -->
+    <div id="resource-panel" class="glass-panel no-rivets" style="display: none;"
+        data-config='{"cornerRadius":99,"zRadius":6,"refraction":0.85,"chromAberration":0.085,"distortion":0.45,"edgeHighlight":0.25,"fresnel":0.35,"specular":0.20,"blurAmount":1.5,"brightness":0.08,"saturation":0.38,"tintStrength":0.12,"shadowOpacity":0.22,"shadowSpread":10}'>
+        <div class="resource-item">
+            <span class="phone-icon" style="margin-right: 6px; font-size: 1.05em;">📱</span>
+            <span class="resource-name">Phones</span>
+            <span class="resource-value" id="res-phones">0</span>
+        </div>
+    </div>
+
+    <!-- Top Right: Big Thune's Demands (Direct child of body for LiquidGlass WebGL physical refraction on mobile) -->
+    <div id="goal-panel" class="glass-panel" style="display: none;"
+        data-config='{"cornerRadius":22,"zRadius":6,"refraction":0.85,"chromAberration":0.085,"distortion":0.45,"edgeHighlight":0.25,"fresnel":0.35,"specular":0.20,"blurAmount":1.5,"brightness":0.08,"saturation":0.38,"tintStrength":0.12,"shadowOpacity":0.22,"shadowSpread":12}'>
+        <h2>Big Thune's Demands</h2>
+        <p class="subtitle" id="goal-subtitle">Quest 1</p>
+        <div id="goal-requirements">
+            <!-- Dynamically populated -->
+        </div>
+        <button id="btn-launch-rocket" class="nuke-btn"
+            style="display: none; margin-top: 15px; width: 100%; font-size: 1.2em; box-shadow: 0 0 15px #e74c3c;">LAUNCH
+            RESOURCES</button>
+    </div>
+
+    <!-- Bottom Toolbar: iOS Dock (Direct child of body for LiquidGlass WebGL physical refraction) -->
+    <div id="bottom-toolbar" class="glass-panel ios-dock" style="display: none;"
+        data-config='{"cornerRadius":99,"zRadius":7,"refraction":0.88,"chromAberration":0.09,"distortion":0.48,"edgeHighlight":0.26,"fresnel":0.35,"specular":0.20,"blurAmount":1.6,"brightness":0.08,"saturation":0.38,"tintStrength":0.12,"shadowOpacity":0.26,"shadowSpread":14}'>
+        <!-- Menu Button (Mobile Only) -->
+        <button id="btn-open-menu" class="dock-btn menu-btn" style="display: none;" aria-label="Storage">
+            <span style="font-size: 1.15em;">📦</span>
+        </button>
+        
+        <!-- Flip Flop Switch (Center) -->
+        <div class="flip-flop-switch">
+            <div class="switch-thumb"></div>
+            <button class="switch-btn active" data-tool="select">Select</button>
+            <button class="switch-btn" data-tool="delete" id="btn-delete-tool">Delete</button>
+        </div>
+        
+        <div class="toolbar-group">
+            <div class="menu-container">
+                <button class="dock-btn tool-btn" id="btn-machine-category">Machines <span class="machine-arrow">▼</span></button>
+            </div>
+        </div>
+        <div class="toolbar-group">
+            <button class="dock-btn tool-btn highlight" data-tool="school">Leigh</button>
+        </div>
+    </div>
+
     <!-- Main Game Logic -->
-    <script type="module" src="src/main.js"></script>
+    <script type="module" src="src/main.js?v=3.2.4"></script>
 </body>
 
 </html>

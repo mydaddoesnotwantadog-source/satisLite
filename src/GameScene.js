@@ -5,7 +5,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { CameraController } from './CameraController.js';
 import { GridSystem } from './GridSystem.js';
-import { PlacementSystem } from './PlacementSystem.js';
+import { PlacementSystem } from './PlacementSystem.js?v=3.2.4';
 import { FXSystem } from './FXSystem.js';
 import { SoundEngine } from './SoundEngine.js';
 
@@ -16,13 +16,26 @@ export class GameScene {
         this.ui = ui;
         
         // Setup Renderer
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
         this.renderer.toneMappingExposure = 1.1;
+        
+        this.renderer.domElement.addEventListener('webglcontextlost', (e) => {
+            e.preventDefault();
+            console.warn("WebGL Context Lost! Prevented default to allow recovery.");
+        }, false);
+        this.renderer.domElement.addEventListener('webglcontextrestored', () => {
+            console.log("WebGL Context Restored! Reinitializing render sizes...");
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+            if (this.composer) {
+                this.composer.setSize(window.innerWidth, window.innerHeight);
+            }
+        }, false);
+
         container.appendChild(this.renderer.domElement);
         
         // Setup Scene
@@ -108,11 +121,12 @@ export class GameScene {
         }
         
         if (this.gridSystem) {
-            this.scene.remove(this.gridSystem.group);
             this.gridSystem.dispose();
             
             if (this.placementSystem) {
-                // Clear existing building meshes
+                if (this.placementSystem.buildingsGroup) {
+                    this.scene.remove(this.placementSystem.buildingsGroup);
+                }
                 for (const child of [...this.scene.children]) {
                     if (child.userData && child.userData.isBuilding) {
                         this.scene.remove(child);

@@ -61,11 +61,8 @@ export class MobileInputManager {
                 // Y mapping is scaled because the ground plane is viewed at an angle
                 const factorY = frustumSize / (this.domElement.clientHeight * this.cameraController.camera.zoom) * 1.2; 
                 
-                const moveRight = this.cameraController.right.clone().multiplyScalar(-deltaX * factorX);
-                const moveForward = this.cameraController.forward.clone().multiplyScalar(deltaY * factorY);
-                
-                this.cameraController.target.add(moveRight);
-                this.cameraController.target.add(moveForward);
+                this.cameraController.target.addScaledVector(this.cameraController.right, -deltaX * factorX);
+                this.cameraController.target.addScaledVector(this.cameraController.forward, deltaY * factorY);
                 this.cameraController.updateCameraPosition();
                 
                 touchData.lastX = touch.clientX;

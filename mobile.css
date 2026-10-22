@@ -69,134 +69,242 @@ body.mobile-mode #inventory-panel {
     align-content: start;
 }
 
-/* Industrial iOS Dock */
+body.mobile-mode #inventory-header {
+    display: none !important;
+}
+
+/* Native iOS Liquid Glass Dock (Main Menu Bar) */
 body.mobile-mode #bottom-toolbar.ios-dock {
     position: fixed !important;
-    bottom: max(env(safe-area-inset-bottom), 15px) !important;
+    bottom: max(env(safe-area-inset-bottom), 14px) !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: max-content !important;
-    max-width: 98vw !important;
+    max-width: 96vw !important;
     height: auto !important;
     top: auto !important;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 2px;
-    padding: 6px 30px !important;
-    border-radius: 30px !important;
-    background: rgba(30, 30, 35, 0.65) !important;
-    backdrop-filter: blur(25px) saturate(1.8) !important;
-    -webkit-backdrop-filter: blur(25px) saturate(1.8) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.1) !important;
+    gap: 2px !important;
+    padding: 4px 5px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.10) !important;
+    backdrop-filter: url(#apple-liquid-glass) blur(14px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.26) !important;
+    box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.22),
+        inset 0 1px 1px rgba(255, 255, 255, 0.55),
+        inset 0 -1px 1px rgba(255, 255, 255, 0.15) !important;
     z-index: 900;
 }
 
-body.mobile-mode .dock-btn {
-    width: auto;
-    min-width: 0;
-    flex: 1 1 auto;
-    height: 38px !important;
-    box-sizing: border-box !important;
-    padding: 0 10px;
-    border-radius: 19px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: white;
-    font-weight: 600;
+body.mobile-mode #bottom-toolbar.ios-dock.liquid-glass-active {
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.26) !important;
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.55),
+        inset 0 -1px 1px rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Remove industrial LED strips on mobile */
+body.mobile-mode .tool-btn::before,
+body.mobile-mode .switch-btn::before {
+    display: none !important;
+}
+
+/* Subtle glass hairline dividers between integrated dock sections */
+body.mobile-mode #bottom-toolbar .toolbar-group {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 0.8em;
-    transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), background 0.2s;
+    gap: 2px;
+    margin: 0 !important;
+    position: relative;
+}
+
+body.mobile-mode #bottom-toolbar .toolbar-group::before,
+body.mobile-mode #bottom-toolbar .flip-flop-switch::before {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.16);
+    margin: 0 2px;
+    flex-shrink: 0;
+    pointer-events: none;
+}
+
+/* Integrated flush segment buttons inside the Liquid Glass bar */
+body.mobile-mode .dock-btn,
+body.mobile-mode #bottom-toolbar .tool-btn {
+    width: auto !important;
+    min-width: 0 !important;
+    flex: 0 1 auto;
+    height: 36px !important;
+    box-sizing: border-box !important;
+    padding: 0 13px !important;
+    border-radius: 999px !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    box-shadow: none !important;
+    color: rgba(255, 255, 255, 0.94) !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px;
+    font-size: 0.84rem !important;
+    letter-spacing: -0.01em !important;
+    text-transform: none !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.52), 0 0 10px rgba(0, 0, 0, 0.22) !important;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease !important;
     white-space: nowrap;
     margin: 0 !important;
 }
 
-body.mobile-mode .dock-btn:active {
-    transform: scale(0.92);
-    background: rgba(255, 255, 255, 0.2);
+body.mobile-mode .dock-btn:active,
+body.mobile-mode #bottom-toolbar .tool-btn:active {
+    transform: scale(0.95) !important;
+    background: rgba(255, 255, 255, 0.16) !important;
 }
 
-body.mobile-mode .menu-btn {
-    background: linear-gradient(135deg, #0A84FF, #005bb5);
-    border: 1px solid rgba(255,255,255,0.3);
-    padding: 0 12px;
-    margin-right: 6px !important;
+body.mobile-mode #bottom-toolbar .tool-btn.active {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.30) 0%, rgba(255, 255, 255, 0.18) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.46) !important;
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.65),
+        inset 0 -0.5px 0.5px rgba(255, 255, 255, 0.20),
+        0 2px 6px rgba(0, 0, 0, 0.16) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    text-shadow: 0 1px 2.5px rgba(0, 0, 0, 0.58), 0 0 10px rgba(0, 0, 0, 0.24) !important;
+    transform: none !important;
+}
+
+body.mobile-mode .dock-btn.menu-btn,
+body.mobile-mode #btn-open-menu {
+    display: inline-flex !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    box-shadow: none !important;
+    padding: 0 11px !important;
+    margin: 0 !important;
     flex: 0 0 auto;
 }
 
-/* Flip-Flop Switch */
+body.mobile-mode #btn-open-menu:active {
+    background: rgba(255, 255, 255, 0.24) !important;
+    border-color: rgba(255, 255, 255, 0.38) !important;
+}
+
+/* Integrated Select / Delete Segment inside the Liquid Glass bar */
 body.mobile-mode .flip-flop-switch {
     position: relative;
     display: flex;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 19px;
-    padding: 4px;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
-    width: 120px;
-    height: 38px !important;
+    align-items: center;
+    background: transparent !important;
+    border-radius: 999px !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    width: 126px;
+    height: 36px !important;
     box-sizing: border-box !important;
-    flex: 1 1 auto;
-    min-width: 100px;
-    max-width: 130px;
+    flex: 0 0 auto;
+    margin: 0 !important;
 }
 
 body.mobile-mode .switch-thumb {
     position: absolute;
-    top: 4px;
-    left: 4px;
-    width: calc(50% - 4px);
-    height: calc(100% - 8px);
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 18px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    top: 0;
+    left: 5px;
+    width: calc(50% - 2.5px);
+    height: 100%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.30) 0%, rgba(255, 255, 255, 0.18) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.46);
+    border-radius: 999px;
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.65),
+        inset 0 -0.5px 0.5px rgba(255, 255, 255, 0.20),
+        0 2px 6px rgba(0, 0, 0, 0.16);
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.25s ease, border-color 0.25s ease, opacity 0.2s ease;
+    box-sizing: border-box;
+    pointer-events: none;
 }
 
 body.mobile-mode .switch-thumb.pos-right {
     transform: translateX(100%);
-    background: rgba(231, 76, 60, 0.8);
+    background: linear-gradient(180deg, rgba(255, 82, 71, 0.52) 0%, rgba(255, 59, 48, 0.38) 100%);
+    border-color: rgba(255, 160, 150, 0.55);
+    box-shadow:
+        inset 0 1px 1px rgba(255, 215, 210, 0.62),
+        0 2px 8px rgba(255, 69, 58, 0.25);
+}
+
+/* Fade out the Select/Delete thumb when another tool (e.g. Machines / Leigh) is active */
+body.mobile-mode .switch-thumb.hidden-thumb,
+body.mobile-mode .flip-flop-switch:not(:has(.switch-btn.active)) .switch-thumb {
+    opacity: 0 !important;
 }
 
 body.mobile-mode .switch-btn {
     flex: 1;
+    height: 100%;
     position: relative;
     z-index: 1;
-    background: none;
-    border: none;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.8em;
-    font-weight: 700;
-    transition: color 0.3s;
+    background: none !important;
+    border: none !important;
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 0.84rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.52), 0 0 10px rgba(0, 0, 0, 0.22);
+    transition: color 0.2s ease, font-weight 0.2s ease;
+    padding: 0 8px;
 }
 
 body.mobile-mode .switch-btn.active {
-    color: white;
+    color: #ffffff;
+    font-weight: 700;
+    text-shadow: 0 1px 2.5px rgba(0, 0, 0, 0.58), 0 0 10px rgba(0, 0, 0, 0.24);
 }
 
 body.mobile-mode #goal-panel {
-    /* Top right docked */
+    /* Top right docked — bright iOS Native Liquid Glass matching dock & submenu */
     position: fixed !important;
-    top: 5px !important;
-    right: 15px !important;
+    top: max(env(safe-area-inset-top), 8px) !important;
+    right: max(env(safe-area-inset-right), 12px) !important;
     left: auto !important;
     width: auto !important;
     height: auto !important;
-    max-width: 38vw !important;
-    min-width: 0 !important;
-    padding: 10px !important;
-    background: rgba(20, 20, 25, 0.45) !important;
-    backdrop-filter: blur(15px) !important;
-    -webkit-backdrop-filter: blur(15px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.2) !important;
-    font-size: 0.6em !important;
+    min-width: 152px !important;
+    max-width: 46vw !important;
+    padding: 10px 14px !important;
+    background: rgba(255, 255, 255, 0.10) !important;
+    backdrop-filter: url(#apple-liquid-glass) blur(14px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.26) !important;
+    border-radius: 22px !important;
+    box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.18),
+        inset 0 1px 1px rgba(255, 255, 255, 0.55),
+        inset 0 -1px 1px rgba(255, 255, 255, 0.15) !important;
+    font-size: 0.74rem !important;
     pointer-events: none;
     z-index: 800;
+}
+
+body.mobile-mode #goal-panel.liquid-glass-active {
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.26) !important;
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.55),
+        inset 0 -1px 1px rgba(255, 255, 255, 0.15) !important;
 }
 
 body.mobile-mode #btn-launch-rocket {
@@ -205,15 +313,48 @@ body.mobile-mode #btn-launch-rocket {
 
 body.mobile-mode #goal-panel h2,
 body.mobile-mode #resource-panel h2 {
-    font-size: 1.1em !important;
-    margin: 2px 0 !important;
+    font-size: 1.05em !important;
+    font-weight: 700 !important;
+    margin: 1px 0 !important;
     padding: 0 !important;
     border: none !important;
+    color: #ffffff !important;
+    text-transform: none !important;
+    letter-spacing: -0.01em !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.54), 0 0 10px rgba(0, 0, 0, 0.22) !important;
 }
 
 body.mobile-mode #goal-panel .subtitle {
-    font-size: 0.9em !important;
-    margin: 2px 0 !important;
+    font-size: 0.92em !important;
+    font-weight: 600 !important;
+    margin: 2px 0 6px 0 !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.52), 0 0 8px rgba(0, 0, 0, 0.22) !important;
+}
+
+/* Override dark inline progress bar tracks inside #goal-panel on mobile */
+body.mobile-mode #goal-requirements > div {
+    background: rgba(15, 22, 32, 0.22) !important;
+    border: 1px solid rgba(255, 255, 255, 0.32) !important;
+    border-radius: 999px !important;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35) !important;
+    height: 19px !important;
+    margin-bottom: 4px !important;
+}
+
+body.mobile-mode #goal-requirements > div > div:nth-child(2) {
+    left: 8px !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.01em !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.62), 0 0 6px rgba(0, 0, 0, 0.28) !important;
+}
+
+body.mobile-mode #goal-requirements > div > div:nth-child(3) {
+    right: 8px !important;
+    font-size: 0.70rem !important;
+    font-weight: 700 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.62), 0 0 6px rgba(0, 0, 0, 0.28) !important;
 }
 
 body.mobile-mode #goal-panel .goal-item {
@@ -225,25 +366,77 @@ body.mobile-mode #goal-panel .goal-item {
 
 body.mobile-mode #resource-panel {
     position: fixed !important;
-    top: 5px !important;
-    left: 5px !important;
+    top: max(env(safe-area-inset-top), 8px) !important;
+    left: max(env(safe-area-inset-left), 8px) !important;
     width: auto !important;
     height: auto !important;
     max-width: 48vw !important;
-    padding: 8px !important;
-    background: rgba(20, 20, 25, 0.45) !important;
-    backdrop-filter: blur(15px) !important;
-    -webkit-backdrop-filter: blur(15px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.2) !important;
-    font-size: 0.65em !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-size: 0.85em !important;
     z-index: 800;
+    pointer-events: none;
 }
 
 body.mobile-mode #resource-panel .resource-item {
-    margin: 2px 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    font-weight: 700 !important;
+    font-size: 1.05em !important;
+    background: rgba(255, 255, 255, 0.10) !important;
+    backdrop-filter: url(#apple-liquid-glass) blur(14px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.26) !important;
+    border-radius: 999px !important;
+    padding: 5px 13px !important;
+    box-shadow:
+        0 6px 20px rgba(0, 0, 0, 0.18),
+        inset 0 1px 1px rgba(255, 255, 255, 0.55),
+        inset 0 -1px 1px rgba(255, 255, 255, 0.15) !important;
+    margin: 0 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.52), 0 0 10px rgba(0, 0, 0, 0.22) !important;
+}
+
+body.mobile-mode #resource-panel.liquid-glass-active {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 6px 14px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.26) !important;
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.55),
+        inset 0 -1px 1px rgba(255, 255, 255, 0.15) !important;
+    pointer-events: auto !important;
+}
+
+body.mobile-mode #resource-panel.liquid-glass-active .resource-item {
+    display: inline-flex !important;
+    align-items: center !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
     padding: 0 !important;
+    margin: 0 !important;
+}
+
+body.mobile-mode #resource-panel .resource-name {
+    display: none !important;
+}
+
+body.mobile-mode #resource-panel .resource-value {
+    color: #fff !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Rajdhani', sans-serif !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    font-size: 1.05em !important;
+    font-weight: 700 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.54), 0 0 10px rgba(0, 0, 0, 0.22) !important;
 }
 
 /* Enlarge close buttons */
@@ -257,30 +450,30 @@ body.mobile-mode #close-inventory-btn {
     right: 10px;
 }
 
-/* Enlarge tools for touch, but keep compact */
+/* Enlarge tools for touch (outside bottom-toolbar, e.g. in popups/submenus) */
 body.mobile-mode .tool-btn {
     width: auto !important;
     min-width: 60px;
-    height: 40px;
-    padding: 5px 15px;
-    font-size: 0.85em !important;
-    font-weight: 500 !important;
-    margin-right: 8px;
+    height: 36px;
+    padding: 5px 14px;
+    font-size: 0.84rem !important;
+    font-weight: 600 !important;
+    margin-right: 4px;
     margin-bottom: 0;
     flex-shrink: 0;
     border-radius: 9999px !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    background: rgba(255, 255, 255, 0.1) !important;
-    color: #fff !important;
-    text-shadow: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    background: rgba(255, 255, 255, 0.10) !important;
+    color: rgba(255, 255, 255, 0.94) !important;
+    text-transform: none !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.52), 0 0 10px rgba(0, 0, 0, 0.22) !important;
     box-shadow: none !important;
-    transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.2s !important;
+    transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), background 0.2s, opacity 0.2s !important;
 }
 
 body.mobile-mode .tool-btn:active {
-    transform: scale(0.92) !important;
-    opacity: 0.7 !important;
-}
+    transform: scale(0.94) !important;
+    opacity: 0.85 !important;
 }
 
 /* Hide hover tooltips */
@@ -305,13 +498,72 @@ body.mobile-mode #inventory-panel:not(.mobile-expanded) {
 
 /* Closed inventory state is no longer used; panel is pure overlay */
 
-/* Fix machine submenu clipping in scrollable toolbar */
+/* Hide horizontal scrollbars on mobile menu bars while keeping touch scroll */
+body.mobile-mode #machine-submenu,
+body.mobile-mode .submenu-horizontal,
+body.mobile-mode #bottom-toolbar {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+body.mobile-mode #machine-submenu::-webkit-scrollbar,
+body.mobile-mode .submenu-horizontal::-webkit-scrollbar,
+body.mobile-mode #bottom-toolbar::-webkit-scrollbar,
+body.mobile-mode #machine-submenu::-webkit-scrollbar-track,
+body.mobile-mode .submenu-horizontal::-webkit-scrollbar-track,
+body.mobile-mode #machine-submenu::-webkit-scrollbar-thumb,
+body.mobile-mode .submenu-horizontal::-webkit-scrollbar-thumb {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+/* Machine Submenu on Mobile: matching unified iOS Liquid Glass bar */
 body.mobile-mode #machine-submenu {
     position: fixed !important;
-    bottom: 80px !important; /* Above the taller toolbar */
+    bottom: calc(max(env(safe-area-inset-bottom), 14px) + 54px) !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     z-index: 2000 !important;
+    padding: 4px 6px !important;
+    gap: 2px !important;
+    border-radius: 999px !important;
+    background: rgba(18, 24, 34, 0.14) !important;
+    backdrop-filter: url(#apple-liquid-glass) blur(16px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.28) !important;
+    box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.22),
+        inset 0 1px 1px rgba(255, 255, 255, 0.55),
+        inset 0 -1px 1px rgba(255, 255, 255, 0.15) !important;
+}
+
+body.mobile-mode #machine-submenu .tool-btn {
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    margin: 0 !important;
+    height: 34px !important;
+    padding: 0 12px !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.52), 0 0 10px rgba(0, 0, 0, 0.22) !important;
+}
+
+body.mobile-mode #machine-submenu .tool-btn.locked {
+    opacity: 0.76 !important;
+    color: rgba(255, 255, 255, 0.82) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.52), 0 0 8px rgba(0, 0, 0, 0.22) !important;
+}
+
+body.mobile-mode #machine-submenu .tool-btn.active {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.30) 0%, rgba(255, 255, 255, 0.18) 100%) !important;
+    border-color: rgba(255, 255, 255, 0.46) !important;
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.65),
+        0 2px 6px rgba(0, 0, 0, 0.16) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
 }
 
 /* Hide desktop-specific build controls overlay */
