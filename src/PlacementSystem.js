@@ -104,10 +104,17 @@ export class PlacementSystem {
         this.screenMouse.y = e.clientY;
     }
 
+    centerGhostOnScreen() {
+        this.mouse.set(0, 0);
+        this.screenMouse.set(window.innerWidth * 0.5, window.innerHeight * 0.5);
+        this.updateGhost();
+    }
+
     bindEvents() {
         this._lastMouseEvent = null;
         
         window.addEventListener('mousemove', (e) => {
+            if (window.isMobile) return;
             this.onMouseMove(e);
             this._lastMouseEvent = e;
         });

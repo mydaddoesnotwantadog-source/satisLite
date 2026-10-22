@@ -187,6 +187,9 @@ export class UI {
                 if (machineBtn) machineBtn.classList.add('active');
                 
                 this.activeTool = mac.id;
+                if (window.isMobile && this.app.scene && this.app.scene.placementSystem) {
+                    this.app.scene.placementSystem.centerGhostOnScreen();
+                }
                 
                 // On mobile, don't close the submenu when selecting a tool
                 if (!window.isMobile) {
@@ -648,6 +651,9 @@ export class UI {
                 }
                 
                 this.activeTool = newBtn.getAttribute('data-tool');
+                if (window.isMobile && this.activeTool !== 'select' && this.activeTool !== 'delete' && this.app.scene && this.app.scene.placementSystem) {
+                    this.app.scene.placementSystem.centerGhostOnScreen();
+                }
                 
                 document.querySelectorAll('.submenu-horizontal').forEach(s => s.classList.remove('show'));
                 if (window.isMobile && this.app.scene && this.app.scene.gridSystem && this.app.scene.gridSystem.instancedLeaves) {

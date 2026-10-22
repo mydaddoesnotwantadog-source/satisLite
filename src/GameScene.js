@@ -4,8 +4,8 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { CameraController } from './CameraController.js';
-import { GridSystem } from './GridSystem.js?v=3.2.9';
-import { PlacementSystem } from './PlacementSystem.js?v=3.2.9';
+import { GridSystem } from './GridSystem.js?v=3.2.10';
+import { PlacementSystem } from './PlacementSystem.js?v=3.2.10';
 import { FXSystem } from './FXSystem.js';
 import { SoundEngine } from './SoundEngine.js';
 
