@@ -50,6 +50,8 @@ export class PlacementSystem {
         this.scene.add(this.ghostMesh);
         
         this.buildingMat = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.8, roughness: 0.2, flatShading: true });
+        this.buildingSelectMat = new THREE.MeshStandardMaterial({ color: 0x555555, emissive: 0x333333, metalness: 0.8, roughness: 0.2, flatShading: true });
+        this.buildingDeleteMat = new THREE.MeshStandardMaterial({ color: 0x555555, emissive: 0xff0000, metalness: 0.8, roughness: 0.2, flatShading: true });
         
         // Drone Instanced Mesh
         const bodyGeo = new THREE.CylinderGeometry(0.05, 0.15, 0.4, 4);
@@ -236,12 +238,12 @@ export class PlacementSystem {
 
     executeTap() {
         if (this.ui.activeTool === 'select') {
-            this.updateGhost();
+            this.updateGhost(true);
             this.trySelectBuilding();
         } else if (this.ui.activeTool === 'delete') {
             const prevBld = this.hoveredBuildingMesh;
             const prevTree = this.hoveredTreeId;
-            this.updateGhost();
+            this.updateGhost(true);
             
             const hasTarget = this.hoveredBuildingMesh || this.hoveredTreeId !== null;
             
@@ -266,7 +268,7 @@ export class PlacementSystem {
             if (resolved) {
                 this.mobileLockedTile = { x: resolved.x, z: resolved.z };
             }
-            this.updateGhost();
+            this.updateGhost(true);
             
             if (this.hoveredX === prevX && this.hoveredZ === prevZ && this.ghostMesh.visible) {
                 this.tryPlaceBuilding();
@@ -282,7 +284,7 @@ export class PlacementSystem {
         return { w: 1, h: 1 };
     }
     
-    updateGhost() {
+    updateGhost(fromTap = false) {
         const toolId = this.ui.activeTool;
         const els = this._getTooltipEls();
         
@@ -291,7 +293,24 @@ export class PlacementSystem {
         }
         
         if (toolId === 'select' || toolId === 'delete') {
+            // If switching between select and delete on mobile, clear previous target highlight
+            if (this._lastGhostToolId !== toolId) {
+                if (this.hoveredBuildingMesh) {
+                    this.hoveredBuildingMesh.material = this.buildingMat;
+                    this.hoveredBuildingMesh = null;
+                }
+                this.hoveredTreeId = null;
+                this.ghostMesh.visible = false;
+                this._lastGhostToolId = toolId;
+            }
+
+            // On mobile, keep the tapped delete/select target locked in world space while panning
+            if (window.isMobile && !fromTap) {
+                return;
+            }
+
             this.ghostMesh.visible = false;
+            this.ghostMesh.scale.set(1, 1, 1);
             
             this.raycaster.setFromCamera(this.mouse, this.camera);
             // Targeted raycast against only placed buildings instead of full scene
@@ -317,15 +336,22 @@ export class PlacementSystem {
             }
             
             if (this.hoveredBuildingMesh && this.hoveredBuildingMesh !== hovered) {
-                this.hoveredBuildingMesh.material.emissive.setHex(0x000000);
+                this.hoveredBuildingMesh.material = this.buildingMat;
             }
-            if (hovered && this.hoveredBuildingMesh !== hovered) {
-                hovered.material.emissive.setHex(toolId === 'delete' ? 0xff0000 : 0x333333);
+            if (hovered) {
+                hovered.material = toolId === 'delete' ? this.buildingDeleteMat : this.buildingSelectMat;
             }
             this.hoveredBuildingMesh = hovered;
             this.hoveredTreeId = hoveredTreeId;
             
-            if (hoveredTreeId !== null && toolId === 'delete') {
+            if (hovered && toolId === 'delete') {
+                this.ghostMesh.geometry = hovered.geometry;
+                this.ghostMesh.position.copy(hovered.position);
+                this.ghostMesh.rotation.y = hovered.rotation.y;
+                this.ghostMesh.scale.set(1.06, 1.06, 1.06);
+                this.ghostMesh.material = this.ghostMatInvalid;
+                this.ghostMesh.visible = true;
+            } else if (hoveredTreeId !== null && toolId === 'delete') {
                 for (const [key, occupant] of this.gridSystem.worldRegistry.entries()) {
                     if (occupant.type === 'tree' && occupant.instanceId === hoveredTreeId) {
                         const [x, z] = key.split(',').map(Number);
@@ -334,6 +360,7 @@ export class PlacementSystem {
                         this.ghostMesh.geometry = this.ghostGeometries['tree'];
                         this.ghostMesh.position.set(centerX, 1.4, centerZ);
                         this.ghostMesh.rotation.y = 0;
+                        this.ghostMesh.scale.set(1, 1, 1);
                         this.ghostMesh.material = this.ghostMatInvalid;
                         this.ghostMesh.visible = true;
                         break;
@@ -343,8 +370,10 @@ export class PlacementSystem {
             return;
         }
         
+        this._lastGhostToolId = toolId;
+        this.ghostMesh.scale.set(1, 1, 1);
         if (this.hoveredBuildingMesh) {
-            this.hoveredBuildingMesh.material.emissive.setHex(0x000000);
+            this.hoveredBuildingMesh.material = this.buildingMat;
             this.hoveredBuildingMesh = null;
         }
         
@@ -711,6 +740,8 @@ export class PlacementSystem {
                 }
                 
                 this.hoveredBuildingMesh = null;
+                this.ghostMesh.visible = false;
+                this.ghostMesh.scale.set(1, 1, 1);
                 this.ui.updateDisplay();
             }
         } else if (this.hoveredTreeId !== null && this.hoveredTreeId !== undefined) {
