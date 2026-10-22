@@ -311,11 +311,8 @@ body.mobile-mode #bottom-toolbar .toolbar-group {
     margin: 0 !important;
     position: relative;
     opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
+    transform: translate3d(0, 0, 0);
     will-change: transform, opacity;
-    transition:
-        opacity 0.18s cubic-bezier(0.22, 1, 0.36, 1) 0.03s,
-        transform 0.24s cubic-bezier(0.22, 1, 0.36, 1) 0.02s;
 }
 
 body.mobile-mode #bottom-toolbar .toolbar-group::before,
@@ -332,12 +329,7 @@ body.mobile-mode #bottom-toolbar .flip-flop-switch::before {
 
 body.mobile-mode #bottom-toolbar.ios-dock.dock-compressed .flip-flop-switch,
 body.mobile-mode #bottom-toolbar.ios-dock.dock-compressed .toolbar-group {
-    opacity: 0 !important;
-    transform: translate3d(-18px, 0, 0) scale(0.86) !important;
     pointer-events: none !important;
-    transition:
-        opacity 0.12s ease-out,
-        transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Integrated flush segment buttons inside the Liquid Glass bar */
@@ -368,8 +360,8 @@ body.mobile-mode #bottom-toolbar .tool-btn {
     margin: 0 !important;
 }
 
-body.mobile-mode .dock-btn:active,
-body.mobile-mode #bottom-toolbar .tool-btn:active {
+body.mobile-mode .dock-btn:not(#btn-open-menu):active,
+body.mobile-mode #bottom-toolbar .tool-btn:not(#btn-open-menu):active {
     transform: scale(0.95) !important;
     background: rgba(255, 255, 255, 0.16) !important;
 }
@@ -403,6 +395,7 @@ body.mobile-mode #btn-open-menu {
     flex: 0 0 36px !important;
     pointer-events: auto !important;
     will-change: transform;
+    transition: background 0.15s ease !important;
     z-index: 2;
 }
 
@@ -410,19 +403,20 @@ body.mobile-mode #btn-open-menu .menu-pkg-icon {
     display: inline-block;
     font-size: 1.18em;
     line-height: 1;
-    transition: transform 0.26s cubic-bezier(0.22, 1.35, 0.36, 1);
+    transition: transform 0.22s cubic-bezier(0.22, 1.35, 0.36, 1);
 }
 
 body.mobile-mode #bottom-toolbar.ios-dock.dock-compressed #btn-open-menu .menu-pkg-icon {
-    transform: scale(1.1);
+    transform: scale(1.08);
 }
 
 body.mobile-mode #btn-open-menu:active {
     background: rgba(255, 255, 255, 0.22) !important;
 }
 
-body.mobile-mode #btn-open-menu:active .menu-pkg-icon {
-    transform: scale(0.86);
+body.mobile-mode #btn-open-menu:active .menu-pkg-icon,
+body.mobile-mode #bottom-toolbar.ios-dock.dock-compressed #btn-open-menu:active .menu-pkg-icon {
+    transform: scale(0.84) !important;
 }
 
 /* Integrated Select / Delete Segment inside the Liquid Glass bar */
@@ -440,11 +434,8 @@ body.mobile-mode .flip-flop-switch {
     flex: 0 0 auto;
     margin: 0 !important;
     opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
+    transform: translate3d(0, 0, 0);
     will-change: transform, opacity;
-    transition:
-        opacity 0.18s cubic-bezier(0.22, 1, 0.36, 1) 0.03s,
-        transform 0.24s cubic-bezier(0.22, 1, 0.36, 1) 0.02s;
 }
 
 body.mobile-mode .switch-thumb {

@@ -2518,29 +2518,45 @@ var LiquidGlass = class _LiquidGlass {
       const now = performance.now();
       if (child._morphPos === void 0) {
         child._morphPos = targetMorph;
-        child._morphVel = 0;
-        child._morphLastTime = now;
+        child._morphStartVal = targetMorph;
+        child._morphTarget = targetMorph;
+        child._morphStartTime = now;
       }
-      const dt = Math.min(0.033, Math.max(1e-3, (now - child._morphLastTime) * 1e-3));
-      child._morphLastTime = now;
-      const dist = targetMorph - child._morphPos;
-      if (Math.abs(dist) > 5e-4 || Math.abs(child._morphVel) > 2e-3) {
-        // Snappy critically-damped iOS spring (zero layout reflow, pure uniform update)
-        const force = dist * 420;
-        child._morphVel += (force - child._morphVel * 38) * dt;
-        child._morphPos += child._morphVel * dt;
-        if (Math.abs(targetMorph - child._morphPos) <= 5e-4 && Math.abs(child._morphVel) <= 2e-3) {
-          child._morphPos = targetMorph;
-          child._morphVel = 0;
+      if (child._morphTarget !== targetMorph) {
+        child._morphStartVal = child._morphPos;
+        child._morphTarget = targetMorph;
+        child._morphStartTime = now;
+      }
+      if (Math.abs(child._morphTarget - child._morphPos) > 5e-4) {
+        const duration = 260;
+        const t = Math.min(1, Math.max(0, (now - child._morphStartTime) / duration));
+        // Smooth analytical cubic/quartic ease-out (100% frame-rate independent)
+        const ease = 1 - Math.pow(1 - t, 3.3);
+        child._morphPos = child._morphStartVal + (child._morphTarget - child._morphStartVal) * ease;
+        if (t >= 1) {
+          child._morphPos = child._morphTarget;
         }
         morphDirty = true;
       }
-      const m = Math.max(0, Math.min(1.04, child._morphPos));
+      const m = Math.max(0, Math.min(1, child._morphPos));
       effectiveElW = Math.max(elH, elW - (elW - elH) * m);
+      const tx = (elW - effectiveElW) * 0.5;
       if (!child._btnOpenMenu) child._btnOpenMenu = child.querySelector("#btn-open-menu");
       if (child._btnOpenMenu) {
-        const tx = (elW - effectiveElW) * 0.5;
-        child._btnOpenMenu.style.transform = tx > 0.05 ? `translate3d(${tx.toFixed(2)}px, 0, 0)` : "";
+        child._btnOpenMenu.style.transform = `translate3d(${tx.toFixed(2)}px, 0, 0)`;
+      }
+      if (!child._dockSiblings) {
+        child._dockSiblings = Array.from(child.querySelectorAll(".flip-flop-switch, .toolbar-group"));
+      }
+      if (child._dockSiblings && (morphDirty || child._lastAppliedM !== m)) {
+        child._lastAppliedM = m;
+        const alpha = Math.max(0, 1 - m * 2.2);
+        const shift = (-tx * 0.32).toFixed(2);
+        const sc = (1 - m * 0.12).toFixed(3);
+        for (const sib of child._dockSiblings) {
+          sib.style.opacity = alpha.toFixed(3);
+          sib.style.transform = `translate3d(${shift}px, 0, 0) scale(${sc})`;
+        }
       }
     }
 
