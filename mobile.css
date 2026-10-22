@@ -37,12 +37,14 @@ body.mobile-mode {
     overscroll-behavior: none;
     user-select: none;
     -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
     -webkit-font-smoothing: antialiased;
 }
 
 body.mobile-mode * {
     font-family: inherit;
+    -webkit-tap-highlight-color: transparent !important;
 }
 
 /* Make specific popups take up full screen when active */
@@ -255,8 +257,14 @@ body.mobile-mode .switch-btn {
     height: 100%;
     position: relative;
     z-index: 1;
-    background: none !important;
+    background: transparent !important;
     border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    border-radius: 999px !important;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-appearance: none;
+    appearance: none;
     color: rgba(255, 255, 255, 0.92);
     font-size: 0.84rem;
     font-weight: 600;
@@ -264,6 +272,15 @@ body.mobile-mode .switch-btn {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.52), 0 0 10px rgba(0, 0, 0, 0.22);
     transition: color 0.2s ease, font-weight 0.2s ease;
     padding: 0 8px;
+}
+
+body.mobile-mode .switch-btn:active,
+body.mobile-mode .switch-btn:focus,
+body.mobile-mode .switch-btn:focus-visible {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 body.mobile-mode .switch-btn.active {
