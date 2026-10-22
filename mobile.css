@@ -166,16 +166,23 @@ body.mobile-mode .mobile-launch-btn {
     margin: 2px 0 0 0 !important;
 }
 
-/* Integrated Demand Progress Rows inside Mobile Inventory List — Desktop Metal Gray Accent Texture */
+/* Integrated Demand Progress Rows inside Mobile Inventory List — Realistic 3D Brushed Metal Texture & Lighting */
 body.mobile-mode #inventory-panel .resource-item {
     position: relative;
     overflow: hidden;
     border-radius: 6px;
-    background: linear-gradient(180deg, var(--panel-bg-light, #555) 0%, var(--panel-bg-dark, #2a2a2a) 100%) !important;
-    border: 2px solid var(--panel-border-dark, #111) !important;
-    border-top: 2px solid var(--panel-border-light, #777) !important;
-    border-left: 2px solid var(--panel-border-light, #777) !important;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.65), inset 0 0 10px rgba(0, 0, 0, 0.5) !important;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 28%),
+        repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, rgba(0, 0, 0, 0.04) 1px, rgba(0, 0, 0, 0.04) 2px),
+        linear-gradient(180deg, #5e6268 0%, #3d4045 48%, #26282c 100%) !important;
+    border: 2px solid #141518 !important;
+    border-top: 2px solid #8a8f96 !important;
+    border-left: 2px solid #787d84 !important;
+    box-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(255, 255, 255, 0.32),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.65),
+        inset 0 0 8px rgba(0, 0, 0, 0.4) !important;
     padding: 5px 10px !important;
 }
 
@@ -313,13 +320,17 @@ body.mobile-mode #bottom-toolbar.ios-dock.liquid-glass-active {
     box-shadow: none !important;
 }
 
-/* Compressed Circle of Glass state when Inventory Menu is open */
+/* Compressed state when Inventory Menu is open: no glass hole-punch, only the enlarged 3D metallic button */
 body.mobile-mode #bottom-toolbar.ios-dock.dock-compressed {
     pointer-events: none !important;
 }
 
 body.mobile-mode #bottom-toolbar.ios-dock:not(.liquid-glass-active).dock-compressed {
-    clip-path: inset(0 calc((100% - 46px) / 2) 0 calc((100% - 46px) / 2) round 999px);
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
 }
 
 /* Remove industrial LED strips on mobile */
@@ -404,17 +415,25 @@ body.mobile-mode #bottom-toolbar .tool-btn.active {
     transform: none !important;
 }
 
-/* Desktop Metal Gray Accent behind Inventory Box Icon inside the Liquid Glass Dock */
+/* Realistic 3D Machined Metal Accent Button behind Inventory Box Icon */
 body.mobile-mode .dock-btn.menu-btn,
 body.mobile-mode #btn-open-menu {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    background: linear-gradient(180deg, var(--panel-bg-light, #555) 0%, var(--panel-bg-dark, #2a2a2a) 100%) !important;
-    border: 1.5px solid var(--panel-border-dark, #111) !important;
-    border-top-color: var(--panel-border-light, #777) !important;
-    border-left-color: var(--panel-border-light, #777) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.65), inset 0 0 8px rgba(0, 0, 0, 0.5) !important;
+    background:
+        radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.08) 38%, transparent 65%),
+        repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0px, rgba(255, 255, 255, 0.035) 1px, rgba(0, 0, 0, 0.045) 1px, rgba(0, 0, 0, 0.045) 2px),
+        linear-gradient(180deg, #686d75 0%, #44484f 48%, #26292e 100%) !important;
+    border: 2px solid #141619 !important;
+    border-top-color: #9ea4ad !important;
+    border-left-color: #878d96 !important;
+    box-shadow:
+        0 3px 8px rgba(0, 0, 0, 0.72),
+        0 1px 2px rgba(0, 0, 0, 0.6),
+        inset 0 1.5px 1px rgba(255, 255, 255, 0.48),
+        inset 0 -2px 3px rgba(0, 0, 0, 0.72),
+        inset 0 0 6px rgba(0, 0, 0, 0.35) !important;
     width: 36px !important;
     height: 36px !important;
     padding: 0 !important;
@@ -423,32 +442,45 @@ body.mobile-mode #btn-open-menu {
     flex: 0 0 36px !important;
     pointer-events: auto !important;
     will-change: transform;
-    transition: background 0.15s ease, box-shadow 0.15s ease !important;
+    transition: background 0.18s ease, box-shadow 0.22s ease, border-color 0.18s ease !important;
     z-index: 2;
+}
+
+body.mobile-mode #bottom-toolbar.ios-dock.dock-compressed #btn-open-menu {
+    box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.88),
+        0 2px 5px rgba(0, 0, 0, 0.75),
+        0 0 0 1px rgba(255, 255, 255, 0.14),
+        inset 0 1.5px 1.5px rgba(255, 255, 255, 0.55),
+        inset 0 -2.5px 4px rgba(0, 0, 0, 0.78),
+        inset 0 0 8px rgba(0, 0, 0, 0.4) !important;
 }
 
 body.mobile-mode #btn-open-menu .menu-pkg-icon {
     display: inline-block;
     font-size: 1.18em;
     line-height: 1;
-    transition: transform 0.22s cubic-bezier(0.22, 1.35, 0.36, 1);
-}
-
-body.mobile-mode #bottom-toolbar.ios-dock.dock-compressed #btn-open-menu .menu-pkg-icon {
-    transform: scale(1.08);
+    filter: drop-shadow(0 1.5px 2px rgba(0, 0, 0, 0.65));
+    transition: transform 0.2s cubic-bezier(0.22, 1.35, 0.36, 1);
 }
 
 body.mobile-mode #btn-open-menu:active {
-    background: linear-gradient(180deg, #2a2a2a 0%, #444 100%) !important;
-    border-color: #111 !important;
-    border-bottom-color: #666 !important;
-    border-right-color: #666 !important;
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.75) !important;
+    background:
+        radial-gradient(circle at 50% 65%, rgba(255, 255, 255, 0.14) 0%, transparent 60%),
+        repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0px, rgba(255, 255, 255, 0.025) 1px, rgba(0, 0, 0, 0.045) 1px, rgba(0, 0, 0, 0.045) 2px),
+        linear-gradient(180deg, #282b30 0%, #3a3e45 55%, #4d525a 100%) !important;
+    border-color: #111316 !important;
+    border-bottom-color: #70757d !important;
+    border-right-color: #70757d !important;
+    box-shadow:
+        0 2px 5px rgba(0, 0, 0, 0.65),
+        inset 0 2.5px 5px rgba(0, 0, 0, 0.82),
+        inset 0 -1px 1px rgba(255, 255, 255, 0.22) !important;
 }
 
 body.mobile-mode #btn-open-menu:active .menu-pkg-icon,
 body.mobile-mode #bottom-toolbar.ios-dock.dock-compressed #btn-open-menu:active .menu-pkg-icon {
-    transform: scale(0.84) !important;
+    transform: scale(0.86) !important;
 }
 
 /* Integrated Select / Delete Segment inside the Liquid Glass bar */

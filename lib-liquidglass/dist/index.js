@@ -2541,9 +2541,15 @@ var LiquidGlass = class _LiquidGlass {
       const m = Math.max(0, Math.min(1, child._morphPos));
       effectiveElW = Math.max(elH, elW - (elW - elH) * m);
       const tx = (elW - effectiveElW) * 0.5;
+      const btnScale = 1 + 0.34 * m;
       if (!child._btnOpenMenu) child._btnOpenMenu = child.querySelector("#btn-open-menu");
       if (child._btnOpenMenu) {
-        child._btnOpenMenu.style.transform = `translate3d(${tx.toFixed(2)}px, 0, 0)`;
+        child._btnOpenMenu.style.transform = `translate3d(${tx.toFixed(2)}px, 0, 0) scale(${btnScale.toFixed(3)})`;
+      }
+      const dockGlassCanvas = this.glassCanvases.get(child);
+      if (dockGlassCanvas) {
+        const glassAlpha = Math.max(0, 1 - m * 1.18);
+        dockGlassCanvas.style.opacity = glassAlpha.toFixed(3);
       }
       if (!child._dockSiblings) {
         child._dockSiblings = Array.from(child.querySelectorAll(".flip-flop-switch, .toolbar-group"));
@@ -2557,6 +2563,9 @@ var LiquidGlass = class _LiquidGlass {
           sib.style.opacity = alpha.toFixed(3);
           sib.style.transform = `translate3d(${shift}px, 0, 0) scale(${sc})`;
         }
+      }
+      if (m >= 0.999) {
+        return;
       }
     }
 
