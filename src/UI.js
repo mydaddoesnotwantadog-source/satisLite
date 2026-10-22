@@ -323,28 +323,25 @@ export class UI {
         if (btnOpenMenu) {
             const toggleMenuState = (open) => {
                 const bottomToolbar = document.getElementById('bottom-toolbar');
+                clearTimeout(this._menuCloseTimer);
                 if (!open) {
                     const isTechActive = techPage && techPage.classList.contains('active');
                     
                     document.body.classList.remove('mobile-menu-open');
                     if (bottomToolbar) {
+                        bottomToolbar._morphLastTime = performance.now();
                         bottomToolbar.classList.remove('dock-compressed');
-                        bottomToolbar.classList.add('dock-expanding');
-                        clearTimeout(this._dockExpandTimer);
-                        this._dockExpandTimer = setTimeout(() => {
-                            bottomToolbar.classList.remove('dock-expanding');
-                        }, 420);
                     }
                     
-                    panel.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s';
-                    panel.style.transformOrigin = '50% 94%';
-                    panel.style.transform = 'translateY(30vh) scale(0.2)';
+                    panel.style.transition = 'transform 0.22s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.2s ease-out';
+                    panel.style.transformOrigin = '50% 92%';
+                    panel.style.transform = 'translate3d(0, 24px, 0) scale(0.96)';
                     panel.style.opacity = '0';
                     
                     if (isTechActive) {
-                        techPage.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s';
-                        techPage.style.transformOrigin = '50% 94%';
-                        techPage.style.transform = 'translateY(30vh) scale(0.2)';
+                        techPage.style.transition = 'transform 0.22s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.2s ease-out';
+                        techPage.style.transformOrigin = '50% 92%';
+                        techPage.style.transform = 'translate3d(0, 24px, 0) scale(0.96)';
                         techPage.style.opacity = '0';
                     } else {
                         if (techPage) techPage.classList.remove('active');
@@ -357,7 +354,7 @@ export class UI {
                     }
                     if (backdrop) backdrop.classList.remove('active');
                     
-                    setTimeout(() => {
+                    this._menuCloseTimer = setTimeout(() => {
                         panel.style.display = 'none';
                         content.style.display = 'none';
                         panel.style.transition = '';
@@ -369,37 +366,36 @@ export class UI {
                             techPage.style.transform = '';
                             techPage.style.opacity = '';
                         }
-                    }, 300);
+                    }, 230);
                 } else {
                     const machineSubmenu = document.getElementById('machine-submenu');
                     if (machineSubmenu) machineSubmenu.classList.remove('show');
 
                     document.body.classList.add('mobile-menu-open');
                     if (bottomToolbar) {
-                        clearTimeout(this._dockExpandTimer);
-                        bottomToolbar.classList.remove('dock-expanding');
+                        bottomToolbar._morphLastTime = performance.now();
                         bottomToolbar.classList.add('dock-compressed');
                     }
 
                     panel.style.display = 'block';
                     content.style.display = 'contents';
-                    panel.style.transformOrigin = '50% 94%';
-                    panel.style.transition = 'transform 0.38s cubic-bezier(0.2, 0.85, 0.2, 1), opacity 0.34s';
-                    panel.style.transform = 'translateY(30vh) scale(0.2)';
+                    panel.style.transformOrigin = '50% 92%';
+                    panel.style.transition = 'none';
+                    panel.style.transform = 'translate3d(0, 26px, 0) scale(0.96)';
                     panel.style.opacity = '0';
-                    
-                    // Trigger reflow
-                    void panel.offsetWidth;
-                    
-                    panel.style.transform = 'translateY(0) scale(1)';
-                    panel.style.opacity = '1';
                     
                     if (techToggle && window.isMobile) techToggle.style.display = '';
                     if (backdrop) backdrop.classList.add('active');
                     
-                    setTimeout(() => {
+                    requestAnimationFrame(() => {
+                        panel.style.transition = 'transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease-out';
+                        panel.style.transform = 'translate3d(0, 0, 0) scale(1)';
+                        panel.style.opacity = '1';
+                    });
+                    
+                    this._menuCloseTimer = setTimeout(() => {
                         panel.style.transition = '';
-                    }, 400);
+                    }, 300);
                 }
             };
             this._toggleMobileMenu = toggleMenuState;

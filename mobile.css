@@ -3,13 +3,14 @@ body.mobile-mode #mobile-backdrop {
     display: block !important;
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
+    background: rgba(14, 16, 22, 0.78);
+    backdrop-filter: blur(20px) saturate(1.6);
+    -webkit-backdrop-filter: blur(20px) saturate(1.6);
     z-index: 950;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: opacity;
+    transition: opacity 0.24s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 body.mobile-mode #mobile-backdrop.active {
@@ -49,8 +50,7 @@ body.mobile-mode * {
 
 /* Make specific popups take up full screen when active */
 body.mobile-mode #recipe-popup,
-body.mobile-mode #leigh-high-popup,
-body.mobile-mode #inventory-panel {
+body.mobile-mode #leigh-high-popup {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
@@ -69,6 +69,31 @@ body.mobile-mode #inventory-panel {
     border: none !important;
     overflow-y: auto;
     align-content: start;
+}
+
+/* Inventory panel sits over #mobile-backdrop (which already owns the stationary full-screen blur),
+   avoiding a second animated full-screen backdrop-filter resize for locked 60/120fps transitions */
+body.mobile-mode #inventory-panel {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    border-radius: 0;
+    box-sizing: border-box;
+    z-index: 10000;
+    margin: 0;
+    padding: 20px;
+    padding-top: max(env(safe-area-inset-top), 32px) !important;
+    padding-bottom: calc(max(env(safe-area-inset-bottom), 14px) + 76px) !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    overflow-y: auto;
+    align-content: start;
+    will-change: transform, opacity;
 }
 
 body.mobile-mode #inventory-header {
@@ -225,7 +250,7 @@ body.mobile-mode #inventory-panel .phone-item-icon {
     margin-right: 9px !important;
 }
 
-/* Native iOS Liquid Glass Dock (Main Menu Bar) */
+/* Native iOS Liquid Glass Dock (Main Menu Bar) — Zero-Reflow GPU Morph */
 body.mobile-mode #bottom-toolbar.ios-dock {
     position: fixed !important;
     bottom: max(env(safe-area-inset-bottom), 14px) !important;
@@ -250,48 +275,26 @@ body.mobile-mode #bottom-toolbar.ios-dock {
         0 10px 28px rgba(0, 0, 0, 0.22),
         inset 0 1px 1px rgba(255, 255, 255, 0.55),
         inset 0 -1px 1px rgba(255, 255, 255, 0.15) !important;
-    transition:
-        padding 0.32s cubic-bezier(0.32, 0.72, 0, 1),
-        gap 0.32s cubic-bezier(0.32, 0.72, 0, 1),
-        transform 0.34s cubic-bezier(0.22, 1.25, 0.36, 1),
-        box-shadow 0.25s ease !important;
     z-index: 900;
 }
 
-@keyframes dockCompressSnap {
-    0% { transform: translateX(-50%) scale(1, 1); }
-    42% { transform: translateX(-50%) scale(0.86, 1.08); }
-    76% { transform: translateX(-50%) scale(1.06, 0.96); }
-    100% { transform: translateX(-50%) scale(1, 1); }
-}
-
-@keyframes dockExpandSnap {
-    0% { transform: translateX(-50%) scale(0.84, 0.92); }
-    52% { transform: translateX(-50%) scale(1.04, 1.02); }
-    82% { transform: translateX(-50%) scale(0.99, 0.99); }
-    100% { transform: translateX(-50%) scale(1, 1); }
+/* When WebGL LiquidGlass is active, the shader renders the morphing capsule/circle,
+   specular rim, and drop shadow directly on its fixed canvas with zero DOM layout reflow */
+body.mobile-mode #bottom-toolbar.ios-dock.liquid-glass-active {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
 }
 
 /* Compressed Circle of Glass state when Inventory Menu is open */
 body.mobile-mode #bottom-toolbar.ios-dock.dock-compressed {
-    padding: 4px !important;
-    gap: 0px !important;
-    border-radius: 999px !important;
-    animation: dockCompressSnap 0.36s cubic-bezier(0.22, 1.25, 0.36, 1) forwards !important;
+    pointer-events: none !important;
 }
 
-body.mobile-mode #bottom-toolbar.ios-dock.dock-expanding {
-    animation: dockExpandSnap 0.38s cubic-bezier(0.22, 1.25, 0.36, 1) forwards !important;
-}
-
-body.mobile-mode #bottom-toolbar.ios-dock.liquid-glass-active {
-    background: rgba(255, 255, 255, 0.05) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border: 1px solid rgba(255, 255, 255, 0.26) !important;
-    box-shadow:
-        inset 0 1px 1px rgba(255, 255, 255, 0.55),
-        inset 0 -1px 1px rgba(255, 255, 255, 0.15) !important;
+body.mobile-mode #bottom-toolbar.ios-dock:not(.liquid-glass-active).dock-compressed {
+    clip-path: inset(0 calc((100% - 46px) / 2) 0 calc((100% - 46px) / 2) round 999px);
 }
 
 /* Remove industrial LED strips on mobile */
@@ -307,15 +310,12 @@ body.mobile-mode #bottom-toolbar .toolbar-group {
     gap: 2px;
     margin: 0 !important;
     position: relative;
-    max-width: 118px;
     opacity: 1;
-    transform: scale(1);
-    transform-origin: left center;
-    overflow: hidden;
+    transform: translate3d(0, 0, 0) scale(1);
+    will-change: transform, opacity;
     transition:
-        max-width 0.32s cubic-bezier(0.32, 0.72, 0, 1),
-        opacity 0.18s ease,
-        transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+        opacity 0.18s cubic-bezier(0.22, 1, 0.36, 1) 0.03s,
+        transform 0.24s cubic-bezier(0.22, 1, 0.36, 1) 0.02s;
 }
 
 body.mobile-mode #bottom-toolbar .toolbar-group::before,
@@ -328,25 +328,16 @@ body.mobile-mode #bottom-toolbar .flip-flop-switch::before {
     margin: 0 2px;
     flex-shrink: 0;
     pointer-events: none;
-    transition: opacity 0.15s ease;
 }
 
 body.mobile-mode #bottom-toolbar.ios-dock.dock-compressed .flip-flop-switch,
 body.mobile-mode #bottom-toolbar.ios-dock.dock-compressed .toolbar-group {
-    max-width: 0px !important;
-    width: 0px !important;
     opacity: 0 !important;
-    transform: scale(0.6) !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    transform: translate3d(-18px, 0, 0) scale(0.86) !important;
     pointer-events: none !important;
-}
-
-body.mobile-mode #bottom-toolbar.ios-dock.dock-compressed .toolbar-group::before,
-body.mobile-mode #bottom-toolbar.ios-dock.dock-compressed .flip-flop-switch::before {
-    opacity: 0 !important;
-    width: 0 !important;
-    margin: 0 !important;
+    transition:
+        opacity 0.12s ease-out,
+        transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Integrated flush segment buttons inside the Liquid Glass bar */
@@ -410,22 +401,24 @@ body.mobile-mode #btn-open-menu {
     margin: 0 !important;
     border-radius: 50% !important;
     flex: 0 0 36px !important;
+    pointer-events: auto !important;
+    will-change: transform;
+    z-index: 2;
 }
 
 body.mobile-mode #btn-open-menu .menu-pkg-icon {
     display: inline-block;
     font-size: 1.18em;
     line-height: 1;
-    transition: transform 0.34s cubic-bezier(0.22, 1.35, 0.36, 1);
+    transition: transform 0.26s cubic-bezier(0.22, 1.35, 0.36, 1);
 }
 
 body.mobile-mode #bottom-toolbar.ios-dock.dock-compressed #btn-open-menu .menu-pkg-icon {
-    transform: scale(1.12);
+    transform: scale(1.1);
 }
 
 body.mobile-mode #btn-open-menu:active {
-    background: rgba(255, 255, 255, 0.24) !important;
-    border-color: rgba(255, 255, 255, 0.38) !important;
+    background: rgba(255, 255, 255, 0.22) !important;
 }
 
 body.mobile-mode #btn-open-menu:active .menu-pkg-icon {
@@ -442,20 +435,16 @@ body.mobile-mode .flip-flop-switch {
     padding: 0 !important;
     box-shadow: none !important;
     width: 126px;
-    max-width: 126px;
     height: 36px !important;
     box-sizing: border-box !important;
     flex: 0 0 auto;
     margin: 0 !important;
     opacity: 1;
-    transform: scale(1);
-    transform-origin: left center;
-    overflow: hidden;
+    transform: translate3d(0, 0, 0) scale(1);
+    will-change: transform, opacity;
     transition:
-        max-width 0.32s cubic-bezier(0.32, 0.72, 0, 1),
-        width 0.32s cubic-bezier(0.32, 0.72, 0, 1),
-        opacity 0.18s ease,
-        transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+        opacity 0.18s cubic-bezier(0.22, 1, 0.36, 1) 0.03s,
+        transform 0.24s cubic-bezier(0.22, 1, 0.36, 1) 0.02s;
 }
 
 body.mobile-mode .switch-thumb {

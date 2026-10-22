@@ -5,7 +5,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { CameraController } from './CameraController.js';
 import { GridSystem } from './GridSystem.js';
-import { PlacementSystem } from './PlacementSystem.js?v=3.2.6';
+import { PlacementSystem } from './PlacementSystem.js?v=3.2.7';
 import { FXSystem } from './FXSystem.js';
 import { SoundEngine } from './SoundEngine.js';
 

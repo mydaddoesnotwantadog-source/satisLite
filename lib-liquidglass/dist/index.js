@@ -1415,12 +1415,12 @@ void main() {
 	col = mix(col, vec3(0.96, 0.98, 1.0), 0.06);
 
 	// ── Crisp iOS Specular Rim Hairline (1.2px border light, no puffed 3D dome) ──
-	float rimBand = smoothstep(-2.4, -0.8, sdf) * (1.0 - smoothstep(-0.6, 0.2, sdf));
+	float rimBand = smoothstep(-2.2, -0.7, sdf) * (1.0 - smoothstep(-0.5, 0.2, sdf));
 	vec2 normPos = v_localPx / max(half_, vec2(1.0));
 	// Top-left primary specular catchlight + bottom-right secondary counter-reflection
 	float topLeftCatch = clamp((-normPos.y * 0.75 - normPos.x * 0.25) * 0.5 + 0.5, 0.0, 1.0);
 	float botRightCatch = clamp((normPos.y * 0.65 + normPos.x * 0.35) * 0.5 + 0.5, 0.0, 1.0);
-	float directionalRim = pow(topLeftCatch, 1.6) * 0.85 + pow(botRightCatch, 2.2) * 0.35 + 0.18;
+	float directionalRim = pow(topLeftCatch, 1.5) * 0.92 + pow(botRightCatch, 2.0) * 0.42 + 0.26;
 
 	// Subtle perimeter refraction sheen (confined strictly to the outer 2.5px)
 	float thinFresnel = pow(1.0 - abs(N.z), 3.0) * smoothstep(3.5, 0.0, inside) * u_fresnel * 0.18;
@@ -1428,7 +1428,7 @@ void main() {
 
 	// ── Composite ──
 	vec3 fin = col;
-	fin += vec3(rimBand * directionalRim * (u_edgeHL * 1.35 + 0.12));
+	fin += vec3(rimBand * directionalRim * (u_edgeHL * 1.50 + 0.16));
 	fin += vec3(thinFresnel + subtleSpec);
 
 	gl_FragColor = vec4(fin, mask * u_alpha);
@@ -2501,11 +2501,49 @@ var LiquidGlass = class _LiquidGlass {
    * glasses can check whether they need to refresh too.
    */
   _renderGlassElement(child, rootRect, dpr, isDragging, dirtyTargets, renderedThisFrame) {
+    if ((child.id === "resource-panel" || child.id === "goal-panel") && document.body.classList.contains("mobile-menu-open")) {
+      return;
+    }
     const config = this._getConfig(child);
     const elRect = child.getBoundingClientRect();
     const elW = child.offsetWidth;
     const elH = child.offsetHeight;
     if (elW <= 0 || elH <= 0) return;
+
+    // Zero-reflow WebGL SDF capsule-to-circle morph for #bottom-toolbar
+    let effectiveElW = elW;
+    let morphDirty = false;
+    if (child.id === "bottom-toolbar") {
+      const targetMorph = child.classList.contains("dock-compressed") ? 1 : 0;
+      const now = performance.now();
+      if (child._morphPos === void 0) {
+        child._morphPos = targetMorph;
+        child._morphVel = 0;
+        child._morphLastTime = now;
+      }
+      const dt = Math.min(0.033, Math.max(1e-3, (now - child._morphLastTime) * 1e-3));
+      child._morphLastTime = now;
+      const dist = targetMorph - child._morphPos;
+      if (Math.abs(dist) > 5e-4 || Math.abs(child._morphVel) > 2e-3) {
+        // Snappy critically-damped iOS spring (zero layout reflow, pure uniform update)
+        const force = dist * 420;
+        child._morphVel += (force - child._morphVel * 38) * dt;
+        child._morphPos += child._morphVel * dt;
+        if (Math.abs(targetMorph - child._morphPos) <= 5e-4 && Math.abs(child._morphVel) <= 2e-3) {
+          child._morphPos = targetMorph;
+          child._morphVel = 0;
+        }
+        morphDirty = true;
+      }
+      const m = Math.max(0, Math.min(1.04, child._morphPos));
+      effectiveElW = Math.max(elH, elW - (elW - elH) * m);
+      if (!child._btnOpenMenu) child._btnOpenMenu = child.querySelector("#btn-open-menu");
+      if (child._btnOpenMenu) {
+        const tx = (elW - effectiveElW) * 0.5;
+        child._btnOpenMenu.style.transform = tx > 0.05 ? `translate3d(${tx.toFixed(2)}px, 0, 0)` : "";
+      }
+    }
+
     const centerX = elRect.left - rootRect.left + elRect.width / 2;
     const centerY = elRect.top - rootRect.top + elRect.height / 2;
     const glassCanvas = this.glassCanvases.get(child);
@@ -2521,7 +2559,7 @@ var LiquidGlass = class _LiquidGlass {
         break;
       }
     }
-    const isExplicitlyDirty = dirtyTargets.has(child);
+    const isExplicitlyDirty = dirtyTargets.has(child) || morphDirty;
     const needsShaderRender = isDragging ? isBeingDragged || isExplicitlyDirty || priorGlassChanged || hasDynamicContributors : !cached || posChanged || isExplicitlyDirty || priorGlassChanged || hasDynamicContributors;
     if (needsShaderRender && glassCanvas) {
       const renderW = glassCanvas.width;
@@ -2538,7 +2576,7 @@ var LiquidGlass = class _LiquidGlass {
       this.renderer.clear();
       this.renderer.renderGlassPanel(
         config,
-        elW,
+        effectiveElW,
         elH,
         dpr
       );
