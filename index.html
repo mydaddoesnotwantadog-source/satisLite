@@ -11,8 +11,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=3.2.5">
-    <link rel="stylesheet" href="mobile.css?v=3.2.5">
+    <link rel="stylesheet" href="style.css?v=3.2.6">
+    <link rel="stylesheet" href="mobile.css?v=3.2.6">
 
     <!-- Import map for Three.js and LiquidGlass so we can use modern ES imports without a bundler -->
     <script type="importmap">
@@ -20,7 +20,7 @@
         "imports": {
             "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
             "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
-            "liquidglass": "./lib-liquidglass/dist/index.js?v=3.2.4"
+            "liquidglass": "./lib-liquidglass/dist/index.js?v=3.2.6"
         }
     }
     </script>
@@ -140,6 +140,21 @@
             </div>
 
             <div id="inventory-content" style="display: contents;">
+                <!-- Mobile Milestone / Demands Banner -->
+                <div id="mobile-demands-banner" class="mobile-demands-banner mobile-only">
+                    <div class="demands-banner-top">
+                        <div class="demands-banner-titles">
+                            <span class="demands-banner-eyebrow">Big Thune's Demands</span>
+                            <span class="demands-banner-subtitle" id="mobile-goal-subtitle">Unlock Constructor</span>
+                        </div>
+                        <span class="demands-banner-status" id="mobile-goal-status">0/2 Ready</span>
+                    </div>
+                    <button id="btn-launch-rocket-mobile" class="nuke-btn mobile-launch-btn" style="display: none;">
+                        LAUNCH RESOURCES
+                    </button>
+                </div>
+
+                <h2 class="mobile-only" style="margin-top: 4px; grid-column: 1 / -1;">Stored Raw Materials</h2>
                 <!-- Raw Materials -->
                 <div class="resource-item">
                     <span class="resource-icon" style="background: #BDC3C7;"></span>
@@ -207,6 +222,13 @@
                     <span class="resource-icon" style="background: #9b59b6;"></span>
                     <span class="resource-name">Panel</span>
                     <span class="resource-value" id="res-panel">0</span>
+                </div>
+
+                <h2 class="mobile-only" style="margin-top: 10px; grid-column: 1 / -1;">Special Items</h2>
+                <div class="resource-item mobile-only" id="inv-phones-row">
+                    <span class="resource-icon phone-item-icon">📱</span>
+                    <span class="resource-name">Phones</span>
+                    <span class="resource-value" id="res-phones-inv">0</span>
                 </div>
             </div> <!-- Close inventory-content -->
         </div>
@@ -387,7 +409,7 @@
         data-config='{"cornerRadius":99,"zRadius":7,"refraction":0.88,"chromAberration":0.09,"distortion":0.48,"edgeHighlight":0.26,"fresnel":0.35,"specular":0.20,"blurAmount":1.6,"brightness":0.08,"saturation":0.38,"tintStrength":0.12,"shadowOpacity":0.26,"shadowSpread":14}'>
         <!-- Menu Button (Mobile Only) -->
         <button id="btn-open-menu" class="dock-btn menu-btn" style="display: none;" aria-label="Storage">
-            <span style="font-size: 1.15em;">📦</span>
+            <span class="menu-pkg-icon">📦</span>
         </button>
         
         <!-- Flip Flop Switch (Center) -->
@@ -408,7 +430,7 @@
     </div>
 
     <!-- Main Game Logic -->
-    <script type="module" src="src/main.js?v=3.2.4"></script>
+    <script type="module" src="src/main.js?v=3.2.6"></script>
 </body>
 
 </html>

@@ -2328,6 +2328,7 @@ var LiquidGlass = class _LiquidGlass {
         this._glassCache.delete(el);
         this.capture.invalidateCache(el);
         this._glassContentDirty.add(el);
+        this._glassDirty.add(el);
         changed = true;
       }
     }

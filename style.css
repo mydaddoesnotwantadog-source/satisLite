@@ -899,7 +899,8 @@ body:not(.mobile-mode) .ios-dock {
 }
 
 .dock-btn.menu-btn,
-#btn-open-menu {
+#btn-open-menu,
+body:not(.mobile-mode) .mobile-only {
     display: none !important;
 }
 

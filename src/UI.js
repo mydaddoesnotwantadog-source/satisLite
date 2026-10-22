@@ -27,9 +27,14 @@ export class UI {
         for (const res of this._rateResources) {
             this._resourceEls[res] = document.getElementById(`res-${res}`);
         }
+        this.elPhonesInv = document.getElementById('res-phones-inv');
         this.elGoalSubtitle = document.getElementById('goal-subtitle');
         this.elGoalReqDiv = document.getElementById('goal-requirements');
         this.elLaunchBtn = document.getElementById('btn-launch-rocket');
+        this.elMobileGoalSubtitle = document.getElementById('mobile-goal-subtitle');
+        this.elMobileGoalStatus = document.getElementById('mobile-goal-status');
+        this.elMobileLaunchBtn = document.getElementById('btn-launch-rocket-mobile');
+        this.elBottomToolbar = document.getElementById('bottom-toolbar');
         this.elRecipeProgressBar = document.getElementById('recipe-progress-bar');
         this.elRecipeBufferStatus = document.getElementById('recipe-buffer-status');
         this.elLeighPopup = document.getElementById('leigh-high-popup');
@@ -228,6 +233,20 @@ export class UI {
             launchBtn.addEventListener('click', () => {
                 if (this.app.soundEngine) this.app.soundEngine.play('click');
                 launchBtn.style.display = 'none';
+                if (this.elMobileLaunchBtn) this.elMobileLaunchBtn.style.display = 'none';
+                if (this.app.triggerRocketLaunch) {
+                    this.app.triggerRocketLaunch();
+                }
+            });
+        }
+
+        const mobileLaunchBtn = document.getElementById('btn-launch-rocket-mobile');
+        if (mobileLaunchBtn) {
+            mobileLaunchBtn.addEventListener('click', () => {
+                if (this.app.soundEngine) this.app.soundEngine.play('click');
+                mobileLaunchBtn.style.display = 'none';
+                if (launchBtn) launchBtn.style.display = 'none';
+                if (this._toggleMobileMenu) this._toggleMobileMenu(false);
                 if (this.app.triggerRocketLaunch) {
                     this.app.triggerRocketLaunch();
                 }
@@ -303,17 +322,28 @@ export class UI {
 
         if (btnOpenMenu) {
             const toggleMenuState = (open) => {
+                const bottomToolbar = document.getElementById('bottom-toolbar');
                 if (!open) {
                     const isTechActive = techPage && techPage.classList.contains('active');
                     
+                    document.body.classList.remove('mobile-menu-open');
+                    if (bottomToolbar) {
+                        bottomToolbar.classList.remove('dock-compressed');
+                        bottomToolbar.classList.add('dock-expanding');
+                        clearTimeout(this._dockExpandTimer);
+                        this._dockExpandTimer = setTimeout(() => {
+                            bottomToolbar.classList.remove('dock-expanding');
+                        }, 420);
+                    }
+                    
                     panel.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s';
-                    panel.style.transformOrigin = 'bottom left';
+                    panel.style.transformOrigin = '50% 94%';
                     panel.style.transform = 'translateY(30vh) scale(0.2)';
                     panel.style.opacity = '0';
                     
                     if (isTechActive) {
                         techPage.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s';
-                        techPage.style.transformOrigin = 'bottom left';
+                        techPage.style.transformOrigin = '50% 94%';
                         techPage.style.transform = 'translateY(30vh) scale(0.2)';
                         techPage.style.opacity = '0';
                     } else {
@@ -341,10 +371,20 @@ export class UI {
                         }
                     }, 300);
                 } else {
+                    const machineSubmenu = document.getElementById('machine-submenu');
+                    if (machineSubmenu) machineSubmenu.classList.remove('show');
+
+                    document.body.classList.add('mobile-menu-open');
+                    if (bottomToolbar) {
+                        clearTimeout(this._dockExpandTimer);
+                        bottomToolbar.classList.remove('dock-expanding');
+                        bottomToolbar.classList.add('dock-compressed');
+                    }
+
                     panel.style.display = 'block';
                     content.style.display = 'contents';
-                    panel.style.transformOrigin = 'bottom left';
-                    panel.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s';
+                    panel.style.transformOrigin = '50% 94%';
+                    panel.style.transition = 'transform 0.38s cubic-bezier(0.2, 0.85, 0.2, 1), opacity 0.34s';
                     panel.style.transform = 'translateY(30vh) scale(0.2)';
                     panel.style.opacity = '0';
                     
@@ -362,6 +402,7 @@ export class UI {
                     }, 400);
                 }
             };
+            this._toggleMobileMenu = toggleMenuState;
 
             btnOpenMenu.addEventListener('click', () => {
                 if (this.app.soundEngine) this.app.soundEngine.play('whoosh');
@@ -501,17 +542,7 @@ export class UI {
             machineSubmenu.classList.toggle('show');
             
             if (window.isMobile) {
-                const invPanel = document.getElementById('inventory-panel');
                 const isMenuOpen = machineSubmenu.classList.contains('show');
-                
-                if (invPanel) {
-                    if (isMenuOpen) {
-                        invPanel.style.display = 'none';
-                    } else {
-                        invPanel.style.display = '';
-                    }
-                }
-                
                 if (this.app.scene && this.app.scene.gridSystem) {
                     this.app.scene.gridSystem.instancedLeaves.visible = !isMenuOpen;
                 }
@@ -1109,13 +1140,73 @@ export class UI {
     }
 
     updateDisplay() {
-        // Update Inventory UI with dirty checks
+        // Determine active quest demands map for integrated inventory rows
+        let questDemands = {};
+        let questTitle = "All Demands Complete";
+        if (this.logic.currentQuest === 1) {
+            questTitle = "Unlock Constructor";
+            questDemands = { ironIngot: 100, copperIngot: 100 };
+        } else if (this.logic.currentQuest === 2) {
+            questTitle = "Unlock Big Constructor";
+            questDemands = { ironPlate: 25, ironRod: 25 };
+        } else if (this.logic.currentQuest === 3) {
+            questTitle = "Deliver Panels";
+            questDemands = { panel: 15 };
+        }
+        const isMobileView = window.isMobile || document.body.classList.contains('mobile-mode');
+        let metDemandsCount = 0;
+        const totalDemandsCount = Object.keys(questDemands).length;
+
+        // Update Inventory UI with dirty checks + integrated demand rows
         for (const res of this._rateResources) {
             const el = this._resourceEls[res];
             if (el) {
                 const key = this._rateKeys[res];
+                const val = Math.floor(this.logic.inventory[key] || 0);
+                const row = el.parentElement;
+                const demandMax = (res !== 'phones') ? questDemands[res] : undefined;
+
+                if (row && res !== 'phones') {
+                    if (demandMax) {
+                        if (!row.classList.contains('demanded-item')) {
+                            row.classList.add('demanded-item');
+                        }
+                        if (!row._demandFillEl) {
+                            const fillEl = document.createElement('div');
+                            fillEl.className = 'demand-row-fill mobile-only';
+                            row.insertBefore(fillEl, row.firstChild);
+                            row._demandFillEl = fillEl;
+                        }
+                        const nameEl = row.querySelector('.resource-name');
+                        if (nameEl && !row._demandBadgeEl) {
+                            const badgeEl = document.createElement('span');
+                            badgeEl.className = 'demand-badge mobile-only';
+                            nameEl.appendChild(badgeEl);
+                            row._demandBadgeEl = badgeEl;
+                        }
+                        const pct = Math.min(100, Math.max(0, (val / demandMax) * 100));
+                        const isMet = val >= demandMax;
+                        if (isMet) metDemandsCount++;
+                        row.dataset.demandMet = isMet ? 'true' : 'false';
+                        if (row._demandFillEl._lastPct !== pct) {
+                            row._demandFillEl.style.width = pct + '%';
+                            row._demandFillEl._lastPct = pct;
+                        }
+                        const badgeText = isMet ? 'READY ✓' : 'DEMAND';
+                        if (row._demandBadgeEl && row._demandBadgeEl._lastText !== badgeText) {
+                            row._demandBadgeEl.textContent = badgeText;
+                            row._demandBadgeEl._lastText = badgeText;
+                        }
+                    } else if (row.classList.contains('demanded-item')) {
+                        row.classList.remove('demanded-item');
+                        delete row.dataset.demandMet;
+                        if (row._demandFillEl) row._demandFillEl.style.width = '0%';
+                        el._lastVal = null;
+                        el._lastDemandHtml = null;
+                    }
+                }
                 
-                if (el.parentElement && el.parentElement.dataset.showDerivative === 'true') {
+                if (row && row.dataset.showDerivative === 'true') {
                     const rate = this._rates[res] || 0;
                     const rounded = Math.round(rate);
                     const sign = rounded >= 0 ? '+' : '';
@@ -1124,16 +1215,73 @@ export class UI {
                     if (el._lastDerivativeHtml !== html) {
                         el.innerHTML = html;
                         el._lastDerivativeHtml = html;
+                        el._lastVal = null;
+                        el._lastDemandHtml = null;
+                    }
+                } else if (demandMax && isMobileView) {
+                    const isMet = val >= demandMax;
+                    const demandHtml = `<span class="demand-cur${isMet ? ' met' : ''}">${val}</span><span class="demand-slash">/${demandMax}</span>`;
+                    if (el._lastDemandHtml !== demandHtml) {
+                        el.innerHTML = demandHtml;
+                        el._lastDemandHtml = demandHtml;
+                        el._lastVal = null;
+                        el._lastDerivativeHtml = null;
                     }
                 } else {
-                    const val = Math.floor(this.logic.inventory[key] || 0);
-                    if (el._lastVal !== val) {
+                    if (el._lastVal !== val || el._lastDemandHtml !== null) {
                         el.textContent = val;
                         el._lastVal = val;
                         el._lastDerivativeHtml = null;
+                        el._lastDemandHtml = null;
                     }
                 }
             }
+        }
+
+        // Update Special Items -> Phones row in mobile inventory list
+        if (this.elPhonesInv) {
+            const phonesRow = this.elPhonesInv.parentElement;
+            if (phonesRow && phonesRow.dataset.showDerivative === 'true') {
+                const rate = this._rates['phones'] || 0;
+                const rounded = Math.round(rate);
+                const sign = rounded >= 0 ? '+' : '';
+                const color = rounded > 0 ? '#5f5' : rounded < 0 ? '#f55' : '#aaa';
+                const html = `<span style="color:${color}; font-family:'Courier New',monospace; font-weight:bold;">${sign}${rounded}/s</span>`;
+                if (this.elPhonesInv._lastDerivativeHtml !== html) {
+                    this.elPhonesInv.innerHTML = html;
+                    this.elPhonesInv._lastDerivativeHtml = html;
+                    this.elPhonesInv._lastVal = null;
+                }
+            } else {
+                const phonesVal = Math.floor(this.logic.inventory.confiscatedPhones || 0);
+                if (this.elPhonesInv._lastVal !== phonesVal) {
+                    this.elPhonesInv.textContent = phonesVal;
+                    this.elPhonesInv._lastVal = phonesVal;
+                    this.elPhonesInv._lastDerivativeHtml = null;
+                }
+            }
+        }
+
+        // Update Mobile Inventory Demands Banner
+        if (this.elMobileGoalSubtitle) {
+            if (this.elMobileGoalSubtitle._lastText !== questTitle) {
+                this.elMobileGoalSubtitle.textContent = questTitle;
+                this.elMobileGoalSubtitle._lastText = questTitle;
+            }
+        }
+        const questReady = this.logic.isCurrentQuestReady() && !this.app.isLaunchingRockets;
+        if (this.elMobileGoalStatus) {
+            const statusText = totalDemandsCount > 0
+                ? (metDemandsCount >= totalDemandsCount ? 'Ready to Launch' : `${metDemandsCount}/${totalDemandsCount} Met`)
+                : 'Complete ✓';
+            if (this.elMobileGoalStatus._lastText !== statusText) {
+                this.elMobileGoalStatus.textContent = statusText;
+                this.elMobileGoalStatus._lastText = statusText;
+            }
+            this.elMobileGoalStatus.classList.toggle('ready', metDemandsCount >= totalDemandsCount && totalDemandsCount > 0);
+        }
+        if (this.elMobileLaunchBtn) {
+            this.elMobileLaunchBtn.style.display = questReady ? 'block' : 'none';
         }
         
         // Re-populate machines menu only when unlocked count changes
@@ -1438,8 +1586,8 @@ export class UI {
             const valueEl = item.querySelector('.resource-value');
             if (!valueEl) return;
             
-            // Extract the resource key from the id (e.g. "res-iron" -> "iron")
-            const resId = valueEl.id.replace('res-', '');
+            // Extract the resource key from the id (e.g. "res-iron" -> "iron", "res-phones-inv" -> "phones")
+            const resId = valueEl.id.replace('res-', '').replace('-inv', '');
             const nameEl = item.querySelector('.resource-name');
             const resName = nameEl ? nameEl.textContent.trim() : resId;
             
