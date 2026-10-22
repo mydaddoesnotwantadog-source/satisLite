@@ -37,13 +37,24 @@ export class GameLogic {
             iron: 0, copper: 0, coal: 0, gold: 0,
             water: 0, poop: 0, 
             ironIngot: 0, copperIngot: 0, goldIngot: 0,
+            ironRod: 0, ironPlate: 0, copperWire: 0,
             wire: 0, gears: 0, circuitBoard: 0,
-            frame: 0, chassis: 0, computer: 0,
+            frame: 0, panel: 0, chassis: 0, computer: 0,
             confiscatedPhones: 150
         };
+        this.currentQuest = 1;
+        this.otherBuildings = BUILDING_DEFINITIONS.map(b => ({ ...b }));
         this.buildings = [];
         this.drones = [];
         this.brokenTrees = [];
+    }
+
+    setQuestLevel(questLevel) {
+        this.currentQuest = Math.max(1, questLevel || 1);
+        const constructorBld = this.otherBuildings.find(b => b.id === 'constructor');
+        const bigConstructorBld = this.otherBuildings.find(b => b.id === 'bigConstructor');
+        if (constructorBld) constructorBld.unlocked = this.currentQuest >= 2;
+        if (bigConstructorBld) bigConstructorBld.unlocked = this.currentQuest >= 3;
     }
 
     canAfford(toolId) {

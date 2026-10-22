@@ -14,6 +14,7 @@ export class SaveManager {
             const data = {
                 mapSize,
                 difficulty,
+                currentQuest: this.gameLogic.currentQuest || 1,
                 inventory: this.gameLogic.inventory,
                 timestamp: Date.now(),
                 buildings: this.gameLogic.buildings.map(b => ({
@@ -73,6 +74,24 @@ export class SaveManager {
                 }
             }
             this.gameLogic.brokenTrees = data.brokenTrees || [];
+
+            // Restore currentQuest (with smart fallback inference for older saves that didn't store currentQuest)
+            let restoredQuest = data.currentQuest || 1;
+            if (!data.currentQuest) {
+                const blds = data.buildings || [];
+                const inv = data.inventory || {};
+                const hasBigConstructor = blds.some(b => b.id === 'bigConstructor' || b.type === 'bigConstructor');
+                const hasConstructor = blds.some(b => b.id === 'constructor' || b.type === 'constructor') ||
+                    (inv.ironPlate > 0 || inv.ironRod > 0 || inv.copperWire > 0 || inv.frame > 0);
+                if (inv.panel >= 15) {
+                    restoredQuest = Math.max(restoredQuest, 3);
+                } else if (hasBigConstructor) {
+                    restoredQuest = Math.max(restoredQuest, 3);
+                } else if (hasConstructor) {
+                    restoredQuest = Math.max(restoredQuest, 2);
+                }
+            }
+            this.gameLogic.setQuestLevel(restoredQuest);
             
             // First, animate breaking the trees that were cleared by the player
             let treeIndex = 0;

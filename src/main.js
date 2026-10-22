@@ -1,9 +1,9 @@
-import { GameScene } from './GameScene.js?v=3.2.16';
-import { UI } from './UI.js?v=3.2.16';
-import { GameLogic } from './GameLogic.js';
-import { SaveManager } from './SaveManager.js';
-import { MobileInputManager } from './MobileInputManager.js?v=3.2.16';
-import { GlassManager } from './GlassManager.js?v=3.2.16';
+import { GameScene } from './GameScene.js?v=3.2.17';
+import { UI } from './UI.js?v=3.2.17';
+import { GameLogic } from './GameLogic.js?v=3.2.17';
+import { SaveManager } from './SaveManager.js?v=3.2.17';
+import { MobileInputManager } from './MobileInputManager.js?v=3.2.17';
+import { GlassManager } from './GlassManager.js?v=3.2.17';
 
 class GameApp {
     constructor() {
@@ -89,12 +89,18 @@ class GameApp {
                 this.logic.advanceQuest();
                 this.isLaunchingRockets = false;
                 this.ui.updateDisplay();
+                if (this.scene.gridSystem) {
+                    this.saveManager.saveGame(this.scene.gridSystem.mapSize, this.logic.inventory.confiscatedPhones);
+                }
             });
         } else {
             // Fallback if not implemented
             this.logic.advanceQuest();
             this.isLaunchingRockets = false;
             this.ui.updateDisplay();
+            if (this.scene.gridSystem) {
+                this.saveManager.saveGame(this.scene.gridSystem.mapSize, this.logic.inventory.confiscatedPhones);
+            }
         }
     }
     
@@ -203,8 +209,10 @@ class GameApp {
                 this.ui.updateDisplay();
                 doZoomTransition(() => {
                     this.saveManager.loadGame(this.scene.placementSystem, () => {
+                        this.ui.updateDisplay();
                         this.revealMainUi();
                     });
+                    this.ui.updateDisplay();
                 });
             }
         });
