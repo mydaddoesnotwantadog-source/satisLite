@@ -35,44 +35,46 @@ export class GridSystem {
         this.treeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x8B5A2B, roughness: 0.9, flatShading: true }); // Rich warm wood
         this.treeLeavesMat = new THREE.MeshStandardMaterial({ color: 0x45B36B, roughness: 0.8, flatShading: true }); // Saturated vibrant canopy
         
-        // Custom shader for seeing through leaves around the mouse ray
-        this.treeLeavesMat.onBeforeCompile = (shader) => {
-            shader.uniforms.uRayOrigin = { value: new THREE.Vector3(0,0,0) };
-            shader.uniforms.uRayDir = { value: new THREE.Vector3(0,-1,0) };
-            shader.uniforms.uRadius = { value: 2.5 };
-            
-            shader.vertexShader = `
-                varying vec3 vMyWorldPos;
-                ${shader.vertexShader}
-            `.replace(
-                `#include <worldpos_vertex>`,
-                `
-                #include <worldpos_vertex>
-                #ifdef USE_INSTANCING
-                    vMyWorldPos = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz;
-                #else
-                    vMyWorldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;
-                #endif
-                `
-            );
-            
-            shader.fragmentShader = `
-                uniform vec3 uRayOrigin;
-                uniform vec3 uRayDir;
-                uniform float uRadius;
-                varying vec3 vMyWorldPos;
-                ${shader.fragmentShader}
-            `.replace(
-                `#include <alphatest_fragment>`,
-                `
-                #include <alphatest_fragment>
-                float distToRay = length(cross(uRayDir, vMyWorldPos - uRayOrigin));
-                if (distToRay < uRadius) discard;
-                `
-            );
-            
-            this.treeLeavesMat.userData.shader = shader;
-        };
+        // Custom shader for seeing through leaves around the mouse ray (desktop only; initialized far off-map)
+        if (!window.isMobile) {
+            this.treeLeavesMat.onBeforeCompile = (shader) => {
+                shader.uniforms.uRayOrigin = { value: new THREE.Vector3(99999, 99999, 99999) };
+                shader.uniforms.uRayDir = { value: new THREE.Vector3(0, -1, 0) };
+                shader.uniforms.uRadius = { value: 2.5 };
+                
+                shader.vertexShader = `
+                    varying vec3 vMyWorldPos;
+                    ${shader.vertexShader}
+                `.replace(
+                    `#include <worldpos_vertex>`,
+                    `
+                    #include <worldpos_vertex>
+                    #ifdef USE_INSTANCING
+                        vMyWorldPos = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz;
+                    #else
+                        vMyWorldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;
+                    #endif
+                    `
+                );
+                
+                shader.fragmentShader = `
+                    uniform vec3 uRayOrigin;
+                    uniform vec3 uRayDir;
+                    uniform float uRadius;
+                    varying vec3 vMyWorldPos;
+                    ${shader.fragmentShader}
+                `.replace(
+                    `#include <alphatest_fragment>`,
+                    `
+                    #include <alphatest_fragment>
+                    float distToRay = length(cross(uRayDir, vMyWorldPos - uRayOrigin));
+                    if (distToRay < uRadius) discard;
+                    `
+                );
+                
+                this.treeLeavesMat.userData.shader = shader;
+            };
+        }
         
         this.generateMap();
     }
