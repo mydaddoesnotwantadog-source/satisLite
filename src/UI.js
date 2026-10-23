@@ -1,4 +1,4 @@
-import { ALL_ITEM_KEYS } from './Config.js';
+import { ALL_ITEM_KEYS, getItemDisplayName } from './Config.js';
 
 export class UI {
     constructor(app, logic) {
@@ -76,60 +76,54 @@ export class UI {
     }
     
     showNotification(text, color = '#2ecc71') {
+        const isMobile = window.isMobile || document.body.classList.contains('mobile-mode');
         const toast = document.createElement('div');
-        toast.className = 'glass-panel';
-        toast.style.position = 'fixed';
-        toast.style.left = '50%';
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
         toast.style.top = '-100px'; // Start off-screen
-        toast.style.transform = 'translateX(-50%)';
-        toast.style.zIndex = '25000';
-        toast.style.transition = 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; // Springy effect
-        toast.style.display = 'flex';
-        toast.style.alignItems = 'center';
-        toast.style.gap = '15px';
-        toast.style.padding = '15px 30px';
-        toast.style.border = '1px solid rgba(255, 255, 255, 0.1)';
-        toast.style.borderTop = `2px solid ${color}`;
-        toast.style.boxShadow = `0 10px 30px rgba(0,0,0,0.8), inset 0 10px 20px rgba(0,0,0,0.5), 0 0 15px ${color}40`;
-        toast.style.pointerEvents = 'none';
 
-        if (text.toLowerCase().includes('sav') && (window.isMobile || document.body.classList.contains('mobile-mode'))) {
-            toast.className = 'save-toast';
-            toast.style.background = 'rgba(255, 255, 255, 0.12)';
-            toast.style.backdropFilter = 'url(#apple-liquid-glass) blur(16px) saturate(180%)';
-            toast.style.webkitBackdropFilter = 'blur(18px) saturate(180%)';
-            toast.style.borderRadius = '999px';
-            toast.style.border = '1px solid rgba(255, 255, 255, 0.28)';
-            toast.style.boxShadow = '0 10px 28px rgba(0, 0, 0, 0.22), inset 0 1px 1px rgba(255, 255, 255, 0.58), inset 0 -1px 1px rgba(255, 255, 255, 0.16)';
-            toast.style.color = '#ffffff';
-            toast.style.padding = '10px 22px';
-            toast.style.gap = '12px';
-            
-            toast.innerHTML = `
-                <div style="position: relative; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;">
-                    <svg width="22" height="22" viewBox="0 0 24 24" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg); overflow: visible; filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.65));">
+        const lowerText = text.toLowerCase();
+        const isSaveNotif = lowerText.includes('sav');
+        let icon = 'ℹ️';
+        if (lowerText.includes('phone') || lowerText.includes('hotel') || lowerText.includes('bethune')) {
+            icon = '📱';
+        }
+
+        if (isMobile) {
+            toast.className = 'mobile-glass-notif save-toast';
+            const iconMarkup = isSaveNotif
+                ? `<svg width="22" height="22" viewBox="0 0 24 24" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg); overflow: visible; filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.65));" aria-hidden="true">
                         <circle cx="12" cy="12" r="9.5" fill="none" stroke="rgba(255, 255, 255, 0.24)" stroke-width="2.5" />
                         <circle cx="12" cy="12" r="9.5" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="60" stroke-dashoffset="60" style="transform-origin: center; animation: drawRing 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.4s forwards, ringPop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 2.2s forwards;" />
-                    </svg>
+                   </svg>`
+                : `<span aria-hidden="true">${icon}</span>`;
+
+            toast.innerHTML = `
+                <div class="mobile-notif-icon">
+                    ${iconMarkup}
                 </div>
-                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.9rem; font-weight: 600; letter-spacing: -0.01em; color: #ffffff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.52), 0 0 10px rgba(0, 0, 0, 0.22);">
+                <div class="mobile-notif-text">
                     ${text}
                 </div>
-                <style>
-                    @keyframes drawRing {
-                        to { stroke-dashoffset: 0; }
-                    }
-                    @keyframes ringPop {
-                        0% { transform: scale(1); opacity: 1; stroke-width: 2.5; }
-                        100% { transform: scale(1.45); opacity: 0; stroke-width: 0; }
-                    }
-                </style>
             `;
         } else {
-            let icon = 'ℹ️';
-            if (text.toLowerCase().includes('phone')) icon = '📱';
+            toast.className = 'glass-panel';
+            toast.style.position = 'fixed';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.zIndex = '25000';
+            toast.style.transition = 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; // Springy effect
+            toast.style.display = 'flex';
+            toast.style.alignItems = 'center';
+            toast.style.gap = '15px';
+            toast.style.padding = '15px 30px';
+            toast.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+            toast.style.borderTop = `2px solid ${color}`;
+            toast.style.boxShadow = `0 10px 30px rgba(0,0,0,0.8), inset 0 10px 20px rgba(0,0,0,0.5), 0 0 15px ${color}40`;
+            toast.style.pointerEvents = 'none';
+
             toast.innerHTML = `
-                <div style="font-size: 2em; filter: drop-shadow(0 0 5px ${color});">${icon}</div>
+                <div style="font-size: 2em; filter: drop-shadow(0 0 5px ${color});" aria-hidden="true">${icon}</div>
                 <div style="display: flex; flex-direction: column;">
                     <span style="font-family: var(--font-display, Orbitron, sans-serif); color: ${color}; font-size: 1.1em; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">Notification</span>
                     <span style="font-size: 0.95em; color: #fff; font-family: var(--font-main, Rajdhani, sans-serif);">${text}</span>
@@ -143,7 +137,7 @@ export class UI {
         void toast.offsetWidth;
         
         // Slide in
-        toast.style.top = (window.isMobile || document.body.classList.contains('mobile-mode'))
+        toast.style.top = isMobile
             ? 'max(env(safe-area-inset-top, 0px) + 14px, 20px)'
             : '30px';
         
@@ -761,52 +755,12 @@ export class UI {
         
         if (building.type === 'storage') {
             title.textContent = 'Storage Configuration';
-            if (building.inventoryCount > 0) {
-                info.innerHTML = 'Box type is fixed while it contains items. Empty it to change the assigned item type.';
-            } else {
-                info.innerHTML = 'Select an assigned item type for this storage box. Items will not flow in until a type is assigned.';
-            }
-            
-            const clearBtn = document.createElement('button');
-            clearBtn.className = 'tool-btn';
-            clearBtn.style.display = 'block';
-            clearBtn.style.width = '100%';
-            clearBtn.style.marginBottom = '5px';
-            clearBtn.textContent = 'Unassigned';
-            if (!building.storageFilter) clearBtn.classList.add('active');
-            if (building.inventoryCount > 0) clearBtn.disabled = true;
-            clearBtn.addEventListener('click', () => {
-                if (this.app.soundEngine) this.app.soundEngine.play('ding');
-                building.storageFilter = null;
-                this.openRecipeUI(building);
-            });
-            list.appendChild(clearBtn);
-
-            const allItems = ['iron', 'copper', 'coal', 'gold', 'water', 'poop', 'ironIngot', 'copperIngot', 'ironRod', 'ironPlate', 'copperWire', 'frame', 'panel'];
-            for (const item of allItems) {
-                const btn = document.createElement('button');
-                btn.className = 'tool-btn';
-                btn.style.display = 'block';
-                btn.style.width = '100%';
-                btn.style.marginBottom = '5px';
-                let name = item.replace(/([A-Z])/g, ' $1');
-                name = name.charAt(0).toUpperCase() + name.slice(1);
-                btn.textContent = name;
-                
-                if (building.storageFilter === item) {
-                    btn.classList.add('active');
-                }
-                
-                if (building.inventoryCount > 0 && building.storageFilter !== item) btn.disabled = true;
-                
-                btn.addEventListener('click', () => {
-                    if (this.app.soundEngine) this.app.soundEngine.play('ding');
-                    building.storageFilter = item;
-                    this.openRecipeUI(building);
-                });
-                list.appendChild(btn);
-            }
+            info.style.display = 'none'; // Pop up replaces permanent bottom green info text
+            this.renderStorageConfigurator(list, info, building);
+            this.showStorageGuidePopup(false);
             return;
+        } else {
+            info.style.display = 'block';
         }
         
         // Find recipes that this machine can process
@@ -860,9 +814,320 @@ export class UI {
     closeRecipeUI() {
         this.selectedBuilding = null;
         document.getElementById('recipe-popup').style.display = 'none';
+        const info = document.getElementById('recipe-info');
+        if (info) info.style.display = 'block';
         const leighPopup = document.getElementById('leigh-high-popup');
         if (!leighPopup || leighPopup.style.display === 'none') {
             document.body.classList.remove('building-menu-open');
+        }
+    }
+
+    showStorageGuidePopup(force = false) {
+        if (!force && localStorage.getItem('satislite_storage_guide_seen')) {
+            return;
+        }
+        localStorage.setItem('satislite_storage_guide_seen', 'true');
+
+        let backdrop = document.getElementById('storage-guide-backdrop');
+        if (!backdrop) {
+            backdrop = document.createElement('div');
+            backdrop.id = 'storage-guide-backdrop';
+            backdrop.className = 'storage-guide-backdrop';
+            backdrop.setAttribute('role', 'dialog');
+            backdrop.setAttribute('aria-modal', 'true');
+            backdrop.setAttribute('aria-labelledby', 'storage-guide-title');
+
+            backdrop.innerHTML = `
+                <div class="storage-guide-modal" onclick="event.stopPropagation()">
+                    <div class="storage-guide-header">
+                        <h3 id="storage-guide-title">
+                            <span style="font-size:1.15em;">📦</span> Storage Box Guide
+                        </h3>
+                        <button type="button" class="storage-guide-close-btn" id="storage-guide-close" aria-label="Close guide">✖</button>
+                    </div>
+                    <div class="storage-guide-body">
+                        <div class="storage-guide-tip">
+                            <div class="storage-guide-tip-icon">🔍</div>
+                            <div>
+                                <div class="storage-guide-tip-title">Material Assignment</div>
+                                <div class="storage-guide-tip-desc">Search and select a single material to store. Belts and machines only deliver items into this container when assigned.</div>
+                            </div>
+                        </div>
+                        <div class="storage-guide-tip">
+                            <div class="storage-guide-tip-icon">🔒</div>
+                            <div>
+                                <div class="storage-guide-tip-title">Locking Rule</div>
+                                <div class="storage-guide-tip-desc">Once items are stored, the container's material type is fixed until completely emptied.</div>
+                            </div>
+                        </div>
+                        <div class="storage-guide-tip">
+                            <div class="storage-guide-tip-icon">📊</div>
+                            <div>
+                                <div class="storage-guide-tip-title">Container Capacity</div>
+                                <div class="storage-guide-tip-desc">Stores up to 2,048 units of the configured material to buffer your production line.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="storage-guide-footer">
+                        <button type="button" class="storage-guide-confirm-btn" id="storage-guide-confirm">Got It</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(backdrop);
+
+            const closeGuide = () => {
+                if (this.app.soundEngine) this.app.soundEngine.play('click');
+                backdrop.classList.remove('active');
+            };
+
+            backdrop.addEventListener('click', closeGuide);
+            backdrop.querySelector('#storage-guide-close').addEventListener('click', closeGuide);
+            backdrop.querySelector('#storage-guide-confirm').addEventListener('click', closeGuide);
+
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && backdrop.classList.contains('active')) {
+                    closeGuide();
+                }
+            });
+        }
+
+        // Reflow to ensure transition runs
+        void backdrop.offsetWidth;
+        backdrop.classList.add('active');
+        if (this.app.soundEngine) this.app.soundEngine.play('fanfare');
+
+        const confirmBtn = backdrop.querySelector('#storage-guide-confirm');
+        if (confirmBtn && !window.isMobile && !document.body.classList.contains('mobile-mode')) {
+            setTimeout(() => confirmBtn.focus(), 60);
+        }
+    }
+
+    renderStorageConfigurator(container, infoEl, building) {
+        const isLocked = (building.inventoryCount || 0) > 0;
+
+        const itemsMeta = [
+            { key: 'iron', name: 'Iron', category: 'Raw Ore', color: '#BDC3C7', aliases: ['ore', 'metal'] },
+            { key: 'copper', name: 'Copper', category: 'Raw Ore', color: '#E67E22', aliases: ['ore', 'metal'] },
+            { key: 'coal', name: 'Coal', category: 'Raw Resource', color: '#34495E', aliases: ['fuel', 'carbon'] },
+            { key: 'gold', name: 'Gold', category: 'Precious Ore', color: '#F4D03F', aliases: ['ore', 'precious', 'metal'] },
+            { key: 'water', name: 'Water', category: 'Fluid', color: '#1FB0E8', aliases: ['liquid', 'h2o'] },
+            { key: 'poop', name: 'Biomass (Poop)', category: 'Organic', color: '#6E2C00', aliases: ['poop', 'biomass', 'waste', 'fertilizer'] },
+            { key: 'ironIngot', name: 'Iron Ingot', category: 'Smelted Ingot', color: '#ff6666', aliases: ['metal', 'bar', 'refined'] },
+            { key: 'copperIngot', name: 'Copper Ingot', category: 'Smelted Ingot', color: '#74b9ff', aliases: ['metal', 'bar', 'refined'] },
+            { key: 'ironPlate', name: 'Iron Plate', category: 'Crafted Part', color: '#bdc3c7', aliases: ['sheet', 'plate'] },
+            { key: 'ironRod', name: 'Iron Rod', category: 'Crafted Part', color: '#95a5a6', aliases: ['bar', 'rod'] },
+            { key: 'copperWire', name: 'Copper Wire', category: 'Crafted Part', color: '#e67e22', aliases: ['wire', 'cable', 'electrical'] },
+            { key: 'frame', name: 'Frame', category: 'Structural', color: '#34495e', aliases: ['chassis', 'cube', 'structure'] },
+            { key: 'panel', name: 'Panel', category: 'Advanced Part', color: '#9b59b6', aliases: ['sheet', 'board', 'plate'] }
+        ];
+
+        const configWrapper = document.createElement('div');
+        configWrapper.className = 'storage-config-container';
+
+        // 1. Current Assignment Status Card
+        const statusCard = document.createElement('div');
+        statusCard.className = 'storage-status-card';
+        
+        const renderStatusCard = () => {
+            const currentKey = building.storageFilter;
+            const currentItem = itemsMeta.find(i => i.key === currentKey);
+            const swatchColor = currentItem ? currentItem.color : 'rgba(255, 255, 255, 0.2)';
+            const titleText = currentItem ? currentItem.name : 'Unassigned';
+            const subtitleText = currentItem
+                ? `${currentItem.category} • Stored: ${building.inventoryCount || 0} / 2048`
+                : 'Accepts nothing until assigned';
+
+            statusCard.innerHTML = `
+                <div class="storage-status-left">
+                    <span class="storage-status-swatch" style="background: ${swatchColor};"></span>
+                    <div>
+                        <div class="storage-status-title" style="display:flex; align-items:center; gap:6px;">
+                            ${titleText}
+                            <button type="button" class="storage-help-btn" title="View Storage Guide" aria-label="View Storage Guide">ℹ️</button>
+                        </div>
+                        <div class="storage-status-subtitle">${subtitleText}</div>
+                    </div>
+                </div>
+                ${currentKey ? `<button type="button" class="storage-clear-btn" ${isLocked ? 'disabled title="Cannot unassign while items are in storage"' : ''}>Unassign</button>` : ''}
+            `;
+
+            const helpBtn = statusCard.querySelector('.storage-help-btn');
+            if (helpBtn) {
+                helpBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.showStorageGuidePopup(true);
+                });
+            }
+
+            const clearBtn = statusCard.querySelector('.storage-clear-btn');
+            if (clearBtn && !isLocked) {
+                clearBtn.addEventListener('click', () => {
+                    if (this.app.soundEngine) this.app.soundEngine.play('ding');
+                    building.storageFilter = null;
+                    renderStatusCard();
+                    renderList(searchInput.value);
+                    if (this.updateDisplay) this.updateDisplay();
+                });
+            }
+        };
+
+        // 2. Search Input Box
+        const searchBox = document.createElement('div');
+        searchBox.className = 'storage-search-box';
+        searchBox.innerHTML = `
+            <span class="storage-search-icon" aria-hidden="true">🔍</span>
+            <input type="text" class="storage-search-input" 
+                placeholder="${isLocked ? 'Storage locked while containing items...' : 'Search material to store...'}" 
+                ${isLocked ? 'disabled' : ''} 
+                autocomplete="off" 
+                spellcheck="false"
+                aria-label="Search material to store">
+            <button type="button" class="storage-search-clear" aria-label="Clear search">✕</button>
+        `;
+
+        const searchInput = searchBox.querySelector('.storage-search-input');
+        const clearSearchBtn = searchBox.querySelector('.storage-search-clear');
+
+        // 3. Results List
+        const resultsList = document.createElement('div');
+        resultsList.className = 'storage-results-list';
+        resultsList.setAttribute('role', 'listbox');
+
+        const selectMaterial = (key) => {
+            if (isLocked && building.storageFilter !== key) return;
+            if (this.app.soundEngine) this.app.soundEngine.play('ding');
+            building.storageFilter = key;
+            renderStatusCard();
+            renderList(searchInput.value);
+            if (this.updateDisplay) this.updateDisplay();
+        };
+
+        const renderList = (filterQuery = '') => {
+            resultsList.innerHTML = '';
+            const q = filterQuery.trim().toLowerCase().replace(/\s+/g, '');
+
+            // Unassigned row matches if query is empty or matches keywords
+            const matchesUnassigned = !q || 'unassigned'.includes(q) || 'clear'.includes(q) || 'none'.includes(q) || 'empty'.includes(q);
+            
+            if (matchesUnassigned) {
+                const unassignedRow = document.createElement('div');
+                unassignedRow.className = `storage-item-row ${!building.storageFilter ? 'active' : ''} ${isLocked ? 'disabled' : ''}`;
+                unassignedRow.setAttribute('role', 'option');
+                unassignedRow.setAttribute('aria-selected', !building.storageFilter ? 'true' : 'false');
+                unassignedRow.innerHTML = `
+                    <div class="storage-item-left">
+                        <span class="storage-item-swatch" style="background: rgba(255, 255, 255, 0.15); border-style: dashed;"></span>
+                        <div class="storage-item-meta">
+                            <span class="storage-item-name">Unassigned</span>
+                            <span class="storage-item-category">Accepts No Input</span>
+                        </div>
+                    </div>
+                    <div class="storage-item-right">
+                        ${!building.storageFilter ? '<span class="storage-item-badge">ACTIVE</span>' : ''}
+                    </div>
+                `;
+                unassignedRow.addEventListener('click', () => {
+                    selectMaterial(null);
+                });
+                resultsList.appendChild(unassignedRow);
+            }
+
+            // Filter materials
+            let matchCount = 0;
+            for (const item of itemsMeta) {
+                const cleanName = item.name.toLowerCase().replace(/\s+/g, '');
+                const cleanKey = item.key.toLowerCase();
+                const cleanCat = item.category.toLowerCase().replace(/\s+/g, '');
+                const aliases = item.aliases || [];
+                
+                const matches = !q || 
+                    cleanName.includes(q) || 
+                    cleanKey.includes(q) || 
+                    cleanCat.includes(q) || 
+                    aliases.some(a => a.toLowerCase().includes(q));
+
+                if (!matches) continue;
+                matchCount++;
+
+                const isCurrent = building.storageFilter === item.key;
+                const isRowDisabled = isLocked && !isCurrent;
+                const invCount = Math.floor(this.logic.inventory[item.key] || 0);
+
+                const row = document.createElement('div');
+                row.className = `storage-item-row ${isCurrent ? 'active' : ''} ${isRowDisabled ? 'disabled' : ''}`;
+                row.setAttribute('role', 'option');
+                row.setAttribute('aria-selected', isCurrent ? 'true' : 'false');
+                if (isRowDisabled) {
+                    row.title = 'Storage box is locked until emptied';
+                }
+
+                row.innerHTML = `
+                    <div class="storage-item-left">
+                        <span class="storage-item-swatch" style="background: ${item.color};"></span>
+                        <div class="storage-item-meta">
+                            <span class="storage-item-name">${item.name}</span>
+                            <span class="storage-item-category">${item.category}</span>
+                        </div>
+                    </div>
+                    <div class="storage-item-right">
+                        <span class="storage-item-inv" title="Amount in personal inventory">Inv: ${invCount}</span>
+                        ${isCurrent ? '<span class="storage-item-badge">ASSIGNED</span>' : ''}
+                    </div>
+                `;
+
+                row.addEventListener('click', () => {
+                    if (isRowDisabled) return;
+                    selectMaterial(item.key);
+                });
+
+                resultsList.appendChild(row);
+            }
+
+            if (matchCount === 0 && !matchesUnassigned) {
+                const empty = document.createElement('div');
+                empty.className = 'storage-empty-state';
+                empty.textContent = `No materials match "${filterQuery}"`;
+                resultsList.appendChild(empty);
+            }
+        };
+
+        searchInput.addEventListener('input', () => {
+            const val = searchInput.value;
+            clearSearchBtn.classList.toggle('visible', val.length > 0);
+            renderList(val);
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const firstRow = resultsList.querySelector('.storage-item-row:not(.disabled)');
+                if (firstRow) firstRow.click();
+            } else if (e.key === 'Escape') {
+                searchInput.value = '';
+                clearSearchBtn.classList.remove('visible');
+                renderList('');
+                searchInput.blur();
+            }
+        });
+
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            clearSearchBtn.classList.remove('visible');
+            renderList('');
+            searchInput.focus();
+        });
+
+        renderStatusCard();
+        renderList('');
+
+        configWrapper.appendChild(statusCard);
+        configWrapper.appendChild(searchBox);
+        configWrapper.appendChild(resultsList);
+        container.appendChild(configWrapper);
+
+        if (!isLocked && !window.isMobile && !document.body.classList.contains('mobile-mode')) {
+            setTimeout(() => searchInput.focus(), 60);
         }
     }
 
@@ -1405,28 +1670,48 @@ export class UI {
                     percent = Math.min(100, Math.max(0, (this.selectedBuilding.progress / recipeData.time) * 100));
                 }
                 if (this.elRecipeProgressBar) this.elRecipeProgressBar.style.width = percent + '%';
+            } else if (this.selectedBuilding.type === 'storage') {
+                const count = this.selectedBuilding.inventoryCount || 0;
+                const percent = Math.min(100, Math.max(0, (count / 2048) * 100));
+                if (this.elRecipeProgressBar) this.elRecipeProgressBar.style.width = percent + '%';
             } else {
                 if (this.elRecipeProgressBar) this.elRecipeProgressBar.style.width = '0%';
             }
 
             if (this.elRecipeBufferStatus) {
                 const bld = this.selectedBuilding;
-                let inParts = [];
-                let outParts = [];
-                if (bld.inputBuffer) {
-                    for (const [k, v] of Object.entries(bld.inputBuffer)) {
-                        if (v > 0) inParts.push(`<span style="color:#f39c12;">${k}:</span> <span style="font-family:'Courier New',monospace; font-weight:bold; color:#fff;">${Math.floor(v)}</span>`);
-                    }
-                }
-                if (bld.outputBuffer) {
-                    for (const [k, v] of Object.entries(bld.outputBuffer)) {
-                        if (v > 0) outParts.push(`<span style="color:#3498db;">${k}:</span> <span style="font-family:'Courier New',monospace; font-weight:bold; color:#fff;">${Math.floor(v)}</span>`);
-                    }
-                }
-                
                 let html = '';
-                if (inParts.length > 0) html += `<div style="background: rgba(243, 156, 18, 0.1); border-left: 3px solid #f39c12; padding: 4px 8px;"><strong style="color:#f39c12; font-size:0.85em; text-transform:uppercase; letter-spacing:1px;">Input</strong><br>${inParts.join(' | ')}</div>`;
-                if (outParts.length > 0) html += `<div style="background: rgba(52, 152, 219, 0.1); border-left: 3px solid #3498db; padding: 4px 8px;"><strong style="color:#3498db; font-size:0.85em; text-transform:uppercase; letter-spacing:1px;">Output</strong><br>${outParts.join(' | ')}</div>`;
+                if (bld.type === 'storage') {
+                    const count = bld.inventoryCount || 0;
+                    const filterName = bld.storageFilter ? getItemDisplayName(bld.storageFilter) : 'Unassigned';
+                    const fillPct = Math.min(100, ((count / 2048) * 100)).toFixed(1);
+                    html = `<div style="background: rgba(46, 204, 113, 0.12); border-left: 3px solid #2ecc71; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="color:#2ecc71; font-size:0.85em; text-transform:uppercase; letter-spacing:1px;">Stored Resource</strong><br>
+                            <span style="color:#fff; font-weight:bold;">${filterName}</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="font-family:'Courier New',monospace; font-weight:bold; color:#2ecc71; font-size:1.15em;">${count}</span>
+                            <span style="color:#888; font-size:0.85em;"> / 2048 (${fillPct}%)</span>
+                        </div>
+                    </div>`;
+                } else {
+                    let inParts = [];
+                    let outParts = [];
+                    if (bld.inputBuffer) {
+                        for (const [k, v] of Object.entries(bld.inputBuffer)) {
+                            if (v > 0) inParts.push(`<span style="color:#f39c12;">${k}:</span> <span style="font-family:'Courier New',monospace; font-weight:bold; color:#fff;">${Math.floor(v)}</span>`);
+                        }
+                    }
+                    if (bld.outputBuffer) {
+                        for (const [k, v] of Object.entries(bld.outputBuffer)) {
+                            if (v > 0) outParts.push(`<span style="color:#3498db;">${k}:</span> <span style="font-family:'Courier New',monospace; font-weight:bold; color:#fff;">${Math.floor(v)}</span>`);
+                        }
+                    }
+                    
+                    if (inParts.length > 0) html += `<div style="background: rgba(243, 156, 18, 0.1); border-left: 3px solid #f39c12; padding: 4px 8px;"><strong style="color:#f39c12; font-size:0.85em; text-transform:uppercase; letter-spacing:1px;">Input</strong><br>${inParts.join(' | ')}</div>`;
+                    if (outParts.length > 0) html += `<div style="background: rgba(52, 152, 219, 0.1); border-left: 3px solid #3498db; padding: 4px 8px;"><strong style="color:#3498db; font-size:0.85em; text-transform:uppercase; letter-spacing:1px;">Output</strong><br>${outParts.join(' | ')}</div>`;
+                }
                 
                 if (this.elRecipeBufferStatus._lastHtml !== html) {
                     this.elRecipeBufferStatus.innerHTML = html;

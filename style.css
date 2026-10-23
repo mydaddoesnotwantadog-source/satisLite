@@ -970,3 +970,474 @@ body:not(.mobile-mode) .switch-btn.active::before {
     background: #ff3333;
     box-shadow: 0 2px 5px #ff0000, 0 5px 15px #ff0000, inset 0 1px 2px rgba(255,255,255,0.6);
 }
+
+/* =========================================
+   STORAGE CONFIGURATOR (SEARCH UI)
+   ========================================= */
+.storage-config-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.storage-status-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 14px;
+    background: #141416;
+    border: 1px solid #333;
+    border-radius: 4px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.storage-status-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.storage-status-swatch {
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    flex-shrink: 0;
+}
+
+.storage-status-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.storage-status-subtitle {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.storage-clear-btn {
+    background: rgba(231, 76, 60, 0.15);
+    border: 1px solid rgba(231, 76, 60, 0.4);
+    color: #ff6b6b;
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 0.78rem;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.15s ease;
+}
+
+.storage-clear-btn:hover {
+    background: rgba(231, 76, 60, 0.3);
+    color: #fff;
+    border-color: #e74c3c;
+}
+
+.storage-clear-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: transparent;
+    border-color: #444;
+    color: #666;
+}
+
+.storage-search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.storage-search-icon {
+    position: absolute;
+    left: 12px;
+    font-size: 0.95rem;
+    color: #777;
+    pointer-events: none;
+    line-height: 1;
+}
+
+.storage-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 36px 10px 36px;
+    background: #0d0d0f;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 0.95rem;
+    border: 1px solid #444;
+    border-radius: 4px;
+    outline: none;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.storage-search-input:focus {
+    border-color: var(--accent, #e67e22);
+    box-shadow: 0 0 10px rgba(230, 126, 34, 0.35), inset 0 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.storage-search-input:disabled {
+    background: #181818;
+    color: #666;
+    border-color: #333;
+    cursor: not-allowed;
+}
+
+.storage-search-clear {
+    position: absolute;
+    right: 8px;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+    border-radius: 3px;
+    display: none;
+}
+
+.storage-search-clear.visible {
+    display: block;
+}
+
+.storage-search-clear:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.storage-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-height: 260px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.storage-results-list::-webkit-scrollbar {
+    width: 6px;
+}
+.storage-results-list::-webkit-scrollbar-track {
+    background: #111;
+    border-radius: 3px;
+}
+.storage-results-list::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 3px;
+}
+
+.storage-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    background: linear-gradient(180deg, #333 0%, #242426 100%);
+    border: 1px solid #3d3d40;
+    border-top: 1px solid #555;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    user-select: none;
+    color: #eee;
+}
+
+.storage-item-row:hover:not(.disabled) {
+    background: linear-gradient(180deg, #444 0%, #2e2e32 100%);
+    border-color: #666;
+    transform: translateX(2px);
+}
+
+.storage-item-row.active {
+    background: linear-gradient(180deg, #d35400 0%, #963d00 100%) !important;
+    border: 1px solid #e67e22 !important;
+    border-top: 1px solid #f39c12 !important;
+    color: #fff;
+    box-shadow: 0 0 10px rgba(230, 126, 34, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+}
+
+.storage-item-row.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    filter: grayscale(0.5);
+}
+
+.storage-item-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.storage-item-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.3);
+    flex-shrink: 0;
+}
+
+.storage-item-meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.storage-item-name {
+    font-weight: bold;
+    font-size: 0.92rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.storage-item-category {
+    font-size: 0.70rem;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.storage-item-row.active .storage-item-category {
+    color: #ffd8a8;
+}
+
+.storage-item-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: #aaa;
+    flex-shrink: 0;
+}
+
+.storage-item-inv {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    color: #e67e22;
+    background: #111;
+    padding: 1px 6px;
+    border-radius: 2px;
+    border: 1px solid #333;
+}
+
+.storage-item-row.active .storage-item-inv {
+    color: #fff;
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.storage-item-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: #27ae60;
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 6px rgba(39, 174, 96, 0.5);
+}
+
+.storage-empty-state {
+    padding: 24px 12px;
+    text-align: center;
+    color: #888;
+    font-size: 0.9rem;
+    font-style: italic;
+    background: #141416;
+    border: 1px dashed #333;
+    border-radius: 4px;
+}
+
+.storage-help-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0;
+    line-height: 1;
+    opacity: 0.75;
+    transition: opacity 0.15s, transform 0.15s;
+}
+
+.storage-help-btn:hover {
+    opacity: 1;
+    transform: scale(1.15);
+}
+
+/* =========================================
+   STORAGE GUIDE POPUP MODAL (DESKTOP & COMMON)
+   ========================================= */
+.storage-guide-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 20000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.storage-guide-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.storage-guide-modal {
+    position: relative;
+    width: 90vw;
+    max-width: 440px;
+    background: linear-gradient(180deg, #3a3d44 0%, #222428 50%, #17181c 100%);
+    border: 2px solid #111;
+    border-top: 2px solid #787d84;
+    border-left: 2px solid #686d74;
+    border-radius: 6px;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.9),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 -1px 3px rgba(0, 0, 0, 0.7);
+    color: #e0e0e0;
+    padding: 0;
+    overflow: hidden;
+    transform: scale(0.92) translateY(10px);
+    transition: transform 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.storage-guide-backdrop.active .storage-guide-modal {
+    transform: scale(1) translateY(0);
+}
+
+.storage-guide-header {
+    background: repeating-linear-gradient(45deg, #1b1c20, #1b1c20 10px, #26272c 10px, #26272c 20px);
+    border-bottom: 2px solid #e67e22;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.storage-guide-header h3 {
+    margin: 0;
+    font-family: var(--font-display, 'Orbitron', 'Impact', sans-serif);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #e67e22;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-shadow: 1px 1px 2px #000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.storage-guide-close-btn {
+    background: #c0392b;
+    border: 2px solid #000;
+    color: white;
+    cursor: pointer;
+    font-size: 1.1rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5), 0 2px 5px rgba(0, 0, 0, 0.5);
+    border-radius: 3px;
+    padding: 0;
+    line-height: 1;
+}
+
+.storage-guide-close-btn:hover {
+    background: #e74c3c;
+    transform: scale(1.05);
+}
+
+.storage-guide-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.storage-guide-tip {
+    display: flex;
+    gap: 12px;
+    background: rgba(14, 16, 20, 0.6);
+    border: 1px solid #333;
+    border-left: 3px solid #e67e22;
+    border-radius: 4px;
+    padding: 12px 14px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.storage-guide-tip-icon {
+    font-size: 1.3rem;
+    line-height: 1.2;
+    flex-shrink: 0;
+}
+
+.storage-guide-tip-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #ffffff;
+    margin-bottom: 2px;
+}
+
+.storage-guide-tip-desc {
+    font-size: 0.85rem;
+    color: #bbb;
+    line-height: 1.45;
+}
+
+.storage-guide-footer {
+    padding: 14px 20px 20px 20px;
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.storage-guide-confirm-btn {
+    width: 100%;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: linear-gradient(180deg, #e67e22 0%, #d35400 100%);
+    border: 2px solid #a04000;
+    color: #ffffff;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    transition: all 0.15s ease;
+}
+
+.storage-guide-confirm-btn:hover {
+    background: linear-gradient(180deg, #f39c12 0%, #e67e22 100%);
+    box-shadow: 0 6px 14px rgba(230, 126, 34, 0.4);
+    transform: translateY(-1px);
+}
+
+.storage-guide-confirm-btn:active {
+    transform: translateY(1px);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7);
+}
